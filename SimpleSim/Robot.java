@@ -22,17 +22,17 @@ public class Robot {
 	 * @param args  First argument specifies the server to connect to
 	 */
     public static void main(String[] args) {
-	// Error checking for arguments
-		if(args.length != 1) {
+		// Error checking for arguments
+		if (args.length != 2) {
 			System.err.println("Not enough arguments.\n");
-			System.err.println("Usage: java Robot <Server name or IP>\n");
+			System.err.println("Usage: java Robot <Server name or IP> <Port Number>\n");
 			System.exit(-1);
 	    }
 		try {
 			// Connect to the specified server
-			final Socket sock = new Socket(args[0], CloudServer.SERVER_PORT);
+			final Socket sock = new Socket(args[0], Integer.parseInt(args[1]));
 			System.out.println("Connected to " + args[0] +
-							   " on port " + CloudServer.SERVER_PORT);
+							   " on port " + Integer.parseInt(args[1]));
 			
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
@@ -57,12 +57,12 @@ public class Robot {
 				// type Message.
 				resp = (Message)input.readObject();
 				System.out.println("\nServer says: " + resp.theMessage + "\n");
-			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
+			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
 			
 			// shut things down
 			sock.close();
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
@@ -80,7 +80,7 @@ public class Robot {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			return in.readLine();
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			// Uh oh...
 			return "";
 		}
