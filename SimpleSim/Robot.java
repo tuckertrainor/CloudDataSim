@@ -14,12 +14,14 @@ import java.io.ObjectInputStream;   // Used to read objects sent from the server
 import java.io.ObjectOutputStream;  // Used to write objects to the server
 import java.io.BufferedReader;      // Needed to read from the console
 import java.io.InputStreamReader;   // Needed to read from the console
+import java.net.ConnectException;
 
 public class Robot {
 	/**
 	 * Main method.
 	 *
-	 * @param args  First argument specifies the server to connect to
+	 * @param args - First argument specifies the server address, second
+	 * argument specifies the port number
 	 */
     public static void main(String[] args) {
 		// Error checking for arguments
@@ -61,6 +63,11 @@ public class Robot {
 			
 			// shut things down
 			sock.close();
+		}
+		catch (ConnectException ce) {
+			System.err.println(ce.getMessage() +
+							   ": Check server address and port number.");
+			ce.printStackTrace(System.err);
 		}
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
