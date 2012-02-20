@@ -12,17 +12,27 @@ import java.net.ServerSocket;  // The server uses this to bind to a port
 import java.net.Socket;        // Incoming connections are represented as sockets
 
 public class CloudServer {
-    /** The server will listen on this port for client connections */
-    public static final int SERVER_PORT = 8765;
-
     /**
      * Main routine. Just a dumb loop that keeps accepting new
      * client connections.
      */
     public static void main(String[] args) {
+		int serverPort = 8765; // default port number
+		// Get new port number from command line, otherwise use default
+		if (args.length == 1) {
+			try {
+				serverPort = Integer.parseInt(args[0]);
+			}
+			catch (Exception e) {
+				System.err.println("Error parsing argument. Please use valid integer.");
+				System.err.println("Usage: java CloudServer <Port Number>\n");
+				System.exit(-1);
+			}
+	    }
+
 		try {
 			// This is basically just listens for new client connections
-			final ServerSocket serverSock = new ServerSocket(SERVER_PORT);
+			final ServerSocket serverSock = new ServerSocket(serverPort);
 			
 			// A simple infinite loop to accept connections
 			Socket sock = null;
