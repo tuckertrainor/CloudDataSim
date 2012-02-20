@@ -1,0 +1,4 @@
+This is a Java-based simulation of enforcing policy and data consistency of
+cloud transactions. The goal is to simulate an array of servers processing data
+transactions while subject to different commit protocols and authentication
+policies.
