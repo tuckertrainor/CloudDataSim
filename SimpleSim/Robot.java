@@ -34,7 +34,7 @@ public class Robot {
 		// Communicate with CloudServer through RobotThread
 		try {
 			RobotThread thread = null;
-			thread = new RobotThread("b 1 r 1 1 r 1 3 r 1 1 r 1 2 c 1 exit", args[0], Integer.parseInt(args[1]));
+			thread = new RobotThread("B 1&R 11 &R 1 3&R 1 1&R 1 2&C 1&exit", args[0], Integer.parseInt(args[1]));
 			thread.start();
 		}
 		catch(Exception e) {
