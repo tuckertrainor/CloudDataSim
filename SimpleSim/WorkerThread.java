@@ -23,11 +23,10 @@ public class WorkerThread extends Thread {
 	 * @param _socket - The socket passed in from the server
 	 * @param _socket - The number assigned to the server that created thread
 	 */
-	public WorkerThread(Socket _socket, _serverNumber) {
+	public WorkerThread(Socket _socket, int _serverNumber) {
 		socket = _socket;
 		serverNumber = _serverNumber;
 	}
-
 
 	/**
 	 * run() is basically the main method of a thread. This thread
@@ -63,17 +62,42 @@ public class WorkerThread extends Thread {
 					output.writeObject(new Message("Received message #" + count));
 				}
 				
-				// Perform query
-				if (instr[0].equals("R") { // READ
-					// Get server number from message, compare to own
-					if (accessData() == false) {
-						// message an error, abort transaction
+				// Handle instructions
+				if (instr[0].equals("R")) { // READ
+					// Check server number, perform query or pass on
+					if (Integer.parseInt(instr[2]) == serverNumber) { // Perform query on this server
+						if (accessData() == false) {
+							// message an error, abort transaction
+						}
+						else {
+							// add time to counter or sleep
+						}
 					}
-					else {
-						// add time to counter or sleep
+					else { // pass to server
+						System.out.println("Pass READ of transaction " + instr[1] +
+										   " to server " + instr[2]);
 					}
 				}
-
+				else if (instr[0].equals("W")) { // WRITE
+					// Check server number, perform query or pass on
+					if (Integer.parseInt(instr[2]) == serverNumber) { // Perform query on this server
+						if (accessData() == false) {
+							// message an error, abort transaction
+						}
+						else {
+							// add time to counter or sleep
+						}
+					}
+					else { // pass to server
+						System.out.println("Pass WRITE of transaction " + instr[1] +
+										   " to server " + instr[2]);
+					}
+				}
+				else if (instr[0].equals("C")) { // COMMIT
+					// will need to keep list of all servers accessed, use it
+					// to finalize commit across servers
+					System.out.println("COMMIT STUB");
+				}
 			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
 
 			// Close and cleanup
