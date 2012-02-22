@@ -41,11 +41,11 @@ public class CloudServer {
 			Socket sock = null;
 			WorkerThread thread = null;
 			while(true) {
-				sock = serverSock.accept();			// Accept an incoming connection
-				thread = new WorkerThread(sock);	// Create a thread to handle this connection
-				thread.start();						// Fork the thread
-			}										// Loop to work on new connections while this
-													// the accept()ed connection is handled
+				sock = serverSock.accept(); // Accept an incoming connection
+				thread = new WorkerThread(sock, serverNumber); // Create a thread to handle this connection
+				thread.start(); // Fork the thread
+			}					// Loop to work on new connections while this
+								// the accept()ed connection is handled
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
