@@ -19,6 +19,7 @@ public class CloudServer {
     public static void main(String[] args) {
 		// call loadConfig() here
 		
+		int serverNumner = 1; // should be set by loadConfig, passed to thread
 		int serverPort = 8765; // default port number
 		// Get new port number from command line, otherwise use default
 		if (args.length == 1) {
