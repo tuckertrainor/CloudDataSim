@@ -48,7 +48,7 @@ public class RobotThread extends Thread {
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
-			String queries[] = transactions.split(" ");
+			String queries[] = transactions.split("&");
 			int queryIndex = 0;
 			
 			// loop to send messages
