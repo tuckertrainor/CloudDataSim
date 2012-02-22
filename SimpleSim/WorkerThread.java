@@ -65,24 +65,58 @@ public class WorkerThread extends Thread {
 			e.printStackTrace(System.err);
 		}
 	}
-	
+
+	/**
+	 * Checks the integrity of the data for the commit
+	 *
+	 * @return boolean - true if integrity check comes back OK, else false
+	 */
 	public static boolean verifyIntegrity() {
 		System.out.println("verifyIntegrity() stub");
+		// perform random success operation
+		return true;
 	}
-	
+	/**
+	 * Checks if accessing requested data was successful
+	 *
+	 * @return boolean - true if access was successful, else false
+	 */
 	public static boolean accessData() {
 		System.out.println("accessData() stub");
+		// perform random success operation
+		return true;
 	}
 	
+	/**
+	 * Checks the local policy for authorization to data
+	 *
+	 * @return boolean - true if authorization check comes back OK, else false
+	 */
 	public static boolean getLocalAuth() {
 		System.out.println("getLocalAuth() stub");
+		// perform random success operation
+		return true;
 	}
 	
-	public static boolean getPolictAuth() {
-		System.out.println("getPolictAuth() stub");
+	/**
+	 * Checks the global policy for authorization to data
+	 *
+	 * @return boolean - true if authorization check comes back OK, else false
+	 */
+	public static boolean getPolicyAuth() {
+		System.out.println("getPolicyAuth() stub");
+		// perform random success operation
+		return true;
 	}
 	
+	/**
+	 * Calls the Certificate Authority for the freshest policy
+	 *
+	 * @return boolean - true if freshest policy is received/good, else false
+	 */
 	public static boolean checkPolicyWithCA() {
 		System.out.println("checkPolicyWithCA() stub");
+		// call the CA server, get results of call back
+		return true;
 	}
 }
