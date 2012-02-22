@@ -96,7 +96,7 @@ public class WorkerThread extends Thread {
 				else if (instr[0].equals("C")) { // COMMIT
 					// will need to keep list of all servers accessed, use it
 					// to finalize commit across servers
-					System.out.println("COMMIT STUB");
+					System.out.println("COMMIT STUB - transaction " + instr[1]);
 				}
 			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
 
