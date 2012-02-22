@@ -30,6 +30,18 @@ public class Robot {
 			System.err.println("Usage: java Robot <Server name or IP> <Port Number>\n");
 			System.exit(-1);
 	    }
+		
+		// Communicate with CloudServer through RobotThread
+		try {
+			RobotThread thread = null;
+			thread = new RobotThread("exit", args[0], Integer.parseInt(args[1]));
+			thread.start();
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+
 		try {
 			// Connect to the specified server
 			final Socket sock = new Socket(args[0], Integer.parseInt(args[1]));
