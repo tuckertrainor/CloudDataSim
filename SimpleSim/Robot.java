@@ -123,9 +123,11 @@ public class Robot {
 		System.out.println("loadParameters() stub");
 		// load parameters file
 		
+		BufferedReader inputBuf = null;
+		String line = null;
 		// use a try/catch block to open the input file with a FileReader
 		try {
-			inputBuf = new BufferedReader(new FileReader(args[0]));
+			inputBuf = new BufferedReader(new FileReader("parameters.txt"));
 		}
 		catch (FileNotFoundException fnfe) {
 			// if the file is not found, exit the program
