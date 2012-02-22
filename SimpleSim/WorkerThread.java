@@ -15,14 +15,17 @@ import java.io.ObjectOutputStream;  // For writing Java objects to the wire
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
+    private final int serverNumber; // The number of this server
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
 	 *
-	 * @param _socket The socket passed in from the server
+	 * @param _socket - The socket passed in from the server
+	 * @param _socket - The number assigned to the server that created thread
 	 */
-	public WorkerThread(Socket _socket) {
+	public WorkerThread(Socket _socket, _serverNumber) {
 		socket = _socket;
+		serverNumber = _serverNumber;
 	}
 
 
