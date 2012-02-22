@@ -48,6 +48,9 @@ public class RobotThread extends Thread {
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
+			String queries[] = transactions.split(" ");
+			int queryIndex = 0;
+			
 			// loop to send messages
 			Message msg = null, resp = null;
 			do {
@@ -56,7 +59,8 @@ public class RobotThread extends Thread {
 				// ObjectOutputStream "output" object automatically
 				// encodes the Message object into a format that can
 				// be transmitted over the socket to the server.
-				msg = new Message(transactions);
+				msg = new Message(queries[queryIndex]);
+				queryIndex++;
 				output.writeObject(msg);
 				
 				// Get ACK and print. Since Message implements
