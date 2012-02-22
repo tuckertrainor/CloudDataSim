@@ -122,5 +122,38 @@ public class Robot {
 	private static void loadParameters() {
 		System.out.println("loadParameters() stub");
 		// load parameters file
+		
+		// use a try/catch block to open the input file with a FileReader
+		try {
+			inputBuf = new BufferedReader(new FileReader(args[0]));
+		}
+		catch (FileNotFoundException fnfe) {
+			// if the file is not found, exit the program
+			System.out.println("File \"parameters.txt\" not found. Exiting program.");
+			fnfe.printStackTrace();
+			System.exit(0);
+		}
+		// read a line from the dictionary file using a try/catch block
+		try {
+			line = inputBuf.readLine();
+		}
+		catch (IOException ioe) {
+			System.out.println("IOException during readLine(). Exiting program.");
+			ioe.printStackTrace();
+			System.exit(0);
+		}
+		
+		// close BufferedReader using a try/catch block
+		try {
+			inputBuf.close();
+			
+		}
+		catch (IOException ioe) {
+			// if exception caught, exit the program
+			System.out.println("Error closing reader. Exiting program");
+			ioe.printStackTrace();
+			System.exit(0);
+		}
+
 	}
 }
