@@ -70,7 +70,7 @@ public class RobotThread extends Thread {
 				// explicitly cast the return from readObject() to the
 				// type Message.
 				resp = (Message)input.readObject();
-				System.out.println("\nServer says: " + resp.theMessage + "\n");
+				System.out.println("Server says: " + resp.theMessage);
 			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
 			
 			// shut things down
