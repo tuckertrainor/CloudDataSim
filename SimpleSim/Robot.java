@@ -108,4 +108,12 @@ public class Robot {
 			return "";
 		}
 	}
+	
+    /**
+     * Load a file containing the parameters and applicable data for the Robot
+     */
+	private static void loadParameters() {
+		System.out.println("loadParameters() stub");
+		// load parameters file
+	}
 }
