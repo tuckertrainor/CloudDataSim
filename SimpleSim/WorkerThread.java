@@ -65,4 +65,24 @@ public class WorkerThread extends Thread {
 			e.printStackTrace(System.err);
 		}
 	}
+	
+	public static boolean verifyIntegrity() {
+		System.out.println("verifyIntegrity() stub");
+	}
+	
+	public static boolean accessData() {
+		System.out.println("accessData() stub");
+	}
+	
+	public static boolean getLocalAuth() {
+		System.out.println("getLocalAuth() stub");
+	}
+	
+	public static boolean getPolictAuth() {
+		System.out.println("getPolictAuth() stub");
+	}
+	
+	public static boolean checkPolicyWithCA() {
+		System.out.println("checkPolicyWithCA() stub");
+	}
 }
