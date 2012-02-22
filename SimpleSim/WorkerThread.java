@@ -112,6 +112,15 @@ public class WorkerThread extends Thread {
 	}
 
 	/**
+	 * Passes a query to other specified server
+	 *
+	 * @return boolean - true if query was successful, else false
+	 */
+	public static boolean passQuery(String _transaction) {
+		
+	}
+	
+	/**
 	 * Checks the integrity of the data for the commit
 	 *
 	 * @return boolean - true if integrity check comes back OK, else false
@@ -121,6 +130,7 @@ public class WorkerThread extends Thread {
 		// perform random success operation
 		return true;
 	}
+
 	/**
 	 * Checks if accessing requested data was successful
 	 *
