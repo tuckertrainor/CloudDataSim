@@ -22,13 +22,14 @@ public class CloudServer {
 		int serverNumber = 1; // should be set by loadConfig, passed to thread
 		int serverPort = 8765; // default port number
 		// Get new port number from command line, otherwise use default
-		if (args.length == 1) {
+		if (args.length == 2) {
 			try {
-				serverPort = Integer.parseInt(args[0]);
+				serverNumber = Integer.parseInt(args[0]);
+				serverPort = Integer.parseInt(args[1]);
 			}
 			catch (Exception e) {
-				System.err.println("Error parsing argument. Please use valid integer.");
-				System.err.println("Usage: java CloudServer <Port Number>\n");
+				System.err.println("Error parsing argument. Please use valid integers.");
+				System.err.println("Usage: java CloudServer <Server Number> <Port Number>\n");
 				System.exit(-1);
 			}
 	    }
