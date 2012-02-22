@@ -55,50 +55,6 @@ public class Robot {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-//
-//		try {
-//			// Connect to the specified server
-//			final Socket sock = new Socket(args[0], Integer.parseInt(args[1]));
-//			System.out.println("Connected to " + args[0] +
-//							   " on port " + Integer.parseInt(args[1]));
-//			
-//			// Set up I/O streams with the server
-//			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-//			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
-//
-//			// loop to send messages
-//			Message msg = null, resp = null;
-//			do {
-//				// Read and send message. Since the Message class
-//				// implements the Serializable interface, the
-//				// ObjectOutputStream "output" object automatically
-//				// encodes the Message object into a format that can
-//				// be transmitted over the socket to the server.
-//				msg = new Message(readSomeText());
-//				output.writeObject(msg);
-//
-//				// Get ACK and print. Since Message implements
-//				// Serializable, the ObjectInputStream can
-//				// automatically read this object off of the wire and
-//				// encode it as a Message. Note that we need to
-//				// explicitly cast the return from readObject() to the
-//				// type Message.
-//				resp = (Message)input.readObject();
-//				System.out.println("Server says: " + resp.theMessage);
-//			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
-//			
-//			// shut things down
-//			sock.close();
-//		}
-//		catch (ConnectException ce) {
-//			System.err.println(ce.getMessage() +
-//							   ": Check server address and port number.");
-//			ce.printStackTrace(System.err);
-//		}
-//		catch (Exception e) {
-//			System.err.println("Error: " + e.getMessage());
-//			e.printStackTrace(System.err);
-//		}
     }
 
     /**
