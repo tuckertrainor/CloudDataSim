@@ -17,6 +17,8 @@ public class CloudServer {
      * client connections.
      */
     public static void main(String[] args) {
+		// call loadConfig() here
+		
 		int serverPort = 8765; // default port number
 		// Get new port number from command line, otherwise use default
 		if (args.length == 1) {
@@ -49,4 +51,8 @@ public class CloudServer {
 			e.printStackTrace(System.err);
 		}
     }
+	
+	public static boolean loadConfig() {
+		System.out.println("loadConfig() stub");
+	}
 }
