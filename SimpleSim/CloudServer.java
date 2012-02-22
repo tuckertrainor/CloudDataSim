@@ -52,7 +52,14 @@ public class CloudServer {
 		}
     }
 	
+	/**
+	 * Loads the configuration file for this server
+	 *
+	 * @return boolean - true if file loaded successfully, else false
+	 */
 	public static boolean loadConfig() {
 		System.out.println("loadConfig() stub");
+		// load the local configuration file
+		return true;
 	}
 }
