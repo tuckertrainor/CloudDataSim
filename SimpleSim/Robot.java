@@ -38,6 +38,9 @@ public class Robot {
 			System.exit(-1);
 	    }
 		
+		// Load the parameters for this simulation
+		loadParameters();
+		
 		// Communicate with CloudServer through RobotThread
 		try {
 			RobotThread thread = null;
