@@ -138,6 +138,7 @@ public class Robot {
 		// read a line from the dictionary file using a try/catch block
 		try {
 			line = inputBuf.readLine();
+			System.out.println(line);
 		}
 		catch (IOException ioe) {
 			System.out.println("IOException during readLine(). Exiting program.");
