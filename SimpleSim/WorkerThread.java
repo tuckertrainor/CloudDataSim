@@ -51,7 +51,9 @@ public class WorkerThread extends Thread {
 
 				// Write an ACK back to the sender
 				count++;
-				output.writeObject(new Message("Received message #" + count));
+				String instr[] = msg.theMessage.split(" ");
+				output.writeObject(new Message("Received message #" + count +
+											   " of transaction " + instr[1]));
 
 			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
 
