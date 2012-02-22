@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;   // For reading Java objects off of the wire
 import java.io.ObjectOutputStream;  // For writing Java objects to the wire
 
 public class WorkerThread extends Thread {
-    private final Socket socket;                   // The socket that we'll be talking over
+    private final Socket socket; // The socket that we'll be talking over
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -58,6 +58,17 @@ public class WorkerThread extends Thread {
 				}
 				else {
 					output.writeObject(new Message("Received message #" + count));
+				}
+				
+				// Perform query
+				if (instr[0].equals("R") { // READ
+					// Get server number from message, compare to own
+					if (accessData() == false) {
+						// message an error, abort transaction
+					}
+					else {
+						// add time to counter or sleep
+					}
 				}
 
 			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
