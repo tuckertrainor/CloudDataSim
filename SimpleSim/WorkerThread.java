@@ -77,6 +77,8 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass READ of transaction " + instr[1] +
 										   " to server " + instr[2]);
+						// need to pass correct server number here - 2 is a stub
+						passQuery(2, msg.theMessage);
 					}
 				}
 				else if (instr[0].equals("W")) { // WRITE
