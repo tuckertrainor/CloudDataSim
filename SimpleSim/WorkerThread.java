@@ -119,8 +119,53 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if query was successful, else false
 	 */
-	public static boolean passQuery(int otherServer, String _query) {
+	public static boolean passQuery(int otherServer, String query) {
 		// need to figure out how to store server addresses/ports
+		// for now, use localhost and a given port
+		String server = "localhost";
+		int port = 8888;
+		
+		// here we do the same thing we'd do from RobotThread: set up a
+		// socket with server X, pass it just a single query, and get back
+		// the result
+		try {
+			// Connect to the specified server
+			final Socket sock = new Socket(server, port);
+			System.out.println("Connected to " + server +
+							   " on port " + port);
+			
+			// Set up I/O streams with the server
+			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+			Message msg = null, resp = null;
+			
+			// send query
+			msg = new Message(query);
+			output.writeObject(msg);
+			resp = (Message)input.readObject();
+			System.out.println("Server " + otherServer +
+							   " says: " + resp.theMessage);
+			// handle response
+			
+			// send EXIT
+			msg = new Message("EXIT");
+			output.writeObject(msg);
+			resp = (Message)input.readObject();
+			System.out.println("Server " + otherServer +
+							   " says: " + resp.theMessage);
+			
+			// shut things down
+			sock.close();
+		}
+		catch (ConnectException ce) {
+			System.err.println(ce.getMessage() +
+							   ": Check server address and port number.");
+			ce.printStackTrace(System.err);
+		}
+		catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}		
 	}
 	
 	/**
