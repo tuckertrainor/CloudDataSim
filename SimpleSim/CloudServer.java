@@ -80,7 +80,7 @@ public class CloudServer {
 	public static ArrayList<ServerID> loadConfig(String filename) {
 		BufferedReader inputBuf = null;
 		String line = null;
-		ArrayList<ServerID> tempList = null;
+		ArrayList<ServerID> tempList = new ArrayList<ServerID>();
 	
 		// use a try/catch block to open the input file with a FileReader
 		try {
@@ -115,9 +115,11 @@ public class CloudServer {
 					ServerID foo = new ServerID(Integer.parseInt(triplet[0]),
 												triplet[1],
 												Integer.parseInt(triplet[2]));
-					tempList.add(new ServerID(Integer.parseInt(triplet[0]),
-											  triplet[1],
-											  Integer.parseInt(triplet[2])));
+					if (foo != null) { System.out.println(foo.getAddress());}
+//					tempList.add(new ServerID(Integer.parseInt(triplet[0]),
+//											  triplet[1],
+//											  Integer.parseInt(triplet[2])));
+					tempList.add(foo);
 				}
 				catch (Exception e) {
 					System.out.println("Error while parsing \"serverConfig.txt\".");
