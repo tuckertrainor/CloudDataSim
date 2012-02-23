@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CloudServer {
-	static ArrayList<ServerID> serverList;
 	
     /**
      * Main routine. Just a dumb loop that keeps accepting new
@@ -25,7 +24,8 @@ public class CloudServer {
      */
     public static void main(String[] args) {
 		// Load server information from configuration file
-		if (!loadConfig()) {
+		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
+		if (serverList == null) {
 			System.err.println("Error loading configuration file. Exiting.");
 			System.exit(-1);
 		}
@@ -77,19 +77,20 @@ public class CloudServer {
 	 *
 	 * @return boolean - true if file loaded successfully, else false
 	 */
-	public static boolean loadConfig() {
+	public static ArrayList<ServerID> loadConfig(String filename) {
 		BufferedReader inputBuf = null;
 		String line = null;
+		ArrayList<ServerID> tempList = null;
 	
 		// use a try/catch block to open the input file with a FileReader
 		try {
-			inputBuf = new BufferedReader(new FileReader("serverConfig.txt"));
+			inputBuf = new BufferedReader(new FileReader(filename));
 		}
 		catch (FileNotFoundException fnfe) {
 			// if the file is not found, exit the program
-			System.out.println("File \"serverConfig.txt\" not found.");
+			System.out.println("File \"" + filename + "\" not found.");
 			fnfe.printStackTrace();
-			return false;
+			return null;
 		}
 		// read a line from the file using a try/catch block
 		try {
@@ -98,7 +99,7 @@ public class CloudServer {
 		catch (IOException ioe) {
 			System.out.println("IOException during readLine().");
 			ioe.printStackTrace();
-			return false;
+			return null;
 		}
 
 		while (line != null) {
@@ -106,41 +107,43 @@ public class CloudServer {
 
 			if (line.charAt(0) != '#') { // not a comment
 				try {
-					String temp = line.split("\n")[0];
-					String triplet[] = temp.split(" ");
+//					String temp = line.split("\n")[0];
+					String triplet[] = line.split(" ");
 					System.out.println(triplet[0] + " " + triplet[1] + " " + triplet[2]);
 					System.out.println(Integer.parseInt(triplet[0]));
 					System.out.println(triplet[1]);
 					System.out.println(Integer.parseInt(triplet[2]));
-					ServerID newServer = new ServerID(Integer.parseInt(triplet[0]),
-											 triplet[1],
-											 Integer.parseInt(triplet[2]));
-					serverList.add(newServer);
+//					ServerID newServer = new ServerID(Integer.parseInt(triplet[0]),
+//											 triplet[1],
+//											 Integer.parseInt(triplet[2]));
+					tempList.add(new ServerID(Integer.parseInt(triplet[0]),
+											  triplet[1],
+											  Integer.parseInt(triplet[2])));
 				}
 				catch (Exception e) {
 					System.out.println("Error while parsing \"serverConfig.txt\".");
 					e.printStackTrace();
-					return false;
+					return null;
 				}
-				// read next line
-				try {
-					line = inputBuf.readLine();
-				}
-				catch (IOException ioe) {
-					System.out.println("IOException during readLine().");
-					ioe.printStackTrace();
-					return false;
-				}
+//				// read next line
+//				try {
+//					line = inputBuf.readLine();
+//				}
+//				catch (IOException ioe) {
+//					System.out.println("IOException during readLine().");
+//					ioe.printStackTrace();
+//					return null;
+//				}
+//			}
 			}
-			else { // it's a comment, skip to next line
-				try {
-					line = inputBuf.readLine();
-				}
-				catch (IOException ioe) {
-					System.out.println("IOException during readLine().");
-					ioe.printStackTrace();
-					return false;
-				}
+			// get next line
+			try {
+				line = inputBuf.readLine();
+			}
+			catch (IOException ioe) {
+				System.out.println("IOException during readLine().");
+				ioe.printStackTrace();
+				return null;
 			}
 		}
 		
@@ -152,9 +155,9 @@ public class CloudServer {
 			// if exception caught, exit the program
 			System.out.println("Error closing reader.");
 			ioe.printStackTrace();
-			return false;
+			return null;
 		}
 		
-		return true;
+		return tempList;
 	}
 }
