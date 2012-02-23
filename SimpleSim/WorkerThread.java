@@ -77,10 +77,7 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass READ of transaction " + instr[1] +
 										   " to server " + instr[2]);
-						// need to pass correct server number here - 2 is a stub
-						if (Integer.parseInt(instr[2]) == 2) {
-							passQuery(2, msg.theMessage);
-						}
+						passQuery(Integer.parseInt(instr[2]), msg.theMessage);
 					}
 				}
 				else if (instr[0].equals("W")) { // WRITE
@@ -96,6 +93,7 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass WRITE of transaction " + instr[1] +
 										   " to server " + instr[2]);
+						passQuery(Integer.parseInt(instr[2]), msg.theMessage);
 					}
 				}
 				else if (instr[0].equals("C")) { // COMMIT
