@@ -38,7 +38,7 @@ public class WorkerThread extends Thread {
 			System.out.println("** New connection from " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
 
-			// set up I/O streams with the client
+			// set up I/O streams with the RobotThread
 			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
