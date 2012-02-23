@@ -29,6 +29,9 @@ public class CloudServer {
 			System.err.println("Error loading configuration file. Exiting.");
 			System.exit(-1);
 		}
+		else {
+			System.out.println("booya");
+		}
 		
 		int serverNumber = 0;
 		// Get new server number from command line
@@ -43,7 +46,11 @@ public class CloudServer {
 			}
 	    }
 		
-		
+		// test loadConfig
+		System.out.println(serverNumber + ": " +
+						   serverList.get(serverNumber).getNumber() + " " +
+						   serverList.get(serverNumber).getAddress() + " " +
+						   serverList.get(serverNumber).getPort());
 
 		try {
 			// This is basically just listens for new client connections
@@ -73,9 +80,7 @@ public class CloudServer {
 	public static boolean loadConfig() {
 		BufferedReader inputBuf = null;
 		String line = null;
-		String triple[] = null;
-		ServerID newServer = null;
-		
+	
 		// use a try/catch block to open the input file with a FileReader
 		try {
 			inputBuf = new BufferedReader(new FileReader("serverConfig.txt"));
@@ -95,14 +100,21 @@ public class CloudServer {
 			ioe.printStackTrace();
 			return false;
 		}
-		
+
 		while (line != null) {
+			System.out.println("hi");
+
 			if (line.charAt(0) != '#') { // not a comment
 				try {
-					triple = line.split(" ");
-					newServer = new ServerID(Integer.parseInt(triple[0]),
-											 triple[1],
-											 Integer.parseInt(triple[2]));
+					String temp = line.split("\n")[0];
+					String triplet[] = temp.split(" ");
+					System.out.println(triplet[0] + " " + triplet[1] + " " + triplet[2]);
+					System.out.println(Integer.parseInt(triplet[0]));
+					System.out.println(triplet[1]);
+					System.out.println(Integer.parseInt(triplet[2]));
+					ServerID newServer = new ServerID(Integer.parseInt(triplet[0]),
+											 triplet[1],
+											 Integer.parseInt(triplet[2]));
 					serverList.add(newServer);
 				}
 				catch (Exception e) {
@@ -111,6 +123,16 @@ public class CloudServer {
 					return false;
 				}
 				// read next line
+				try {
+					line = inputBuf.readLine();
+				}
+				catch (IOException ioe) {
+					System.out.println("IOException during readLine().");
+					ioe.printStackTrace();
+					return false;
+				}
+			}
+			else { // it's a comment, skip to next line
 				try {
 					line = inputBuf.readLine();
 				}
