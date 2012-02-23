@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CloudServer {
-	ArrayList<String> serverList;
+	ArrayList<ServerID> serverList;
     /**
      * Main routine. Just a dumb loop that keeps accepting new
      * client connections.
@@ -65,10 +65,12 @@ public class CloudServer {
 	 *
 	 * @return boolean - true if file loaded successfully, else false
 	 */
-	public static boolean loadConfig() {
-		// load the local configuration file
+	public boolean loadConfig() {
 		BufferedReader inputBuf = null;
 		String line = null;
+		String triple[] = null;
+		ServerID newServer = null;
+		
 		// use a try/catch block to open the input file with a FileReader
 		try {
 			inputBuf = new BufferedReader(new FileReader("serverConfig.txt"));
@@ -91,7 +93,18 @@ public class CloudServer {
 		
 		while (line != null) {
 			if (line.charAt(0) != '#') { // not a comment
-				
+				try {
+					triple = line.split(" ");
+					newServer = new ServerID(Integer.parseInt(triple[0]),
+											 triple[1],
+											 Integer.parseInt(triple[2]));
+					serverList.add(newServer);
+				}
+				catch (Exception e) {
+					System.out.println("Error while parsing \"serverConfig.txt\".");
+					e.printStackTrace();
+					return false;
+				}
 				// read next line
 				try {
 					line = inputBuf.readLine();
