@@ -114,10 +114,13 @@ public class WorkerThread extends Thread {
 	/**
 	 * Passes a query to other specified server
 	 *
+	 * @param otherServer - The number of the server to pass to
+	 * @param query - The query that must be performed on another server
+	 *
 	 * @return boolean - true if query was successful, else false
 	 */
-	public static boolean passQuery(String _transaction) {
-		
+	public static boolean passQuery(int otherServer, String _query) {
+		// need to figure out how to store server addresses/ports
 	}
 	
 	/**
