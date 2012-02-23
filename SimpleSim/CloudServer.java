@@ -107,15 +107,14 @@ public class CloudServer {
 
 			if (line.charAt(0) != '#') { // not a comment
 				try {
-//					String temp = line.split("\n")[0];
 					String triplet[] = line.split(" ");
 					System.out.println(triplet[0] + " " + triplet[1] + " " + triplet[2]);
 					System.out.println(Integer.parseInt(triplet[0]));
 					System.out.println(triplet[1]);
 					System.out.println(Integer.parseInt(triplet[2]));
-//					ServerID newServer = new ServerID(Integer.parseInt(triplet[0]),
-//											 triplet[1],
-//											 Integer.parseInt(triplet[2]));
+					ServerID foo = new ServerID(Integer.parseInt(triplet[0]),
+												triplet[1],
+												Integer.parseInt(triplet[2]));
 					tempList.add(new ServerID(Integer.parseInt(triplet[0]),
 											  triplet[1],
 											  Integer.parseInt(triplet[2])));
@@ -125,16 +124,6 @@ public class CloudServer {
 					e.printStackTrace();
 					return null;
 				}
-//				// read next line
-//				try {
-//					line = inputBuf.readLine();
-//				}
-//				catch (IOException ioe) {
-//					System.out.println("IOException during readLine().");
-//					ioe.printStackTrace();
-//					return null;
-//				}
-//			}
 			}
 			// get next line
 			try {
