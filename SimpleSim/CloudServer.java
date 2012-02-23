@@ -17,32 +17,37 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CloudServer {
-	ArrayList<ServerID> serverList;
+	static ArrayList<ServerID> serverList;
+	
     /**
      * Main routine. Just a dumb loop that keeps accepting new
      * client connections.
      */
     public static void main(String[] args) {
-		// call loadConfig() here
+		// Load server information from configuration file
+		if (!loadConfig()) {
+			System.err.println("Error loading configuration file. Exiting.");
+			System.exit(-1);
+		}
 		
-		int serverNumber = 1; // should be set by loadConfig, passed to thread
-		int serverPort = 8765; // default port number
-		// Get new port number from command line, otherwise use default
-		if (args.length == 2) {
+		int serverNumber = 0;
+		// Get new server number from command line
+		if (args.length == 1) {
 			try {
 				serverNumber = Integer.parseInt(args[0]);
-				serverPort = Integer.parseInt(args[1]);
 			}
 			catch (Exception e) {
 				System.err.println("Error parsing argument. Please use valid integers.");
-				System.err.println("Usage: java CloudServer <Server Number> <Port Number>\n");
+				System.err.println("Usage: java CloudServer <Server Number>\n");
 				System.exit(-1);
 			}
 	    }
+		
+		
 
 		try {
 			// This is basically just listens for new client connections
-			final ServerSocket serverSock = new ServerSocket(serverPort);
+			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
 			
 			// A simple infinite loop to accept connections
 			Socket sock = null;
@@ -65,7 +70,7 @@ public class CloudServer {
 	 *
 	 * @return boolean - true if file loaded successfully, else false
 	 */
-	public boolean loadConfig() {
+	public static boolean loadConfig() {
 		BufferedReader inputBuf = null;
 		String line = null;
 		String triple[] = null;
