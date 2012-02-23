@@ -14,8 +14,10 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class CloudServer {
+	
     /**
      * Main routine. Just a dumb loop that keeps accepting new
      * client connections.
@@ -80,7 +82,6 @@ public class CloudServer {
 		// read a line from the file using a try/catch block
 		try {
 			line = inputBuf.readLine();
-			System.out.println(line);
 		}
 		catch (IOException ioe) {
 			System.out.println("IOException during readLine().");
@@ -88,10 +89,24 @@ public class CloudServer {
 			return false;
 		}
 		
+		while (line != null) {
+			if (line.charAt(0) != '#') { // not a comment
+				
+				// read next line
+				try {
+					line = inputBuf.readLine();
+				}
+				catch (IOException ioe) {
+					System.out.println("IOException during readLine().");
+					ioe.printStackTrace();
+					return false;
+				}
+			}
+		}
+		
 		// close BufferedReader using a try/catch block
 		try {
 			inputBuf.close();
-			
 		}
 		catch (IOException ioe) {
 			// if exception caught, exit the program
