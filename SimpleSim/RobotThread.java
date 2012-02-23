@@ -54,21 +54,12 @@ public class RobotThread extends Thread {
 			// loop to send messages
 			Message msg = null, resp = null;
 			do {
-				// Read and send message. Since the Message class
-				// implements the Serializable interface, the
-				// ObjectOutputStream "output" object automatically
-				// encodes the Message object into a format that can
-				// be transmitted over the socket to the server.
+				// Read and send message
 				msg = new Message(queries[queryIndex]);
 				queryIndex++;
 				output.writeObject(msg);
 				
-				// Get ACK and print. Since Message implements
-				// Serializable, the ObjectInputStream can
-				// automatically read this object off of the wire and
-				// encode it as a Message. Note that we need to
-				// explicitly cast the return from readObject() to the
-				// type Message.
+				// Get ACK and print
 				resp = (Message)input.readObject();
 				System.out.println("Server says: " + resp.theMessage);
 			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
