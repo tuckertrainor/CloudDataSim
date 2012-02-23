@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CloudServer {
-	
+	ArrayList<String> serverList;
     /**
      * Main routine. Just a dumb loop that keeps accepting new
      * client connections.
