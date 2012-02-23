@@ -159,6 +159,8 @@ public class WorkerThread extends Thread {
 			
 			// shut things down
 			sock.close();
+			
+			return true;
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
@@ -169,6 +171,7 @@ public class WorkerThread extends Thread {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}		
+		return false;
 	}
 	
 	/**
