@@ -13,10 +13,12 @@ import java.net.Socket;
 import java.net.ConnectException;
 import java.io.ObjectInputStream;   // For reading Java objects off of the wire
 import java.io.ObjectOutputStream;  // For writing Java objects to the wire
+import java.util.ArrayList;
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
     private final int serverNumber; // The number of this server
+	private final ArrayList<ServerID> serverList;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -24,9 +26,10 @@ public class WorkerThread extends Thread {
 	 * @param _socket - The socket passed in from the server
 	 * @param _socket - The number assigned to the server that created thread
 	 */
-	public WorkerThread(Socket _socket, int _serverNumber) {
+	public WorkerThread(Socket _socket, int _serverNumber, ArrayList<ServerID> _serverList) {
 		socket = _socket;
 		serverNumber = _serverNumber;
+		serverList = _serverList;
 	}
 
 	/**
@@ -125,8 +128,8 @@ public class WorkerThread extends Thread {
 	public static boolean passQuery(int otherServer, String query) {
 		// need to figure out how to store server addresses/ports
 		// for now, use localhost and a given port
-		String server = "localhost";
-		int port = 8888;
+		String server = serverList.get(otherServer).getAddress();
+		int port = serverList.get(otherServer).getPort();
 		
 		// here we do the same thing we'd do from RobotThread: set up a
 		// socket with server X, pass it just a single query, and get back
