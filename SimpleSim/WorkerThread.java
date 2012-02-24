@@ -125,7 +125,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if query was successful, else false
 	 */
-	public static boolean passQuery(int otherServer, String query) {
+	public boolean passQuery(int otherServer, String query) {
 		// need to figure out how to store server addresses/ports
 		// for now, use localhost and a given port
 		String server = serverList.get(otherServer).getAddress();
@@ -182,7 +182,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
-	public static boolean verifyIntegrity() {
+	public boolean verifyIntegrity() {
 		System.out.println("verifyIntegrity() stub");
 		// perform random success operation
 		return true;
@@ -193,7 +193,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if access was successful, else false
 	 */
-	public static boolean accessData() {
+	public boolean accessData() {
 		System.out.println("accessData() stub");
 		// perform random success operation
 		return true;
@@ -204,7 +204,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
-	public static boolean getLocalAuth() {
+	public boolean getLocalAuth() {
 		System.out.println("getLocalAuth() stub");
 		// perform random success operation
 		return true;
@@ -215,7 +215,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
-	public static boolean getPolicyAuth() {
+	public boolean getPolicyAuth() {
 		System.out.println("getPolicyAuth() stub");
 		// perform random success operation
 		return true;
@@ -226,7 +226,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if freshest policy is received/good, else false
 	 */
-	public static boolean checkPolicyWithCA() {
+	public boolean checkPolicyWithCA() {
 		System.out.println("checkPolicyWithCA() stub");
 		// call the CA server, get results of call back
 		return true;
