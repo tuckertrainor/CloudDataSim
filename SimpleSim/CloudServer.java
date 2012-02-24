@@ -29,9 +29,6 @@ public class CloudServer {
 			System.err.println("Error loading configuration file. Exiting.");
 			System.exit(-1);
 		}
-		else {
-			System.out.println("booya");
-		}
 		
 		int serverNumber = 0;
 		// Get new server number from command line
@@ -45,12 +42,6 @@ public class CloudServer {
 				System.exit(-1);
 			}
 	    }
-		
-		// test loadConfig
-		System.out.println(serverNumber + ": " +
-						   serverList.get(serverNumber).getNumber() + " " +
-						   serverList.get(serverNumber).getAddress() + " " +
-						   serverList.get(serverNumber).getPort());
 
 		try {
 			// This is basically just listens for new client connections
@@ -60,8 +51,10 @@ public class CloudServer {
 			Socket sock = null;
 			WorkerThread thread = null;
 			while(true) {
-				sock = serverSock.accept(); // Accept an incoming connection
-				thread = new WorkerThread(sock, serverNumber); // Create a thread to handle this connection
+				// Accept an incoming connection
+				sock = serverSock.accept();
+				// Create a thread to handle this connection
+				thread = new WorkerThread(sock, serverNumber, serverList);
 				thread.start(); // Fork the thread
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled
@@ -80,7 +73,7 @@ public class CloudServer {
 	public static ArrayList<ServerID> loadConfig(String filename) {
 		BufferedReader inputBuf = null;
 		String line = null;
-		ArrayList<ServerID> tempList = new ArrayList<ServerID>();
+		ArrayList<ServerID> configList = new ArrayList<ServerID>();
 	
 		// use a try/catch block to open the input file with a FileReader
 		try {
@@ -105,24 +98,20 @@ public class CloudServer {
 		while (line != null) {
 			System.out.println("hi");
 
-			if (line.charAt(0) != '#') { // not a comment
+			if (line.charAt(0) != '#') { // not a comment line
 				try {
 					String triplet[] = line.split(" ");
-					System.out.println(triplet[0] + " " + triplet[1] + " " + triplet[2]);
-					System.out.println(Integer.parseInt(triplet[0]));
-					System.out.println(triplet[1]);
-					System.out.println(Integer.parseInt(triplet[2]));
-					ServerID foo = new ServerID(Integer.parseInt(triplet[0]),
+//					ServerID foo = new ServerID(Integer.parseInt(triplet[0]),
+//												triplet[1],
+//												Integer.parseInt(triplet[2]));
+//					configList.add(foo);
+					configList.add(new ServerID(Integer.parseInt(triplet[0]),
 												triplet[1],
-												Integer.parseInt(triplet[2]));
-					if (foo != null) { System.out.println(foo.getAddress());}
-//					tempList.add(new ServerID(Integer.parseInt(triplet[0]),
-//											  triplet[1],
-//											  Integer.parseInt(triplet[2])));
-					tempList.add(foo);
+												Integer.parseInt(triplet[2])));					
 				}
 				catch (Exception e) {
-					System.out.println("Error while parsing \"serverConfig.txt\".");
+					System.out.println("Error while parsing \"" + filename +
+									   "\".");
 					e.printStackTrace();
 					return null;
 				}
@@ -149,6 +138,6 @@ public class CloudServer {
 			return null;
 		}
 		
-		return tempList;
+		return configList;
 	}
 }
