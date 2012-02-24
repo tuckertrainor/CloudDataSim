@@ -19,6 +19,8 @@ public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
     private final int serverNumber; // The number of this server
 	private final ArrayList<ServerID> serverList;
+	private final int readSleep = 5; // number of milliseconds for a READ
+	private final int writeSleep = 10; // number of milliseconds for a WRITE
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
