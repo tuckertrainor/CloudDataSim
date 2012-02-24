@@ -53,9 +53,24 @@ public class Robot {
 			System.out.println("Server configuration file read successfully.");
 		}
 		
+		// Check arg[0] for proper value, range
+		int primaryServer = 0;
+		try {
+			primaryServer = Integer.parseInt(args[0]);
+			if (primaryServer < 1 || primaryServer >= serverList.size()) {
+				System.err.println("Error in server number. Please check server configuration.");
+				System.exit(-1);
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument. Please use valid integers.");
+			System.err.println("Usage: java Robot <Server number to first contact>\n");
+			System.exit(-1);
+		}
+		
 		// Communicate with CloudServer through RobotThread
 		try {
-			int primaryServer = Integer.parseInt(args[0]);
+			
 			RobotThread thread = null;
 			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit",
 									 serverList.get(primaryServer).getAddress(),
