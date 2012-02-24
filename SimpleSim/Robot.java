@@ -34,9 +34,9 @@ public class Robot {
 	 */
     public static void main(String[] args) {
 		// Error checking for arguments
-		if (args.length != 2) {
-			System.err.println("Not enough arguments.\n");
-			System.err.println("Usage: java Robot <Server name or IP> <Port Number>\n");
+		if (args.length != 1) {
+			System.err.println("Improper argument count.\n");
+			System.err.println("Usage: java Robot <Server number to first contact>\n");
 			System.exit(-1);
 	    }
 		
@@ -55,14 +55,21 @@ public class Robot {
 		
 		// Communicate with CloudServer through RobotThread
 		try {
+			int primaryServer = Integer.parseInt(args[0]);
 			RobotThread thread = null;
-			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit", args[0], Integer.parseInt(args[1]));
+			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit",
+									 serverList.get(primaryServer).getAddress(),
+									 serverList.get(primaryServer).getPort());
 			thread.start();
 			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 2&R 2 1&R 2 3&R 2 1&R 2 2&C 2&exit", args[0], Integer.parseInt(args[1]));
+			thread = new RobotThread("B 2&R 2 1&R 2 3&R 2 1&R 2 2&C 2&exit",
+									 serverList.get(primaryServer).getAddress(),
+									 serverList.get(primaryServer).getPort());
 			thread.start();
 			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 3&R 3 1&R 3 3&R 3 1&R 3 2&C 3&exit", args[0], Integer.parseInt(args[1]));
+			thread = new RobotThread("B 3&R 3 1&R 3 3&R 3 1&R 3 2&C 3&exit",
+									 serverList.get(primaryServer).getAddress(),
+									 serverList.get(primaryServer).getPort());
 			thread.start();
 			ThreadCounter.robotThreads++;
 		}
