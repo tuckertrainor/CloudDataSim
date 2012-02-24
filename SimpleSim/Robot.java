@@ -35,7 +35,7 @@ public class Robot {
     public static void main(String[] args) {
 		// Error checking for arguments
 		if (args.length != 1) {
-			System.err.println("Improper argument count.\n");
+			System.err.println("Improper argument count.");
 			System.err.println("Usage: java Robot <Server number to first contact>\n");
 			System.exit(-1);
 	    }
