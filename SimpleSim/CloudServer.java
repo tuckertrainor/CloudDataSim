@@ -23,13 +23,6 @@ public class CloudServer {
      * client connections.
      */
     public static void main(String[] args) {
-		// Load server information from configuration file
-		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
-		if (serverList == null) {
-			System.err.println("Error loading configuration file. Exiting.");
-			System.exit(-1);
-		}
-		
 		int serverNumber = 0;
 		// Get new server number from command line
 		if (args.length == 1) {
@@ -42,6 +35,17 @@ public class CloudServer {
 				System.exit(-1);
 			}
 	    }
+		
+		// Load server information from configuration file
+		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
+		if (serverList == null) {
+			System.err.println("Error loading configuration file. Exiting.");
+			System.exit(-1);
+		}
+		else {
+			System.out.println("Configuration file loaded. Server " +
+							   serverNumber + " is ready.");
+		}
 
 		try {
 			// This is basically just listens for new client connections
@@ -96,15 +100,9 @@ public class CloudServer {
 		}
 
 		while (line != null) {
-			System.out.println("hi");
-
 			if (line.charAt(0) != '#') { // not a comment line
 				try {
 					String triplet[] = line.split(" ");
-//					ServerID foo = new ServerID(Integer.parseInt(triplet[0]),
-//												triplet[1],
-//												Integer.parseInt(triplet[2]));
-//					configList.add(foo);
 					configList.add(new ServerID(Integer.parseInt(triplet[0]),
 												triplet[1],
 												Integer.parseInt(triplet[2])));					
@@ -137,7 +135,7 @@ public class CloudServer {
 			ioe.printStackTrace();
 			return null;
 		}
-		
+
 		return configList;
 	}
 }
