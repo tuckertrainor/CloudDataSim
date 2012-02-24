@@ -20,7 +20,7 @@ public class WorkerThread extends Thread {
     private final int serverNumber; // The number of this server
 	private final ArrayList<ServerID> serverList;
 	private final int readSleep = 5; // number of milliseconds for a READ
-	private final int writeSleep = 10; // number of milliseconds for a WRITE
+	private final int writeSleep = 5; // number of milliseconds for a WRITE
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -77,6 +77,8 @@ public class WorkerThread extends Thread {
 						}
 						else {
 							// add time to counter or sleep
+							System.out.println("READ for transaction " + instr[1]);
+							Thread.sleep(readSleep);
 						}
 					}
 					else { // pass to server
@@ -93,6 +95,8 @@ public class WorkerThread extends Thread {
 						}
 						else {
 							// add time to counter or sleep
+							System.out.println("WRITE for transaction " + instr[1]);
+							Thread.sleep(writeSleep);
 						}
 					}
 					else { // pass to server
