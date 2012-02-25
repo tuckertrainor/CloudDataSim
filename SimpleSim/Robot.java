@@ -63,7 +63,7 @@ public class Robot {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Error parsing argument. Please use valid integers.");
+			System.err.println("Error parsing argument. Please use a valid integer.");
 			System.err.println("Usage: java Robot <Server number to first contact>\n");
 			System.exit(-1);
 		}
