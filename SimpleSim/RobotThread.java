@@ -39,23 +39,24 @@ public class RobotThread extends Thread {
 	 */
 	public void run() {
 		try {
-			// Connect to the specified server
-			final Socket sock = new Socket(server, port);
-			System.out.println("Connected to " + server +
-							   " on port " + port);
-			
-			// Set up I/O streams with the server
-			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
-			
 			// Divide transaction into groups to process in chunks (i.e., all
 			// contiguous READs or WRITEs)
 			String queryGroups[] = transactions.split(";");
 			int groupIndex = 0;
 			
-			// Loop to send query qroups
-			Message msg = null, resp = null;
 			do {
+				// Connect to the specified server
+				final Socket sock = new Socket(server, port);
+				System.out.println("Connected to " + server +
+								   " on port " + port);
+				
+				// Set up I/O streams with the server
+				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				
+				// Loop to send query qroups
+				Message msg = null, resp = null;
+
 				// Read and send message
 				msg = new Message(queryGroups[groupIndex]);
 				groupIndex++;
@@ -75,10 +76,11 @@ public class RobotThread extends Thread {
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
 				}
-			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
-			
-			// shut things down
-			sock.close();
+				
+				// shut things down
+				sock.close();
+//			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
+			} while (groupIndex < queryGroups.length);
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
