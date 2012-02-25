@@ -50,68 +50,88 @@ public class WorkerThread extends Thread {
 
 			// Loop to read messages
 			Message msg = null;
-			int count = 0;
-			do {
+//			do {
 				// read and print message
 				msg = (Message)input.readObject();
 				System.out.println("[" + socket.getInetAddress() +
 								   ":" + socket.getPort() + "] " + msg.theMessage);
 
-				// Write an ACK back to the sender
-				count++;
-				String instr[] = msg.theMessage.split(" ");
-				if (instr.length != 1) {
-					output.writeObject(new Message("Received message #" + count +
-												   " of transaction " + instr[1]));
-				}
-				else {
-					output.writeObject(new Message("Received message #" + count));
-				}
+				// Sample messages
+				// B 1
+				// R 1 1,R 1 3,R 1 1,R 1 2
+				// W 1 2,W 1 1
+				// R 1 3
+				// C 1
+				// exit
 				
+				// Break up query grouping
+				String queryGroup[] = msg.theMessage.split(",");
+				// Get first query
+				
+				// Write an ACK back to the sender
+//				if (query.length != 1) { // if not "exit"
+//					output.writeObject(new Message("Received message #" + count +
+//												   " of transaction " + query[1]));
+//				}
+//				else {
+//					output.writeObject(new Message("Received message #" + count));
+//				}
+				
+				// Break up query grouping and loop to process each query
+//			int groupIndex = 0;
+			
+			for (int i = 0; i < queryGroup.length; i++) {
 				// Handle instructions
-				if (instr[0].equals("R")) { // READ
+				String query[] = queryGroup[i].split(" ");
+				if (query[0].equals("B")) { // BEGIN
+					System.out.println("BEGIN transaction " + query[1]);
+				}
+				else if (query[0].equals("R")) { // READ
 					// Check server number, perform query or pass on
-					if (Integer.parseInt(instr[2]) == serverNumber) { // Perform query on this server
+					if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
 						if (accessData() == false) {
 							// message an error, abort transaction
 						}
 						else {
 							// add time to counter or sleep
-							System.out.println("READ for transaction " + instr[1]);
+							System.out.println("READ for transaction " + query[1]);
 							Thread.sleep(readSleep);
 						}
 					}
 					else { // pass to server
-						System.out.println("Pass READ of transaction " + instr[1] +
-										   " to server " + instr[2]);
-						passQuery(Integer.parseInt(instr[2]), msg.theMessage);
+						System.out.println("Pass READ of transaction " + query[1] +
+										   " to server " + query[2]);
+						passQuery(Integer.parseInt(query[2]), msg.theMessage);
 					}
 				}
-				else if (instr[0].equals("W")) { // WRITE
+				else if (query[0].equals("W")) { // WRITE
 					// Check server number, perform query or pass on
-					if (Integer.parseInt(instr[2]) == serverNumber) { // Perform query on this server
+					if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
 						if (accessData() == false) {
 							// message an error, abort transaction
 						}
 						else {
 							// add time to counter or sleep
-							System.out.println("WRITE for transaction " + instr[1]);
+							System.out.println("WRITE for transaction " + query[1]);
 							Thread.sleep(writeSleep);
 						}
 					}
 					else { // pass to server
-						System.out.println("Pass WRITE of transaction " + instr[1] +
-										   " to server " + instr[2]);
-						passQuery(Integer.parseInt(instr[2]), msg.theMessage);
+						System.out.println("Pass WRITE of transaction " + query[1] +
+										   " to server " + query[2]);
+						passQuery(Integer.parseInt(query[2]), msg.theMessage);
 					}
 				}
-				else if (instr[0].equals("C")) { // COMMIT
+				else if (query[0].equals("C")) { // COMMIT
 					// will need to keep list of all servers accessed, use it
 					// to finalize commit across servers
-					System.out.println("COMMIT STUB - transaction " + instr[1]);
+					System.out.println("COMMIT STUB - transaction " + query[1]);
 				}
-			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
-
+			}
+//			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
+			// ACK complettion
+			output.writeObject(new Message("ACK"));
+			
 			// Close and cleanup
 			System.out.println("** Closing connection with " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
