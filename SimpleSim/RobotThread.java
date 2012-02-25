@@ -48,20 +48,32 @@ public class RobotThread extends Thread {
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
-			String queries[] = transactions.split("&");
-			int queryIndex = 0;
+			// Divide transaction into groups to process in chunks (i.e., all
+			// contiguous READs or WRITEs)
+			String queryGroups[] = transactions.split(";");
+			int groupIndex = 0;
 			
-			// loop to send messages
+			// Loop to send query qroups
 			Message msg = null, resp = null;
 			do {
 				// Read and send message
-				msg = new Message(queries[queryIndex]);
-				queryIndex++;
+				msg = new Message(queryGroups[groupIndex]);
+				groupIndex++;
 				output.writeObject(msg);
 				
 				// Get ACK and print
 				resp = (Message)input.readObject();
 				System.out.println("Server says: " + resp.theMessage);
+				resp = (Message)input.readObject();
+				if (resp.theMessage.equals("ACK")) {
+					System.out.println("RobotThread: query group processed");
+				}
+				else if (queryGroups[groupIndex].toUpperCase().equals("EXIT")) {
+					System.out.println("RobotThread: transaction complete");
+				}
+				else { // Something went wrong
+					System.out.println("RobotThread: query handling error");
+				}
 			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
 			
 			// shut things down
