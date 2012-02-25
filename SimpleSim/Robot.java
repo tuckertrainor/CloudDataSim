@@ -72,17 +72,21 @@ public class Robot {
 		try {
 			
 			RobotThread thread = null;
-			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit",
+			// B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit
+//			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit",
+//									 serverList.get(primaryServer).getAddress(),
+//									 serverList.get(primaryServer).getPort());
+			thread = new RobotThread("B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit",
 									 serverList.get(primaryServer).getAddress(),
 									 serverList.get(primaryServer).getPort());
 			thread.start();
 			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 2&R 2 1&R 2 3&R 2 1&R 2 2&C 2&exit",
+			thread = new RobotThread("B 2;R 2 1,R 2 3,R 2 1,R 2 2;W 2 2,W 2 1;R 2 3;C 2;exit",
 									 serverList.get(primaryServer).getAddress(),
 									 serverList.get(primaryServer).getPort());
 			thread.start();
 			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 3&R 3 1&R 3 3&R 3 1&R 3 2&C 3&exit",
+			thread = new RobotThread("B 3;R 3 1,R 3 3,R 3 1,R 3 2;W 3 2,W 3 1;R 3 3;C 1;exit",
 									 serverList.get(primaryServer).getAddress(),
 									 serverList.get(primaryServer).getPort());
 			thread.start();
