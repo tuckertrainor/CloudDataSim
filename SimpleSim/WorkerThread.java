@@ -129,7 +129,7 @@ public class WorkerThread extends Thread {
 				}
 			}
 //			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
-			// ACK complettion
+			// ACK completion
 			output.writeObject(new Message("ACK"));
 			
 			// Close and cleanup
