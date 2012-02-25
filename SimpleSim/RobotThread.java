@@ -62,8 +62,8 @@ public class RobotThread extends Thread {
 				output.writeObject(msg);
 				
 				// Get ACK and print
-				resp = (Message)input.readObject();
-				System.out.println("Server says: " + resp.theMessage);
+//				resp = (Message)input.readObject();
+//				System.out.println("Server says: " + resp.theMessage);
 				resp = (Message)input.readObject();
 				if (resp.theMessage.equals("ACK")) {
 					System.out.println("RobotThread: query group processed");
