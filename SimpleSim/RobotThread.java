@@ -73,6 +73,7 @@ public class RobotThread extends Thread {
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
+					// break; // ?
 				}
 			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
 			
