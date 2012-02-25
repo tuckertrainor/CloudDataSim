@@ -44,7 +44,8 @@ public class RobotThread extends Thread {
 			String queryGroups[] = transactions.split(";");
 			int groupIndex = 0;
 			
-			do {
+			// Loop to send query qroups
+			while (groupIndex < queryGroups.length) {
 				// Connect to the specified server
 				final Socket sock = new Socket(server, port);
 				System.out.println("Connected to " + server +
@@ -54,12 +55,10 @@ public class RobotThread extends Thread {
 				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 				
-				// Loop to send query qroups
 				Message msg = null, resp = null;
 
 				// Read and send message
 				msg = new Message(queryGroups[groupIndex]);
-				groupIndex++;
 				output.writeObject(msg);
 				
 				// Get ACK and print
@@ -77,10 +76,10 @@ public class RobotThread extends Thread {
 					// break; // ?
 				}
 				
-				// shut things down
+				// Close connection to server
 				sock.close();
-//			} while (!msg.theMessage.toUpperCase().equals("EXIT"));
-			} while (groupIndex < queryGroups.length);
+				groupIndex++;
+			} 
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
