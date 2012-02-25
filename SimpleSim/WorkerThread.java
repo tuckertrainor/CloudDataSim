@@ -81,6 +81,7 @@ public class WorkerThread extends Thread {
 			
 			for (int i = 0; i < queryGroup.length; i++) {
 				// Handle instructions
+				System.out.println(i + ": " + queryGroup.length);
 				String query[] = queryGroup[i].split(" ");
 				if (query[0].equals("B")) { // BEGIN
 					System.out.println("BEGIN transaction " + query[1]);
@@ -100,7 +101,7 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass READ of transaction " + query[1] +
 										   " to server " + query[2]);
-						passQuery(Integer.parseInt(query[2]), msg.theMessage);
+						passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 					}
 				}
 				else if (query[0].equals("W")) { // WRITE
@@ -118,7 +119,7 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass WRITE of transaction " + query[1] +
 										   " to server " + query[2]);
-						passQuery(Integer.parseInt(query[2]), msg.theMessage);
+						passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 					}
 				}
 				else if (query[0].equals("C")) { // COMMIT
