@@ -177,7 +177,7 @@ public class WorkerThread extends Thread {
 			System.out.println("Server " + otherServer +
 							   " says: " + resp.theMessage);
 			// handle response
-			
+/* TODO: need to handle ACK from passed query			*/
 			// send EXIT
 			msg = new Message("EXIT");
 			output.writeObject(msg);
