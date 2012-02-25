@@ -50,10 +50,9 @@ public class WorkerThread extends Thread {
 
 			// Loop to read messages
 			Message msg = null;
-//			do {
-				// read and print message
-				msg = (Message)input.readObject();
-				System.out.println("[" + socket.getInetAddress() +
+			// read and print message
+			msg = (Message)input.readObject();
+			System.out.println("[" + socket.getInetAddress() +
 								   ":" + socket.getPort() + "] " + msg.theMessage);
 
 				// Sample messages
@@ -65,7 +64,7 @@ public class WorkerThread extends Thread {
 				// exit
 				
 				// Break up query grouping
-				String queryGroup[] = msg.theMessage.split(",");
+			String queryGroup[] = msg.theMessage.split(",");
 				// Get first query
 				
 				// Write an ACK back to the sender
@@ -128,7 +127,6 @@ public class WorkerThread extends Thread {
 					System.out.println("COMMIT STUB - transaction " + query[1]);
 				}
 			}
-//			} while(!msg.theMessage.toUpperCase().equals("EXIT"));
 			// ACK completion
 			output.writeObject(new Message("ACK"));
 			
