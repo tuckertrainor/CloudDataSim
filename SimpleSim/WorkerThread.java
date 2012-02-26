@@ -55,29 +55,16 @@ public class WorkerThread extends Thread {
 			System.out.println("[" + socket.getInetAddress() +
 								   ":" + socket.getPort() + "] " + msg.theMessage);
 
-				// Sample messages
-				// B 1
-				// R 1 1,R 1 3,R 1 1,R 1 2
-				// W 1 2,W 1 1
-				// R 1 3
-				// C 1
-				// exit
-				
-				// Break up query grouping
+			// Sample messages
+			// B 1
+			// R 1 1,R 1 3,R 1 1,R 1 2
+			// W 1 2,W 1 1
+			// R 1 3
+			// C 1
+			// exit
+			
+			// Break up query grouping
 			String queryGroup[] = msg.theMessage.split(",");
-				// Get first query
-				
-				// Write an ACK back to the sender
-//				if (query.length != 1) { // if not "exit"
-//					output.writeObject(new Message("Received message #" + count +
-//												   " of transaction " + query[1]));
-//				}
-//				else {
-//					output.writeObject(new Message("Received message #" + count));
-//				}
-				
-				// Break up query grouping and loop to process each query
-//			int groupIndex = 0;
 			
 			for (int i = 0; i < queryGroup.length; i++) {
 				// Handle instructions
