@@ -91,6 +91,14 @@ public class WorkerThread extends Thread {
 						System.out.println("Pass READ of transaction " + query[1] +
 										   " to server " + query[2]);
 						passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+						if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
+							System.out.println("READ of transaction " + query[1] +
+											   " to server " + query[2] +
+											   " successful");
+						}
+						else { // error in passQuery()
+							System.out.println("ERROR in passQuery()");
+						}
 					}
 				}
 				else if (query[0].equals("W")) { // WRITE
@@ -108,7 +116,14 @@ public class WorkerThread extends Thread {
 					else { // pass to server
 						System.out.println("Pass WRITE of transaction " + query[1] +
 										   " to server " + query[2]);
-						passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+						if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
+							System.out.println("WRITE of transaction " + query[1] +
+											   " to server " + query[2] +
+											   " successful");
+						}
+						else { // error in passQuery()
+							System.out.println("ERROR in passQuery()");
+						}
 					}
 				}
 				else if (query[0].equals("C")) { // COMMIT
