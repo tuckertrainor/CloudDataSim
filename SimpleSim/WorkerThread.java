@@ -68,7 +68,6 @@ public class WorkerThread extends Thread {
 			
 			for (int i = 0; i < queryGroup.length; i++) {
 				// Handle instructions
-				System.out.println(i + ": " + queryGroup.length);
 				String query[] = queryGroup[i].split(" ");
 				if (query[0].equals("B")) { // BEGIN
 					System.out.println("BEGIN transaction " + query[1]);
@@ -171,14 +170,6 @@ public class WorkerThread extends Thread {
 			resp = (Message)input.readObject();
 			System.out.println("Server " + otherServer +
 							   " says: " + resp.theMessage);
-			// handle response
-/* TODO: need to handle ACK from passed query			*/
-			// send EXIT
-//			msg = new Message("EXIT");
-//			output.writeObject(msg);
-//			resp = (Message)input.readObject();
-//			System.out.println("Server " + otherServer +
-//							   " says: " + resp.theMessage);
 			
 			// shut things down
 			sock.close();
