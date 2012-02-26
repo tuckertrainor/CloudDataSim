@@ -71,7 +71,43 @@ public class Robot {
 		
 		// Communicate with CloudServer through RobotThread
 		try {
-			
+			int maxTransactions = 5;
+			int maxQueries = 10;
+			int maxServers = 3;
+			int queryServer = 0;
+			Random generator = new Random(12345L);
+			for (int i = 1; i <= maxTransactions; i++) {
+				String newTrans = "B " + i;
+				char prevQuery = 'B';
+				for (int j = 0; j < maxQueries; j++) {
+					String newQuery = new String();
+					// make READ or WRITE
+					if (generator.nextBoolean()) {
+						if (prevQuery == 'R') {
+							newQuery += ",R " + i;
+						}
+						else {
+							newQuery += ";R " + i;
+						}
+						prevQuery = 'R';
+					}
+					else {
+						if (prevQuery == 'W') {
+							newQuery += ",W " + i;
+						}
+						else {
+							newQuery += ";W " + i;
+						}
+						prevQuery = 'W';
+					}
+					// make server number
+					queryServer = generator.nextInt(maxServers) + 1;
+					newQuery += " " + queryServer;
+					newTrans += newQuery;
+				}
+				newTrans += ";C " + i + ";exit";
+				System.out.println(newTrans);
+			}
 			RobotThread thread = null;
 			thread = new RobotThread("B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit",
 									 serverList.get(primaryServer).getAddress(),
