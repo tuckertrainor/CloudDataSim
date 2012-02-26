@@ -62,14 +62,9 @@ public class RobotThread extends Thread {
 				output.writeObject(msg);
 				
 				// Get ACK and print
-//				resp = (Message)input.readObject();
-//				System.out.println("Server says: " + resp.theMessage);
 				resp = (Message)input.readObject();
 				if (resp.theMessage.equals("ACK")) {
 					System.out.println("RobotThread: query group processed");
-				}
-				else if (queryGroups[groupIndex].toUpperCase().equals("EXIT")) {
-					System.out.println("RobotThread: transaction complete");
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
