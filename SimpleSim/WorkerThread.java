@@ -72,6 +72,9 @@ public class WorkerThread extends Thread {
 				String query[] = queryGroup[i].split(" ");
 				if (query[0].equals("B")) { // BEGIN
 					System.out.println("BEGIN transaction " + query[1]);
+
+					// send notification to Robot
+					
 				}
 				else if (query[0].equals("R")) { // READ
 					// Check server number, perform query or pass on
@@ -113,6 +116,11 @@ public class WorkerThread extends Thread {
 					// will need to keep list of all servers accessed, use it
 					// to finalize commit across servers
 					System.out.println("COMMIT STUB - transaction " + query[1]);
+				}
+				else if (query[0].toUpperCase().equals("EXIT") { // end of transaction
+					
+					// send notification to Robot
+					
 				}
 			}
 			// ACK completion
