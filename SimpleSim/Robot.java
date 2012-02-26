@@ -72,10 +72,6 @@ public class Robot {
 		try {
 			
 			RobotThread thread = null;
-			// B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit
-//			thread = new RobotThread("B 1&R 1 1&R 1 3&R 1 1&R 1 2&C 1&exit",
-//									 serverList.get(primaryServer).getAddress(),
-//									 serverList.get(primaryServer).getPort());
 			thread = new RobotThread("B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit",
 									 serverList.get(primaryServer).getAddress(),
 									 serverList.get(primaryServer).getPort());
