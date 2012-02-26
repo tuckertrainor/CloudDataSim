@@ -123,7 +123,7 @@ public class WorkerThread extends Thread {
 					
 				}
 			}
-			// ACK completion
+			// ACK completion of this query group
 			output.writeObject(new Message("ACK"));
 			
 			// Close and cleanup
