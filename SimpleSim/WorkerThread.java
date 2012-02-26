@@ -117,7 +117,7 @@ public class WorkerThread extends Thread {
 					// to finalize commit across servers
 					System.out.println("COMMIT STUB - transaction " + query[1]);
 				}
-				else if (query[0].toUpperCase().equals("EXIT") { // end of transaction
+				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 					
 					// send notification to Robot
 					
