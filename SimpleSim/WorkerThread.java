@@ -14,6 +14,7 @@ import java.net.ConnectException;
 import java.io.ObjectInputStream;   // For reading Java objects off of the wire
 import java.io.ObjectOutputStream;  // For writing Java objects to the wire
 import java.util.ArrayList;
+import java.util.Date;
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
