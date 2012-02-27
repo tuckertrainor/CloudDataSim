@@ -72,9 +72,6 @@ public class WorkerThread extends Thread {
 				String query[] = queryGroup[i].split(" ");
 				if (query[0].equals("B")) { // BEGIN
 					System.out.println("BEGIN transaction " + query[1]);
-
-					// send notification to Robot
-					
 				}
 				else if (query[0].equals("R")) { // READ
 					// Check server number, perform query or pass on
