@@ -125,6 +125,7 @@ public class Robot {
 				thread = new RobotThread(TransactionLog.entry.get(i).getQuerySet(),
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
+				TransactionLog.entry.get(i).setStartTime();
 				thread.start();
 				ThreadCounter.robotThreads++;
 			}
