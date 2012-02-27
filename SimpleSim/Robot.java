@@ -338,19 +338,31 @@ public class Robot {
 		}
 		
 		// Write to file
-		for (int i = 1; i <= maxTransactions; i++) {
-			try {
-				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "," +
+		try {
+			outputBuf.write("PARAMETERS:");
+			outputBuf.newLine();
+			outputBuf.write("MT=" + maxTransactions);
+			outputBuf.newLine();
+			outputBuf.write("MQ=" + maxQueries);
+			outputBuf.newLine();
+			outputBuf.write("MS=" + maxServers);
+			outputBuf.newLine();
+			outputBuf.write("MD=" + maxDegree);
+			outputBuf.newLine();
+			outputBuf.write("RS=" + randomSeed);
+			outputBuf.newLine();
+			for (int i = 1; i <= maxTransactions; i++) {
+				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
 								TransactionLog.entry.get(i).getQuerySet() + "," +
 								TransactionLog.entry.get(i).getStartTime() + "," +
 								TransactionLog.entry.get(i).getEndTime());
 				outputBuf.newLine();
 			}
-			catch(IOException ioe) {
-				System.out.println("IOException while writing to output file.");
-				ioe.printStackTrace();
-				success = false;
-			}
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException while writing to output file.");
+			ioe.printStackTrace();
+			success = false;
 		}
 		
 		// Close the output stream
