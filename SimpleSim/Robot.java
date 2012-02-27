@@ -257,4 +257,11 @@ public class Robot {
 		
 		return configList;
 	}
+	
+    /**
+     * Output a file with the results of the simulation
+     */
+	private static void outputLog() {
+		// stub
+	}
 }
