@@ -1,0 +1,8 @@
+# <server number> <IP Address> <Port>
+# 0 is reserved for the Robot
+0 localhost 8000
+1 localhost 8001
+2 localhost 8002
+3 localhost 8003
+4 localhost 8004
+5 localhost 8005
