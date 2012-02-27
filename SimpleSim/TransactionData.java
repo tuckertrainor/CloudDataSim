@@ -25,7 +25,7 @@ public class TransactionData {
 		startTime = _startTime;
 	}
 	
-	public setEndTime(long _endTime) {
+	public void setEndTime(long _endTime) {
 		endTime = _endTime;
 	}
 	
