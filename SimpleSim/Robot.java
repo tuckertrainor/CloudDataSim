@@ -78,7 +78,10 @@ public class Robot {
 		
 		// Build a series of transactions using parameters
 		Random generator = new Random(randomSeed);
-		TransactionData tData = new TransactionData(0, "ZERO", new Date().getTime());
+		TransactionData tData = new TransactionData(0, "ZERO");
+		tData.setStartTime();
+		tData.setEndTime(0L);
+		TransactionLog.entry.add(tData);
 		for (int i = 1; i <= maxTransactions; i++) {
 			String newTrans = "B " + i;
 			char prevQuery = 'B';
@@ -109,7 +112,8 @@ public class Robot {
 				newTrans += newQuery;
 			}
 			newTrans += ";C " + i + ";exit";
-			TransactionData tData = new TransactionData(i, newTrans, new Date().getTime());
+			tData = new TransactionData(i, newTrans);
+			tData.setStartTime();
 			TransactionLog.entry.add(tData);
 		}
 		
