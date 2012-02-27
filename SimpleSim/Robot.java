@@ -140,7 +140,8 @@ public class Robot {
 					i++;
 				}
 				else {
-					System.out.print("*");
+					// Release I/O block
+					System.out.flush();
 				}
 			}
 		}
@@ -148,10 +149,6 @@ public class Robot {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		
-		System.out.println("Thread count: " + ThreadCounter.threadCount);
-		System.out.println("Threads active: " + ThreadCounter.activeThreads);
-		System.out.println("Log count: " + TransactionLog.entry.size());
     }
 	
     /**
