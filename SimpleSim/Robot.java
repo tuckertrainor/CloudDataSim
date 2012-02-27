@@ -128,11 +128,11 @@ public class Robot {
 		try {
 			RobotThread thread = null;
 			for (int i = 1; i <= maxTransactions; i++) {
+				TransactionLog.entry.get(i).setStartTime();
 				thread = new RobotThread(i,
 										 TransactionLog.entry.get(i).getQuerySet(),
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
-				TransactionLog.entry.get(i).setStartTime();
 				thread.start();
 				ThreadCounter.robotThreads++;
 			}
