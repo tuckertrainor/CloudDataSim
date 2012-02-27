@@ -28,6 +28,12 @@ import java.util.Random;
 import java.util.Date;
 
 public class Robot {
+	
+	int maxTransactions;
+	int maxQueries;
+	int maxServers;
+	int maxDegree;
+
 	/**
 	 * Main method.
 	 *
@@ -69,6 +75,8 @@ public class Robot {
 			System.err.println("Usage: java Robot <Server number to first contact>\n");
 			System.exit(-1);
 		}
+		
+		// Build a series of transactions using parameters
 		
 		// Communicate with CloudServer through RobotThread
 		try {
@@ -149,6 +157,11 @@ public class Robot {
      */
 	private static void loadParameters() {
 		System.out.println("loadParameters() stub");
+		maxTransactions = 50;
+		maxQueries = 10;
+		maxServers = 3;
+		maxDegree = 10;
+		
 		// load parameters file
 		
 		BufferedReader inputBuf = null;
