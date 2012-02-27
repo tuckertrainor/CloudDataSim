@@ -28,11 +28,11 @@ import java.util.Random;
 import java.util.Date;
 
 public class Robot {
-	int maxTransactions;
-	int maxQueries;
-	int maxServers;
-	int maxDegree;
-	long randomSeed;
+	static int maxTransactions;
+	static int maxQueries;
+	static int maxServers;
+	static int maxDegree;
+	static long randomSeed;
 
 	/**
 	 * Main method.
@@ -85,6 +85,7 @@ public class Robot {
 		for (int i = 1; i <= maxTransactions; i++) {
 			String newTrans = "B " + i;
 			char prevQuery = 'B';
+			int queryServer = 0;
 			for (int j = 0; j < maxQueries; j++) {
 				String newQuery = new String();
 				// make READ or WRITE
@@ -119,43 +120,9 @@ public class Robot {
 		
 		// Communicate with CloudServer through RobotThread
 		try {
-			int maxTransactions = 50;
-			int maxQueries = 10;
-			int maxServers = 3;
-			int queryServer = 0;
-			Random generator = new Random(12345L);
 			RobotThread thread = null;
 			for (int i = 1; i <= maxTransactions; i++) {
-				String newTrans = "B " + i;
-				char prevQuery = 'B';
-				for (int j = 0; j < maxQueries; j++) {
-					String newQuery = new String();
-					// make READ or WRITE
-					if (generator.nextBoolean()) {
-						if (prevQuery == 'R') {
-							newQuery += ",R " + i;
-						}
-						else {
-							newQuery += ";R " + i;
-						}
-						prevQuery = 'R';
-					}
-					else {
-						if (prevQuery == 'W') {
-							newQuery += ",W " + i;
-						}
-						else {
-							newQuery += ";W " + i;
-						}
-						prevQuery = 'W';
-					}
-					// make server number
-					queryServer = generator.nextInt(maxServers) + 1;
-					newQuery += " " + queryServer;
-					newTrans += newQuery;
-				}
-				newTrans += ";C " + i + ";exit";
-				thread = new RobotThread(newTrans,
+				thread = new RobotThread(TransactionLog.entry.get(i).getQuerySet(),
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
 				thread.start();
@@ -168,7 +135,7 @@ public class Robot {
 		}
 		
 		System.out.println("Thread count: " + ThreadCounter.robotThreads);
-		System.out.println("Log count: " + TransactionLog.transaction.size());
+		System.out.println("Log count: " + TransactionLog.entry.size());
     }
 
     /**
