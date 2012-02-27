@@ -180,10 +180,9 @@ public class Robot {
 			return false;
 		}
 		
-		// read lines
+		// Read and parse the contents of the file
 		try {
 			line = inputBuf.readLine();
-			System.out.println(line);
 		}
 		catch (IOException ioe) {
 			System.out.println("IOException during readLine(). Exiting program.");
