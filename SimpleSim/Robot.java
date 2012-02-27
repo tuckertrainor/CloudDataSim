@@ -141,7 +141,8 @@ public class Robot {
 				}
 				else {
 					// Release I/O block
-					System.out.flush();
+//					System.out.flush();
+					Thread.yield();
 				}
 			}
 		}
