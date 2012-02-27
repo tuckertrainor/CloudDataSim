@@ -6,6 +6,8 @@
  * string, its start and end times
  */
 
+import java.util.Date();
+
 public class TransactionData {
 	private int transactionNumber;
 	private String querySet;
@@ -19,10 +21,17 @@ public class TransactionData {
 	 * @param _querySet
 	 * @param _startTime
 	 */
-	public TransactionData(int _transNumber, String _querySet, long _startTime) {
+	public TransactionData(int _transNumber, String _querySet) {
 		transactionNumber = _transNumber;
 		querySet = _querySet;
-		startTime = _startTime;
+	}
+	
+	public void setStartTime() {
+		startTime = new Date().getTime();
+	}
+	
+	public void setEndTime() {
+		endTime = new Date().getTime();
 	}
 	
 	public void setEndTime(long _endTime) {
