@@ -77,6 +77,40 @@ public class Robot {
 		}
 		
 		// Build a series of transactions using parameters
+		Random generator = new Random(randomSeed);
+		for (int i = 1; i <= maxTransactions; i++) {
+			String newTrans = "B " + i;
+			char prevQuery = 'B';
+			for (int j = 0; j < maxQueries; j++) {
+				String newQuery = new String();
+				// make READ or WRITE
+				if (generator.nextBoolean()) {
+					if (prevQuery == 'R') {
+						newQuery += ",R " + i;
+					}
+					else {
+						newQuery += ";R " + i;
+					}
+					prevQuery = 'R';
+				}
+				else {
+					if (prevQuery == 'W') {
+						newQuery += ",W " + i;
+					}
+					else {
+						newQuery += ";W " + i;
+					}
+					prevQuery = 'W';
+				}
+				// make server number
+				queryServer = generator.nextInt(maxServers) + 1;
+				newQuery += " " + queryServer;
+				newTrans += newQuery;
+			}
+			newTrans += ";C " + i + ";exit";
+			TransactionData tData = new TransactionData(i, newTrans, new Date().getTime());
+			TransactionLog.transaction.add(tData);
+		}
 		
 		// Communicate with CloudServer through RobotThread
 		try {
@@ -120,8 +154,6 @@ public class Robot {
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
 				thread.start();
-				TransactionData tData = new TransactionData(i, newTrans, new Date().getTime());
-				TransactionLog.transaction.add(tData);
 				ThreadCounter.robotThreads++;
 			}
 		}
