@@ -112,7 +112,8 @@ public class Robot {
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
 				thread.start();
-				// tData = new TransactionData(transNum, query, new Date().
+				TransactionData tData = new TransactionData(i, newTrans, new Date().getTime());
+				TransactionLog.transaction.add(tData);
 				ThreadCounter.robotThreads++;
 			}
 		}
@@ -122,6 +123,7 @@ public class Robot {
 		}
 		
 		System.out.println("Thread count: " + ThreadCounter.robotThreads);
+		System.out.println("Log count: " + TransactionLog.transaction.size());
     }
 
     /**
