@@ -67,7 +67,6 @@ public class WorkerThread extends Thread {
 			
 			// Break up query grouping
 			String queryGroup[] = msg.theMessage.split(",");
-			
 			for (int i = 0; i < queryGroup.length; i++) {
 				// Handle instructions
 				String query[] = queryGroup[i].split(" ");
@@ -131,9 +130,7 @@ public class WorkerThread extends Thread {
 					System.out.println("COMMIT STUB - transaction " + query[1]);
 				}
 				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
-					
 					// send exit flag to RobotThread
-//					TransactionLog.transaction.get(Integer.parseInt(query[1]) - 1).setEndTime(new Date().getTime());
 					msgText = "FIN";
 				}
 			}
