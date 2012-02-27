@@ -211,6 +211,7 @@ public class Robot {
 					System.out.println("Error while parsing \"" + filename +
 									   "\".");
 					e.printStackTrace();
+					return false;
 				}
 			}
 			// get next line
