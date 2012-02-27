@@ -316,7 +316,7 @@ public class Robot {
 		FileWriter outputFile = null;
 		BufferedWriter outputBuf = null;
 		long fileTime = new Date().getTime();
-		String filename = Long.toString(fileTime);
+		String filename = "Log_" + Long.toString(fileTime) + ".txt";
 		boolean success = true;
 		
 		// Create an output stream
@@ -330,16 +330,23 @@ public class Robot {
 			ioe.printStackTrace();
 			success = false;
 		}
+		
 		// Write to file
-		try {
-			outputBuf.write("stub");
-			outputBuf.newLine();
+		for (int i = 1; i <= maxTransactions; i++) {
+			try {
+				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "," +
+								TransactionLog.entry.get(i).getQuerySet() + "," +
+								TransactionLog.entry.get(i).getStartTime() + "," +
+								TransactionLog.entry.get(i).getEndTime());
+				outputBuf.newLine();
+			}
+			catch(IOException ioe) {
+				System.out.println("IOException while writing to output file.");
+				ioe.printStackTrace();
+				success = false;
+			}
 		}
-		catch(IOException ioe) {
-			System.out.println("IOException while writing to output file.");
-			ioe.printStackTrace();
-			success = false;
-		}
+		
 		// Close the output stream
 		try {
 			outputBuf.close();
