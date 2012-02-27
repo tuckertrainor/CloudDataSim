@@ -1,0 +1,11 @@
+# MT maxTransactions - number of transactions to perform
+MT 50
+# MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
+MQ 10
+# MS maxServers - number of servers available
+MS 3
+# MD maxDegree - degree of parallelism - number of active threads permitted
+MD 10
+# RS randomSeed - long integer for seeding PRNG
+# NOTE: do not include an "L" at end of number - it will not parse!
+RS 12345
