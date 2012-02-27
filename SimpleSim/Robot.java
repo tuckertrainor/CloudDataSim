@@ -127,14 +127,18 @@ public class Robot {
 		// Communicate with CloudServer through RobotThread
 		try {
 			RobotThread thread = null;
-			for (int i = 1; i <= maxTransactions; i++) {
-				TransactionLog.entry.get(i).setStartTime();
-				thread = new RobotThread(i,
-										 TransactionLog.entry.get(i).getQuerySet(),
-										 serverList.get(primaryServer).getAddress(),
-										 serverList.get(primaryServer).getPort());
-				thread.start();
-				ThreadCounter.addNewThread();
+			int i = 1;
+			while (ThreadCounter.threadCount < maxTransactions) {
+				if (ThreadCounter.activeThreads < maxDegree) {
+					TransactionLog.entry.get(i).setStartTime();
+					thread = new RobotThread(i,
+											 TransactionLog.entry.get(i).getQuerySet(),
+											 serverList.get(primaryServer).getAddress(),
+											 serverList.get(primaryServer).getPort());
+					thread.start();
+					ThreadCounter.addNewThread();
+					i++;
+				}
 			}
 		}
 		catch (Exception e) {
