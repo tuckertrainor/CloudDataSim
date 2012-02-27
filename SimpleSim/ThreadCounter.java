@@ -13,12 +13,12 @@ public class ThreadCounter {
 	// the number of threads in total to be run (from parameters file)
 	public static int maxThreads = 0;
 	
-	public void addNewThread() {
+	public static void addNewThread() {
 		threadCount++;
 		activeThreads++;
 	}
 	
-	public void threadComplete() {
+	public static void threadComplete() {
 		activeThreads--;
 	}
 }

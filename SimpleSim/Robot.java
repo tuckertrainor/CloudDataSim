@@ -134,7 +134,7 @@ public class Robot {
 										 serverList.get(primaryServer).getAddress(),
 										 serverList.get(primaryServer).getPort());
 				thread.start();
-				ThreadCounter.robotThreads++;
+				ThreadCounter.addNewThread();
 			}
 		}
 		catch (Exception e) {
@@ -142,7 +142,8 @@ public class Robot {
 			e.printStackTrace(System.err);
 		}
 		
-		System.out.println("Thread count: " + ThreadCounter.robotThreads);
+		System.out.println("Thread count: " + ThreadCounter.threadCount);
+		System.out.println("Threads active: " + ThreadCounter.activeThreads);
 		System.out.println("Log count: " + TransactionLog.entry.size());
     }
 
