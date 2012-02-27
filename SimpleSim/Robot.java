@@ -304,7 +304,44 @@ public class Robot {
     /**
      * Output a file with the results of the simulation
      */
-	private static void outputLog() {
-		// stub
+	private static boolean outputLog() {
+		FileWriter outputFile = null;
+		BufferedWriter outputBuf = null;
+		long fileTime = new Date().getTime();
+		String filename = Long.toString(fileTime);
+		boolean success = true;
+		
+		// Create an output stream
+		try {			
+			outputFile = new FileWriter(filename, true);
+			// create a BufferedWriter object for the output methods
+			outputBuf = new BufferedWriter(outputFile);
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException during output file creation.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		// Write to file
+		try {
+			outputBuf.write("stub");
+			outputBuf.newLine();
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException while writing to output file.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		// Close the output stream
+		try {
+			outputBuf.close();
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException while closing the output file.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		
+		return success;
 	}
 }
