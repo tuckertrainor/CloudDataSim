@@ -146,24 +146,6 @@ public class Robot {
 		System.out.println("Threads active: " + ThreadCounter.activeThreads);
 		System.out.println("Log count: " + TransactionLog.entry.size());
     }
-
-    /**
-     * Simple method to print a prompt and read a line of text.
-     *
-     * @return A line of text read from the console
-     */
-	private static String readSomeText() {
-		try {
-			System.out.println("Enter a line of text, or type \"EXIT\" to quit.");
-			System.out.print(" > ");	
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-			return in.readLine();
-		}
-		catch (Exception e) {
-			// Uh oh...
-			return "";
-		}
-	}
 	
     /**
      * Load a file containing the parameters and applicable data for the Robot
