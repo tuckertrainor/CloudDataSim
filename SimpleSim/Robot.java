@@ -139,6 +139,9 @@ public class Robot {
 					ThreadCounter.addNewThread();
 					i++;
 				}
+				else {
+					System.out.print("*");
+				}
 			}
 		}
 		catch (Exception e) {
