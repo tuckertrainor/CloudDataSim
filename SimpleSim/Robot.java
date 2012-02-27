@@ -78,6 +78,7 @@ public class Robot {
 		
 		// Build a series of transactions using parameters
 		Random generator = new Random(randomSeed);
+		TransactionData tData = new TransactionData(0, "ZERO", new Date().getTime());
 		for (int i = 1; i <= maxTransactions; i++) {
 			String newTrans = "B " + i;
 			char prevQuery = 'B';
@@ -109,7 +110,7 @@ public class Robot {
 			}
 			newTrans += ";C " + i + ";exit";
 			TransactionData tData = new TransactionData(i, newTrans, new Date().getTime());
-			TransactionLog.transaction.add(tData);
+			TransactionLog.entry.add(tData);
 		}
 		
 		// Communicate with CloudServer through RobotThread
