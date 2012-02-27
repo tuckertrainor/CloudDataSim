@@ -51,6 +51,7 @@ public class WorkerThread extends Thread {
 
 			// Loop to read messages
 			Message msg = null;
+			String msgText = "ACK";
 			// read and print message
 			msg = (Message)input.readObject();
 			System.out.println("[" + socket.getInetAddress() +
@@ -131,13 +132,13 @@ public class WorkerThread extends Thread {
 				}
 				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 					
-					// send notification to Robot
-					TransactionLog.transaction.get(Integer.parseInt(query[1]) - 1).setEndTime(new Date().getTime());
-					
+					// send exit flag to RobotThread
+//					TransactionLog.transaction.get(Integer.parseInt(query[1]) - 1).setEndTime(new Date().getTime());
+					msgText = "FIN";
 				}
 			}
 			// ACK completion of this query group
-			output.writeObject(new Message("ACK"));
+			output.writeObject(new Message(msgText));
 			
 			// Close and cleanup
 			System.out.println("** Closing connection with " + socket.getInetAddress() +
