@@ -199,6 +199,9 @@ public class Robot {
 					else if (tuple[0].equals("MQ")) {
 						maxQueries = Integer.parseInt(tuple[1]);
 					}
+					else if (tuple[0].equals("MS")) {
+						maxServers = Integer.parseInt(tuple[1]);
+					}
 					else if (tuple[0].equals("MD")) {
 						maxDegree = Integer.parseInt(tuple[1]);
 					}
