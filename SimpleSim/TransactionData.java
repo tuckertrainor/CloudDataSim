@@ -6,7 +6,7 @@
  * string, its start and end times
  */
 
-import java.util.Date();
+import java.util.Date;
 
 public class TransactionData {
 	private int transactionNumber;
