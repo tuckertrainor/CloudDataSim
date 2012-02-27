@@ -76,6 +76,7 @@ public class Robot {
 			int maxServers = 3;
 			int queryServer = 0;
 			Random generator = new Random(12345L);
+			RobotThread thread = null;
 			for (int i = 1; i <= maxTransactions; i++) {
 				String newTrans = "B " + i;
 				char prevQuery = 'B';
@@ -106,24 +107,13 @@ public class Robot {
 					newTrans += newQuery;
 				}
 				newTrans += ";C " + i + ";exit";
-				System.out.println(newTrans);
+				thread = new RobotThread(newTrans,
+										 serverList.get(primaryServer).getAddress(),
+										 serverList.get(primaryServer).getPort());
+				thread.start();
+				// tData = new TransactionData(transNum, query, new Date().
+				ThreadCounter.robotThreads++;
 			}
-			RobotThread thread = null;
-			thread = new RobotThread("B 1;R 1 1,R 1 3,R 1 1,R 1 2;W 1 2,W 1 1;R 1 3;C 1;exit",
-									 serverList.get(primaryServer).getAddress(),
-									 serverList.get(primaryServer).getPort());
-			thread.start();
-			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 2;R 2 1,R 2 3,R 2 1,R 2 2;W 2 2,W 2 1;R 2 3;C 2;exit",
-									 serverList.get(primaryServer).getAddress(),
-									 serverList.get(primaryServer).getPort());
-			thread.start();
-			ThreadCounter.robotThreads++;
-			thread = new RobotThread("B 3;R 3 1,R 3 3,R 3 1,R 3 2;W 3 2,W 3 1;R 3 3;C 1;exit",
-									 serverList.get(primaryServer).getAddress(),
-									 serverList.get(primaryServer).getPort());
-			thread.start();
-			ThreadCounter.robotThreads++;
 		}
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
