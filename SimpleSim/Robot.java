@@ -149,6 +149,14 @@ public class Robot {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		
+		// record output log
+		if (outputLog()) {
+			System.out.println("Log created.");
+		}
+		else {
+			System.out.println("Error during log file creation.");
+		}
     }
 	
     /**
