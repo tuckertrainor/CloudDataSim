@@ -132,6 +132,7 @@ public class WorkerThread extends Thread {
 				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 					
 					// send notification to Robot
+					TransactionLog.transaction.get(Integer.parseInt(query[1]) - 1).setEndTime(new Date().getTime());
 					
 				}
 			}

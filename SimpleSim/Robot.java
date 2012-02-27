@@ -72,7 +72,7 @@ public class Robot {
 		
 		// Communicate with CloudServer through RobotThread
 		try {
-			int maxTransactions = 5;
+			int maxTransactions = 100;
 			int maxQueries = 10;
 			int maxServers = 3;
 			int queryServer = 0;
