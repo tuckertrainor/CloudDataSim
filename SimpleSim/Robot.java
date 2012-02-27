@@ -49,7 +49,13 @@ public class Robot {
 	    }
 		
 		// Load the parameters for this simulation
-		loadParameters();
+		if (loadParameters("parameters.txt")) {
+			System.out.println("Parameters file read successfully.");
+		}
+		else {
+			System.err.println("Error loading parameters file. Exiting.");
+			System.exit(-1);
+		}
 		
 		// Load server information from server configuration file
 		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
@@ -160,29 +166,21 @@ public class Robot {
     /**
      * Load a file containing the parameters and applicable data for the Robot
      */
-	private static void loadParameters() {
-		System.out.println("loadParameters() stub");
-		maxTransactions = 50;
-		maxQueries = 10;
-		maxServers = 3;
-		maxDegree = 10;
-		randomSeed = 12345L;
-		
-		// load parameters file
-		
+	private static boolean loadParameters(String filename) {
 		BufferedReader inputBuf = null;
 		String line = null;
 		// use a try/catch block to open the input file with a FileReader
 		try {
-			inputBuf = new BufferedReader(new FileReader("parameters.txt"));
+			inputBuf = new BufferedReader(new FileReader(filename));
 		}
 		catch (FileNotFoundException fnfe) {
 			// if the file is not found, exit the program
-			System.out.println("File \"parameters.txt\" not found. Exiting program.");
+			System.out.println("File \"" + filename + "\" not found. Exiting program.");
 			fnfe.printStackTrace();
-			System.exit(0);
+			return false;
 		}
-		// read a line from the dictionary file using a try/catch block
+		
+		// read lines
 		try {
 			line = inputBuf.readLine();
 			System.out.println(line);
@@ -190,22 +188,56 @@ public class Robot {
 		catch (IOException ioe) {
 			System.out.println("IOException during readLine(). Exiting program.");
 			ioe.printStackTrace();
-			System.exit(0);
+			return false;
 		}
-		
+		while (line != null) {
+			if (line.charAt(0) != '#') { // not a comment line
+				try {
+					String tuple[] = line.split(" ");
+					if (tuple[0].equals("MT")) {
+						maxTransactions = Integer.parseInt(tuple[0]);
+					}
+					else if (tuple[0].equals("MQ")) {
+						maxQueries = Integer.parseInt(tuple[0]);
+					}
+					else if (tuple[0].equals("MD")) {
+						maxDegree = Integer.parseInt(tuple[0]);
+					}
+					else if (tuple[0].equals("RS")) {
+						randomSeed = Long.parseLong(tuple[0]);
+					}
+				}
+				catch (Exception e) {
+					System.out.println("Error while parsing \"" + filename +
+									   "\".");
+					e.printStackTrace();
+				}
+			}
+			// get next line
+			try {
+				line = inputBuf.readLine();
+			}
+			catch (IOException ioe) {
+				System.out.println("IOException during readLine().");
+				ioe.printStackTrace();
+				return false;
+			}
+		}
+
 		// close BufferedReader using a try/catch block
 		try {
 			inputBuf.close();
-			
 		}
 		catch (IOException ioe) {
 			// if exception caught, exit the program
 			System.out.println("Error closing reader. Exiting program");
 			ioe.printStackTrace();
-			System.exit(0);
+			return false;
 		}
-
+		
+		return true; // success
 	}
+	
 	/**
 	 * Loads the configuration file for servers, giving Robot knowledge of
 	 * server addresses as well as its own
