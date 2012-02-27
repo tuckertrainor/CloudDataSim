@@ -150,7 +150,12 @@ public class Robot {
 			e.printStackTrace(System.err);
 		}
 		
-		// record output log
+		// Wait for all threads to complete
+		while (ThreadCounter.activeThreads != 0) {
+			Thread.yield();
+		}
+		
+		// Record output log
 		if (outputLog()) {
 			System.out.println("Log created.");
 		}
