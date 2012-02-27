@@ -28,11 +28,11 @@ import java.util.Random;
 import java.util.Date;
 
 public class Robot {
-	
 	int maxTransactions;
 	int maxQueries;
 	int maxServers;
 	int maxDegree;
+	long randomSeed;
 
 	/**
 	 * Main method.
@@ -161,6 +161,7 @@ public class Robot {
 		maxQueries = 10;
 		maxServers = 3;
 		maxDegree = 10;
+		randomSeed = 12345L;
 		
 		// load parameters file
 		
