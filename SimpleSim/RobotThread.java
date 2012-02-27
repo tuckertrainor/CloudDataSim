@@ -52,8 +52,8 @@ public class RobotThread extends Thread {
 			while (groupIndex < queryGroups.length) {
 				// Connect to the specified server
 				final Socket sock = new Socket(server, port);
-				System.out.println("Connected to " + server +
-								   " on port " + port);
+//				System.out.println("Connected to " + server +
+//								   " on port " + port);
 				
 				// Set up I/O streams with the server
 				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
@@ -68,14 +68,13 @@ public class RobotThread extends Thread {
 				// Get ACK and print
 				resp = (Message)input.readObject();
 				if (resp.theMessage.equals("ACK")) {
-					System.out.println("RobotThread: query group processed");
+//					System.out.println("RobotThread: query group processed");
 				}
 				else if (resp.theMessage.equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
-					System.out.println("RobotThread: transaction processed");
+//					System.out.println("RobotThread: transaction processed");
 				}
-					
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
