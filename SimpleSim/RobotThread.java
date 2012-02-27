@@ -72,6 +72,8 @@ public class RobotThread extends Thread {
 				}
 				else if (resp.theMessage.equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+					ThreadCounter.threadComplete(); // remove thread from active count
+					System.out.println("RobotThread: transaction processed");
 				}
 					
 				else { // Something went wrong
