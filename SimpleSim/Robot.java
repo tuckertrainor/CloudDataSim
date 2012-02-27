@@ -195,16 +195,16 @@ public class Robot {
 				try {
 					String tuple[] = line.split(" ");
 					if (tuple[0].equals("MT")) {
-						maxTransactions = Integer.parseInt(tuple[0]);
+						maxTransactions = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("MQ")) {
-						maxQueries = Integer.parseInt(tuple[0]);
+						maxQueries = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("MD")) {
-						maxDegree = Integer.parseInt(tuple[0]);
+						maxDegree = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("RS")) {
-						randomSeed = Long.parseLong(tuple[0]);
+						randomSeed = Long.parseLong(tuple[1]);
 					}
 				}
 				catch (Exception e) {
