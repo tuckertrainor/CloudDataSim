@@ -15,7 +15,7 @@ public class ServerID {
 	 * Constructor.
 	 *
 	 * @param _serverNumber
-	 * @param _serverNumber
+	 * @param _serverAddress
 	 * @param _serverPort
 	 */
 	public ServerID (int _serverNumber, String _serverAddress, int _serverPort) {
