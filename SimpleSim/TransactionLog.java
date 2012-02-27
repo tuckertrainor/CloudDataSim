@@ -9,5 +9,5 @@ import java.util.ArrayList;
 
 public class TransactionLog {
 	// the number of RobotThreads active
-	public static ArrayList<TransactionData> transaction = new ArrayList<TransactionData>();
+	public static ArrayList<TransactionData> entry = new ArrayList<TransactionData>();
 }
