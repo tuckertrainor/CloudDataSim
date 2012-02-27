@@ -13,8 +13,10 @@ import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
+import java.util.Date;
 
 public class RobotThread extends Thread {
+	private final int transNumber;
     private final String transactions;
 	private final String server;
 	private final int port;
@@ -22,12 +24,14 @@ public class RobotThread extends Thread {
 	/**
 	 * Constructor that sets up transaction communication
 	 *
+	 * @param _transNumber - the number of this transaction set
 	 * @param _transactions - A string representing the queries to be run
 	 * @param _server - The server name where the primary Transaction Manager
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(String _transactions, String _server, int _port) {
+	public RobotThread(int _transNumber, String _transactions, String _server, int _port) {
+		transNumber = _transNumber;
 		transactions = _transactions;
 		server = _server;
 		port = _port;
@@ -66,6 +70,10 @@ public class RobotThread extends Thread {
 				if (resp.theMessage.equals("ACK")) {
 					System.out.println("RobotThread: query group processed");
 				}
+				else if (resp.theMessage.equals("FIN")) {
+					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+				}
+					
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
