@@ -78,6 +78,7 @@ public class RobotThread extends Thread {
 					int commitOnServer = Integer.parseInt(resp.theMessage);
 					if (!commitStack.contains(commitOnServer)) { // add if new #
 						commitStack.add(commitOnServer);
+						System.out.println("RobotThread: transaction " + transNumber + " added server " + commitOnServer + " to commit stack");
 					}
 				}
 				else if (resp.theMessage.equals("FIN")) {

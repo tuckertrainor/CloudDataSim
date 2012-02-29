@@ -111,7 +111,7 @@ public class WorkerThread extends Thread {
 							
 							// tell RobotThread to add this server to its commitStack
 							output.writeObject(new Message("ACS"));
-							output.writeObject(new Message(serverNumber));
+							output.writeObject(new Message("" + serverNumber));
 							
 							// add time to counter or sleep
 							Thread.sleep(writeSleep);
