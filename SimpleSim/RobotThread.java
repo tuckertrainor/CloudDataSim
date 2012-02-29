@@ -72,6 +72,14 @@ public class RobotThread extends Thread {
 				if (resp.theMessage.equals("ACK")) {
 //					System.out.println("RobotThread: query group processed");
 				}
+				else if (resp.theMessage.equals("ACS")) { // add to commitStack
+					// get next message, parse server number
+					resp = (Message)input.readObject();
+					int commitOnServer = Integer.parseInt(resp.theMessage);
+					if (!commitStack.contains(commitOnServer)) { // add if new #
+						commitStack.add(commitOnServer);
+					}
+				}
 				else if (resp.theMessage.equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
