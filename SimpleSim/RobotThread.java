@@ -14,12 +14,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.util.Date;
+import java.util.ArrayList;
 
 public class RobotThread extends Thread {
 	private final int transNumber;
     private final String transactions;
 	private final String server;
 	private final int port;
+	private ArrayList<Integer> commitStack = new ArrayList<Integer>();
 
 	/**
 	 * Constructor that sets up transaction communication
