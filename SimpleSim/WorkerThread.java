@@ -27,7 +27,8 @@ public class WorkerThread extends Thread {
 	 * Constructor that sets up the socket we'll chat over
 	 *
 	 * @param _socket - The socket passed in from the server
-	 * @param _socket - The number assigned to the server that created thread
+	 * @param _serverNumber - The number assigned to the server that created thread
+	 * @param _serverList - the list of server IDs for connection
 	 */
 	public WorkerThread(Socket _socket, int _serverNumber, ArrayList<ServerID> _serverList) {
 		socket = _socket;
