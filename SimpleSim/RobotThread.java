@@ -72,10 +72,10 @@ public class RobotThread extends Thread {
 				if (resp.theMessage.equals("ACK")) {
 //					System.out.println("RobotThread: query group processed");
 				}
-				else if (resp.theMessage.equals("ACS")) { // add to commitStack
-					// get next message, parse server number
-					resp = (Message)input.readObject();
-					int commitOnServer = Integer.parseInt(resp.theMessage);
+				else if (resp.theMessage.substring(0,3) == "ACS") { // add to commitStack
+					// parse server number from message
+					String temp[] = resp.theMessage.split(" ");
+					int commitOnServer = Integer.parseInt(temp[1]);
 					if (!commitStack.contains(commitOnServer)) { // add if new #
 						commitStack.add(commitOnServer);
 						System.out.println("RobotThread: transaction " + transNumber + " added server " + commitOnServer + " to commit stack");
