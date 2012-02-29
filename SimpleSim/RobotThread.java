@@ -78,13 +78,18 @@ public class RobotThread extends Thread {
 					int commitOnServer = Integer.parseInt(temp[1]);
 					if (!commitStack.contains(commitOnServer)) { // add if new #
 						commitStack.add(commitOnServer);
-						System.out.println("RobotThread: transaction " + transNumber + " added server " + commitOnServer + " to commit stack");
 					}
 				}
 				else if (resp.theMessage.equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: transaction " + transNumber + " complete");
+//					// output its commit stack
+//					System.out.print("Commit stack: ");
+//					for (int i = 0; i < commitStack.size(); i++) {
+//						System.out.print(commitStack.get(i) + " ");
+//					}
+//					System.out.println();
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
