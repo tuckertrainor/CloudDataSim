@@ -106,8 +106,11 @@ public class WorkerThread extends Thread {
 							// message an error, abort transaction
 						}
 						else {
-							// add time to counter or sleep
 							System.out.println("WRITE for transaction " + query[1]);
+							
+							// tell RobotThread to add this server to its commitStack
+							
+							// add time to counter or sleep
 							Thread.sleep(writeSleep);
 						}
 					}
