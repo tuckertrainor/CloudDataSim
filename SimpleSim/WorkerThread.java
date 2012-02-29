@@ -134,6 +134,8 @@ public class WorkerThread extends Thread {
 					// will need to keep list of all servers accessed, use it
 					// to finalize commit across servers
 					System.out.println("COMMIT STUB - transaction " + query[1]);
+					
+					// call verifyIntegrity() here?
 				}
 				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 					// send exit flag to RobotThread
