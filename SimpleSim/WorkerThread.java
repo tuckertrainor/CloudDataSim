@@ -108,11 +108,11 @@ public class WorkerThread extends Thread {
 						}
 						else {
 							System.out.println("WRITE for transaction " + query[1]);
+							// add time to counter or sleep
 							
 							// tell RobotThread to add this server to its commitStack
-							msgText = "ACS " + serverNumber;
-							
-							// add time to counter or sleep
+							msgText = "ACS " + query[2];
+
 							Thread.sleep(writeSleep);
 						}
 					}
