@@ -49,18 +49,17 @@ public class RobotThread extends Thread {
 			// contiguous READs or WRITEs)
 			String queryGroups[] = transactions.split(";");
 			int groupIndex = 0;
+
+			// Connect to the specified server
+			final Socket sock = new Socket(server, port);
+			System.out.println("Connected to " + server +
+							   " on port " + port);
+			// Set up I/O streams with the server
+			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
-				// Connect to the specified server
-				final Socket sock = new Socket(server, port);
-//				System.out.println("Connected to " + server +
-//								   " on port " + port);
-				
-				// Set up I/O streams with the server
-				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
-				
 				Message msg = null, resp = null;
 
 				// Read and send message
@@ -84,22 +83,16 @@ public class RobotThread extends Thread {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: transaction " + transNumber + " complete");
-//					// output its commit stack
-//					System.out.print("Commit stack: ");
-//					for (int i = 0; i < commitStack.size(); i++) {
-//						System.out.print(commitStack.get(i) + " ");
-//					}
-//					System.out.println();
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
 				}
 				
-				// Close connection to server
-				sock.close();
 				groupIndex++;
 			} 
+			// Close connection to server
+			sock.close();
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
