@@ -178,8 +178,11 @@ public class WorkerThread extends Thread {
 		try {
 			// Check SocketGroup for an existing socket, else create and add new
 			if (!SocketGroup.hasSocket(otherServer)) {
-				// Create new sock, add it to SocketGroup
-				SocketGroup.addSocket(otherServer, new Socket(server, port));
+				// Create new socket, add it to SocketGroup
+				Socket sock = new Socket(server, port);
+				SocketGroup.addSocketObj(otherServer, new SocketObj(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),	
+																	new ObjectInputStream(sock.getInputStream())));
 			}
 			// Connect to the specified server
 //			final Socket sock = new Socket(server, port);
@@ -187,19 +190,19 @@ public class WorkerThread extends Thread {
 							   " on port " + port);
 			
 			// Set up I/O streams with the server
-			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+//			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+//			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			Message msg = null, resp = null;
 			
 			// send query
 			msg = new Message(query);
-			output.writeObject(msg);
-			resp = (Message)input.readObject();
+			SocketGroup.getSocket(otherServer).output.writeObject(msg);
+			resp = (Message)SocketGroup.getSocket(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
 							   " says: " + resp.theMessage);
 			
 			// shut things down
-			sock.close();
+//			sock.close();
 			
 			return true;
 		}

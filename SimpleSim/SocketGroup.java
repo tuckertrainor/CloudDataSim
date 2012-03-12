@@ -7,12 +7,14 @@
 
 import java.util.*;
 import java.net.Socket;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 
 public class SocketGroup {
-	private static Hashtable<Integer, Socket> list = new Hashtable<Integer, Socket>();
+	private static Hashtable<Integer, SocketObj> list = new Hashtable<Integer, SocketObj>();
 	
-	public static void addSocket(int serverNum, Socket socket) {
-		list.put(serverNum, socket);
+	public static void addSocketObj(int serverNum, SocketObj so) {
+		list.put(serverNum, so);
 	}
 	
 	public static boolean hasSocket(int serverNum) {
@@ -22,7 +24,19 @@ public class SocketGroup {
 		return false;
 	}
 	
-	public static Socket getSocket(int serverNum) {
+	public static SocketObj getSocket(int serverNum) {
 		return list.get(serverNum);
+	}
+}
+
+class SocketObj {
+	public Socket socket;
+	public ObjectOutputStream output;
+	public ObjectInputStream input;
+	
+	public SocketObj(Socket s, ObjectOutputStream oos, ObjectInputStream ois) {
+		socket = s;
+		output = oos;
+		input = ois;
 	}
 }

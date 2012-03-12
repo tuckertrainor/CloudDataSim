@@ -54,12 +54,13 @@ public class RobotThread extends Thread {
 			final Socket sock = new Socket(server, port);
 			System.out.println("Connected to " + server +
 							   " on port " + port);
-			// Set up I/O streams with the server
-			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
+				// Set up I/O streams with the server
+				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				
 				Message msg = null, resp = null;
 
 				// Read and send message
