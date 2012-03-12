@@ -176,8 +176,13 @@ public class WorkerThread extends Thread {
 		// socket with server X, pass it just a single query, and get back
 		// the result
 		try {
+			// Check SocketGroup for an existing socket, else create and add new
+			if (!SocketGroup.list.containsKey(otherServer)) {
+				// Create new sock, add it to SocketGroup
+				SocketGroup.addSocket(otherServer, new Socket(server, port));
+			}
 			// Connect to the specified server
-			final Socket sock = new Socket(server, port);
+//			final Socket sock = new Socket(server, port);
 			System.out.println("Connected to " + server +
 							   " on port " + port);
 			
