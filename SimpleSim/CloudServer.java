@@ -58,10 +58,10 @@ public class CloudServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				System.out.println(sock.getInetAddress().toString());
-				System.out.println(sock.getInetAddress());
+				System.out.println(sock.getInetAddress()); // also see getLocalAddress, getLocalPort
 				System.out.println(sock.getLocalSocketAddress()); // e.g. /127.0.0.1:8001
 				System.out.println(sock.getRemoteSocketAddress()); // e.g. /127.0.0.1:50043
-				System.out.println(sock.getPort());
+				System.out.println(sock.getPort()); // e.g. 50043
 				// Create a thread to handle this connection
 				thread = new WorkerThread(sock, serverNumber, serverList);
 				thread.start(); // Fork the thread
