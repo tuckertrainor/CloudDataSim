@@ -148,8 +148,8 @@ public class WorkerThread extends Thread {
 			output.writeObject(new Message(msgText));
 			
 			// Close and cleanup
-			System.out.println("** Closing connection with " + socket.getInetAddress() +
-							   ":" + socket.getPort() + " **");
+//			System.out.println("** Closing connection with " + socket.getInetAddress() +
+//							   ":" + socket.getPort() + " **");
 //			socket.close();
 		}
 		catch(Exception e) {

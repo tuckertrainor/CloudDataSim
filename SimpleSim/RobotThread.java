@@ -66,7 +66,6 @@ public class RobotThread extends Thread {
 				SocketGroup.addSocketObj(primaryServer, new SocketObj(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
-				System.out.println("yow");
 			}
 			
 			
@@ -78,14 +77,19 @@ public class RobotThread extends Thread {
 				
 				Message msg = null, resp = null;
 
-				// Read and send message
+				// Send message
+				System.out.println("1");
 				msg = new Message(queryGroups[groupIndex]);
+				System.out.println("2");
 				SocketGroup.getSocket(primaryServer).output.writeObject(msg);
 				
+				System.out.println("3");
 				// Get ACK and print
 				resp = (Message)SocketGroup.getSocket(primaryServer).input.readObject();
+				System.out.println("4");
+
 				if (resp.theMessage.equals("ACK")) {
-//					System.out.println("RobotThread: query group processed");
+					System.out.println("RobotThread: query group processed");
 				}
 				else if (resp.theMessage.substring(0,3).equals("ACS")) { // add to commitStack
 					// parse server number from message
@@ -104,7 +108,7 @@ public class RobotThread extends Thread {
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
 				}
-				
+				System.out.println(groupIndex);
 				groupIndex++;
 			} 
 			// Close connection to server
