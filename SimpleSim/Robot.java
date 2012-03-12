@@ -116,6 +116,8 @@ public class Robot {
 				// make server number
 				queryServer = generator.nextInt(maxServers) + 1;
 				newQuery += " " + queryServer;
+				// add sequence number
+				newQuery += " " + j;
 				newTrans += newQuery;
 			}
 			newTrans += ";C " + i + ";exit";
