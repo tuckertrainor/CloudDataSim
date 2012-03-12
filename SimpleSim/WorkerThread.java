@@ -150,7 +150,7 @@ public class WorkerThread extends Thread {
 			// Close and cleanup
 			System.out.println("** Closing connection with " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
-			socket.close();
+//			socket.close();
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());

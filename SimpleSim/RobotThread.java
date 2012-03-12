@@ -66,6 +66,7 @@ public class RobotThread extends Thread {
 				SocketGroup.addSocketObj(primaryServer, new SocketObj(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
+				System.out.println("yow");
 			}
 			
 			
