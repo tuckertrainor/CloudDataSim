@@ -15,6 +15,13 @@ public class SocketGroup {
 		list.put(serverNum, socket);
 	}
 	
+	public boolean hasSocket(int serverNum) {
+		if (list.containsKey(serverNum)) {
+			return true;
+		}
+		return false;
+	}
+	
 	public Socket getSocket(int serverNum) {
 		return list.get(serverNum);
 	}
