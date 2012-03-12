@@ -9,20 +9,20 @@ import java.util.*;
 import java.net.Socket;
 
 public class SocketGroup {
-	private Hashtable<Integer, Socket> list = new Hashtable<Integer, Socket>();
+	private static Hashtable<Integer, Socket> list = new Hashtable<Integer, Socket>();
 	
-	public void addSocket(int serverNum, Socket socket) {
+	public static void addSocket(int serverNum, Socket socket) {
 		list.put(serverNum, socket);
 	}
 	
-	public boolean hasSocket(int serverNum) {
+	public static boolean hasSocket(int serverNum) {
 		if (list.containsKey(serverNum)) {
 			return true;
 		}
 		return false;
 	}
 	
-	public Socket getSocket(int serverNum) {
+	public static Socket getSocket(int serverNum) {
 		return list.get(serverNum);
 	}
 }

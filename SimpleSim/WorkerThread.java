@@ -177,7 +177,7 @@ public class WorkerThread extends Thread {
 		// the result
 		try {
 			// Check SocketGroup for an existing socket, else create and add new
-			if (!SocketGroup.list.containsKey(otherServer)) {
+			if (!SocketGroup.hasSocket(otherServer)) {
 				// Create new sock, add it to SocketGroup
 				SocketGroup.addSocket(otherServer, new Socket(server, port));
 			}
