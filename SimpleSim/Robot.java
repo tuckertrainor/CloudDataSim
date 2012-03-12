@@ -134,6 +134,7 @@ public class Robot {
 				if (ThreadCounter.activeThreads < maxDegree) {
 					TransactionLog.entry.get(i).setStartTime();
 					thread = new RobotThread(i,
+											 primaryServer,
 											 TransactionLog.entry.get(i).getQuerySet(),
 											 serverList.get(primaryServer).getAddress(),
 											 serverList.get(primaryServer).getPort());

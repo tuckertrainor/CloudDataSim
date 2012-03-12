@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 public class RobotThread extends Thread {
 	private final int transNumber;
+	private final int primaryServer;
     private final String transactions;
 	private final String server;
 	private final int port;
@@ -32,7 +33,8 @@ public class RobotThread extends Thread {
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, String _transactions, String _server, int _port) {
+	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port) {
+		primaryServer = _primaryServer;
 		transNumber = _transNumber;
 		transactions = _transactions;
 		server = _server;
@@ -51,24 +53,36 @@ public class RobotThread extends Thread {
 			int groupIndex = 0;
 
 			// Connect to the specified server
-			final Socket sock = new Socket(server, port);
-			System.out.println("Connected to " + server +
-							   " on port " + port);
+//			final Socket sock = new Socket(server, port);
+//			System.out.println("Connected to " + server +
+//							   " on port " + port);
+
+			// Check SocketGroup for an existing socket, else create and add new
+			if (!SocketGroup.hasSocket(primaryServer)) {
+				// Create new socket, add it to SocketGroup
+				Socket sock = new Socket(server, port);
+				System.out.println("Connected to " + server +
+								   " on port " + port);
+				SocketGroup.addSocketObj(primaryServer, new SocketObj(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),	
+																	new ObjectInputStream(sock.getInputStream())));
+			}
+			
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
 				// Set up I/O streams with the server
-				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+//				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+//				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 				
 				Message msg = null, resp = null;
 
 				// Read and send message
 				msg = new Message(queryGroups[groupIndex]);
-				output.writeObject(msg);
+				SocketGroup.getSocket(primaryServer).output.writeObject(msg);
 				
 				// Get ACK and print
-				resp = (Message)input.readObject();
+				resp = (Message)SocketGroup.getSocket(primaryServer).input.readObject();
 				if (resp.theMessage.equals("ACK")) {
 //					System.out.println("RobotThread: query group processed");
 				}
@@ -93,7 +107,7 @@ public class RobotThread extends Thread {
 				groupIndex++;
 			} 
 			// Close connection to server
-			sock.close();
+//			sock.close();
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
