@@ -100,7 +100,7 @@ public class RobotThread extends Thread {
 			}
 			
 			// Send message to WorkerThread to release it
-			msg = new Message("DONE");
+			Message msg = new Message("DONE");
 			output.writeObject(msg);
 			
 			// Close connection to server
