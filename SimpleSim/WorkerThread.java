@@ -89,7 +89,6 @@ public class WorkerThread extends Thread {
 						else { // pass to server
 							System.out.println("Pass READ of transaction " + query[1] +
 											   " to server " + query[2]);
-							passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
 								System.out.println("READ of transaction " + query[1] +
 												   " to server " + query[2] +
