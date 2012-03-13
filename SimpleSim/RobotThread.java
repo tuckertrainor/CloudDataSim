@@ -61,19 +61,14 @@ public class RobotThread extends Thread {
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
-				
 				Message msg = null, resp = null;
 
 				// Send message
-				System.out.println("1");
 				msg = new Message(queryGroups[groupIndex]);
-				System.out.println("2");
 				output.writeObject(msg);
 				
-				System.out.println("3");
 				// Get ACK and print
 				resp = (Message)input.readObject();
-				System.out.println("4");
 
 				if (resp.theMessage.equals("ACK")) {
 					System.out.println("RobotThread: query group processed");
@@ -95,7 +90,6 @@ public class RobotThread extends Thread {
 					System.out.println("RobotThread: query handling error");
 					// break; // ?
 				}
-				System.out.println(groupIndex);
 				groupIndex++;
 			}
 			
