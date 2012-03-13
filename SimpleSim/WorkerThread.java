@@ -23,7 +23,7 @@ public class WorkerThread extends Thread {
 	private final ArrayList<ServerID> serverList;
 	private final int readSleep = 5; // number of milliseconds for a READ
 	private final int writeSleep = 5; // number of milliseconds for a WRITE
-	private SocketList sockList;
+	private SocketList sockList = new SocketList();
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -184,7 +184,7 @@ public class WorkerThread extends Thread {
 		
 		try {
 			// Check SocketList for an existing socket, else create and add new
-			if (sockList.get(otherServer) == null) {
+			if (!sockList.hasSocket(otherServer)) {
 				// Create new socket, add it to SocketGroup
 				System.out.println("Connecting to " + server +
 								   " on port " + port);
