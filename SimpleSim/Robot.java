@@ -97,7 +97,7 @@ public class Robot {
 				// make READ or WRITE
 				if (generator.nextBoolean()) {
 					if (prevQuery == 'R') {
-						newQuery += ",R " + i;
+						newQuery += ";R " + i; // ,
 					}
 					else {
 						newQuery += ";R " + i;
@@ -106,7 +106,7 @@ public class Robot {
 				}
 				else {
 					if (prevQuery == 'W') {
-						newQuery += ",W " + i;
+						newQuery += ";W " + i; // ,
 					}
 					else {
 						newQuery += ";W " + i;
@@ -117,7 +117,7 @@ public class Robot {
 				queryServer = generator.nextInt(maxServers) + 1;
 				newQuery += " " + queryServer;
 				// add sequence number
-				newQuery += " " + j;
+				newQuery += " " + (j + 1);
 				newTrans += newQuery;
 			}
 			newTrans += ";C " + i + ";exit";
