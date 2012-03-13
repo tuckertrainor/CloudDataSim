@@ -165,12 +165,12 @@ public class WorkerThread extends Thread {
 		
 		try {
 			// Check SocketGroup for an existing socket, else create and add new
-			if (!sockList.hasSocket(primaryServer)) {
+			if (!sockList.hasSocket(otherServer)) {
 				// Create new socket, add it to SocketGroup
 				System.out.println("Connecting to " + server +
 								   " on port " + port);
 				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(primaryServer, new SocketObj(sock,
+				sockList.addSocketObj(otherServer, new SocketObj(sock,
 																   new ObjectOutputStream(sock.getOutputStream()),	
 																   new ObjectInputStream(sock.getInputStream())));
 			}
