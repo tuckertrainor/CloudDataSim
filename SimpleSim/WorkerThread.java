@@ -22,6 +22,7 @@ public class WorkerThread extends Thread {
 	private final ArrayList<ServerID> serverList;
 	private final int readSleep = 5; // number of milliseconds for a READ
 	private final int writeSleep = 5; // number of milliseconds for a WRITE
+	private SocketGroup sockList;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -46,25 +47,17 @@ public class WorkerThread extends Thread {
 			System.out.println("** New connection from " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
 
-			// set up I/O streams with the RobotThread
+			// Set up I/O streams with the calling thread
 			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
 			// Loop to read messages
 			Message msg = null;
 			String msgText = "ACK";
-			// read and print message
+			// Read and print message
 			msg = (Message)input.readObject();
 			System.out.println("[" + socket.getInetAddress() +
 								   ":" + socket.getPort() + "] " + msg.theMessage);
-
-			// Sample messages
-			// B 1
-			// R 1 1,R 1 3,R 1 1,R 1 2
-			// W 1 2,W 1 1
-			// R 1 3
-			// C 1
-			// exit
 			
 			// Break up query grouping
 			String queryGroup[] = msg.theMessage.split(",");
@@ -167,43 +160,29 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if query was successful, else false
 	 */
 	public boolean passQuery(int otherServer, String query) {
-		// need to figure out how to store server addresses/ports
-		// for now, use localhost and a given port
 		String server = serverList.get(otherServer).getAddress();
 		int port = serverList.get(otherServer).getPort();
 		
-		// here we do the same thing we'd do from RobotThread: set up a
-		// socket with server X, pass it just a single query, and get back
-		// the result
 		try {
 			// Check SocketGroup for an existing socket, else create and add new
-			if (!SocketGroup.hasSocket(otherServer)) {
+			if (!sockList.hasSocket(primaryServer)) {
 				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
 				Socket sock = new Socket(server, port);
-				SocketGroup.addSocketObj(otherServer, new SocketObj(sock,
-																	new ObjectOutputStream(sock.getOutputStream()),	
-																	new ObjectInputStream(sock.getInputStream())));
+				sockList.addSocketObj(primaryServer, new SocketObj(sock,
+																   new ObjectOutputStream(sock.getOutputStream()),	
+																   new ObjectInputStream(sock.getInputStream())));
 			}
-			// Connect to the specified server
-//			final Socket sock = new Socket(server, port);
-			System.out.println("Connected to " + server +
-							   " on port " + port);
-			
-			// Set up I/O streams with the server
-//			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-//			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+
 			Message msg = null, resp = null;
 			
 			// send query
 			msg = new Message(query);
-			SocketGroup.getSocket(otherServer).output.writeObject(msg);
-			resp = (Message)SocketGroup.getSocket(otherServer).input.readObject();
+			sockList.getSocket(otherServer).output.writeObject(msg);
+			resp = (Message)sockList.getSocket(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
-							   " says: " + resp.theMessage);
-			
-			// shut things down
-//			sock.close();
-			
+							   " says: " + resp.theMessage);			
 			return true;
 		}
 		catch (ConnectException ce) {

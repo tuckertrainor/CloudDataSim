@@ -53,28 +53,14 @@ public class RobotThread extends Thread {
 			int groupIndex = 0;
 
 			// Connect to the specified server
-//			final Socket sock = new Socket(server, port);
-//			System.out.println("Connected to " + server +
-//							   " on port " + port);
-
-			// Check SocketGroup for an existing socket, else create and add new
-			if (!SocketGroup.hasSocket(primaryServer)) {
-				// Create new socket, add it to SocketGroup
-				Socket sock = new Socket(server, port);
-				sock.setKeepAlive(true);
-				System.out.println("Connected to " + server +
-								   " on port " + port);
-				SocketGroup.addSocketObj(primaryServer, new SocketObj(sock,
-																	new ObjectOutputStream(sock.getOutputStream()),	
-																	new ObjectInputStream(sock.getInputStream())));
-			}
-			
+			final Socket sock = new Socket(server, port);
+			System.out.println("Connected to " + server + " on port " + port);
+			// Set up I/O streams with the server
+			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
-				// Set up I/O streams with the server
-//				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-//				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 				
 				Message msg = null, resp = null;
 
@@ -82,11 +68,11 @@ public class RobotThread extends Thread {
 				System.out.println("1");
 				msg = new Message(queryGroups[groupIndex]);
 				System.out.println("2");
-				SocketGroup.getSocket(primaryServer).output.writeObject(msg);
+				output.writeObject(msg);
 				
 				System.out.println("3");
 				// Get ACK and print
-				resp = (Message)SocketGroup.getSocket(primaryServer).input.readObject();
+				resp = (Message)input.readObject();
 				System.out.println("4");
 
 				if (resp.theMessage.equals("ACK")) {
@@ -111,9 +97,14 @@ public class RobotThread extends Thread {
 				}
 				System.out.println(groupIndex);
 				groupIndex++;
-			} 
+			}
+			
+			// Send message to WorkerThread to release it
+			msg = new Message("DONE");
+			output.writeObject(msg);
+			
 			// Close connection to server
-//			sock.close();
+			sock.close();
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
