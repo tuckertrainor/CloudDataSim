@@ -148,8 +148,12 @@ public class WorkerThread extends Thread {
 			}
 			// Close any SocketGroup connection
 			if (sockList.size() > 0) {
+				int serverNum;
 				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-					sockList.getSocket(socketList.nextElement()).socket.close();
+					msg = new Message("DONE");
+					serverNum = socketList.nextElement();
+					sockList.getSocket(serverNum).output.writeObject(msg);
+					sockList.getSocket(serverNum).socket.close();
 				}
 			}
 			
