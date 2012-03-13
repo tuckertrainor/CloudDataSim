@@ -27,6 +27,14 @@ public class SocketGroup {
 	public static SocketObj getSocket(int serverNum) {
 		return list.get(serverNum);
 	}
+	
+	public static int size() {
+		return list.size();
+	}
+	
+	public static Enumeration<Integer> keys() {
+		return list.keys();
+	}
 }
 
 class SocketObj {

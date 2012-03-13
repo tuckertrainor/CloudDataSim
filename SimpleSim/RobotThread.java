@@ -103,7 +103,7 @@ public class RobotThread extends Thread {
 			Message msg = new Message("DONE");
 			output.writeObject(msg);
 			
-			// Close connection to server
+			// Close connection to server/worker thread
 			sock.close();
 		}
 		catch (ConnectException ce) {

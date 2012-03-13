@@ -15,6 +15,7 @@ import java.io.ObjectInputStream;   // For reading Java objects off of the wire
 import java.io.ObjectOutputStream;  // For writing Java objects to the wire
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.*;
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
@@ -51,99 +52,112 @@ public class WorkerThread extends Thread {
 			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
-			// Loop to read messages
 			Message msg = null;
-			String msgText = "ACK";
-			// Read and print message
-			msg = (Message)input.readObject();
-			System.out.println("[" + socket.getInetAddress() +
-								   ":" + socket.getPort() + "] " + msg.theMessage);
-			
-			// Break up query grouping
-			String queryGroup[] = msg.theMessage.split(",");
-			for (int i = 0; i < queryGroup.length; i++) {
-				// Handle instructions
-				String query[] = queryGroup[i].split(" ");
-				if (query[0].equals("B")) { // BEGIN
-					System.out.println("BEGIN transaction " + query[1]);
+			Message resp = null;
+			while (true) {
+				// Loop to read messages
+				String msgText = "ACK";
+				// Read and print message
+				msg = (Message)input.readObject();
+				System.out.println("[" + socket.getInetAddress() +
+									   ":" + socket.getPort() + "] " + msg.theMessage);
+				
+				if (msg.theMessage.equals("DONE")) {
+					break;
 				}
-				else if (query[0].equals("R")) { // READ
-					// Check server number, perform query or pass on
-					if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
-						if (accessData() == false) {
-							// message an error, abort transaction
+				
+				// Separate queries
+				String queryGroup[] = msg.theMessage.split(",");
+				for (int i = 0; i < queryGroup.length; i++) {
+					// Handle instructions
+					String query[] = queryGroup[i].split(" ");
+					if (query[0].equals("B")) { // BEGIN
+						System.out.println("BEGIN transaction " + query[1]);
+					}
+					else if (query[0].equals("R")) { // READ
+						// Check server number, perform query or pass on
+						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+							if (accessData() == false) {
+								// message an error, abort transaction
+							}
+							else {
+								// add time to counter or sleep
+								System.out.println("READ for transaction " + query[1]);
+								Thread.sleep(readSleep);
+							}
 						}
-						else {
-							// add time to counter or sleep
-							System.out.println("READ for transaction " + query[1]);
-							Thread.sleep(readSleep);
+						else { // pass to server
+							System.out.println("Pass READ of transaction " + query[1] +
+											   " to server " + query[2]);
+							passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
+								System.out.println("READ of transaction " + query[1] +
+												   " to server " + query[2] +
+												   " successful");
+							}
+							else { // error in passQuery()
+								System.out.println("ERROR in passQuery()");
+							}
 						}
 					}
-					else { // pass to server
-						System.out.println("Pass READ of transaction " + query[1] +
-										   " to server " + query[2]);
-						passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-						if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
-							System.out.println("READ of transaction " + query[1] +
-											   " to server " + query[2] +
-											   " successful");
-						}
-						else { // error in passQuery()
-							System.out.println("ERROR in passQuery()");
-						}
-					}
-				}
-				else if (query[0].equals("W")) { // WRITE
-					// Check server number, perform query or pass on
-					if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
-						if (accessData() == false) {
-							// message an error, abort transaction
-						}
-						else {
-							System.out.println("WRITE for transaction " + query[1]);
-							// add time to counter or sleep
-							
-							// tell RobotThread to add this server to its commitStack
-							msgText = "ACS " + query[2];
+					else if (query[0].equals("W")) { // WRITE
+						// Check server number, perform query or pass on
+						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+							if (accessData() == false) {
+								// message an error, abort transaction
+							}
+							else {
+								System.out.println("WRITE for transaction " + query[1]);
+								// add time to counter or sleep
+								
+								// tell RobotThread to add this server to its commitStack
+								msgText = "ACS " + query[2];
 
-							Thread.sleep(writeSleep);
+								Thread.sleep(writeSleep);
+							}
+						}
+						else { // pass to server
+							System.out.println("Pass WRITE of transaction " + query[1] +
+											   " to server " + query[2]);
+							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
+								System.out.println("WRITE of transaction " + query[1] +
+												   " to server " + query[2] +
+												   " successful");
+								
+								// tell RobotThread to add this server to its commitStack
+								msgText = "ACS " + query[2];
+							}
+							else { // error in passQuery()
+								System.out.println("ERROR in passQuery()");
+							}
 						}
 					}
-					else { // pass to server
-						System.out.println("Pass WRITE of transaction " + query[1] +
-										   " to server " + query[2]);
-						if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
-							System.out.println("WRITE of transaction " + query[1] +
-											   " to server " + query[2] +
-											   " successful");
-							
-							// tell RobotThread to add this server to its commitStack
-							msgText = "ACS " + query[2];
-						}
-						else { // error in passQuery()
-							System.out.println("ERROR in passQuery()");
-						}
+					else if (query[0].equals("C")) { // COMMIT
+						// will need to keep list of all servers accessed, use it
+						// to finalize commit across servers
+						System.out.println("COMMIT STUB - transaction " + query[1]);
+						
+						// call verifyIntegrity() here?
+					}
+					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
+						// send exit flag to RobotThread
+						msgText = "FIN";
 					}
 				}
-				else if (query[0].equals("C")) { // COMMIT
-					// will need to keep list of all servers accessed, use it
-					// to finalize commit across servers
-					System.out.println("COMMIT STUB - transaction " + query[1]);
-					
-					// call verifyIntegrity() here?
-				}
-				else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
-					// send exit flag to RobotThread
-					msgText = "FIN";
+				// ACK completion of this query group
+				output.writeObject(new Message(msgText));
+			}
+			// Close any SocketGroup connection
+			if (sockList.size() > 0) {
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					sockList.getSocket(socketList.nextElement()).socket.close();
 				}
 			}
-			// ACK completion of this query group
-			output.writeObject(new Message(msgText));
 			
 			// Close and cleanup
-//			System.out.println("** Closing connection with " + socket.getInetAddress() +
-//							   ":" + socket.getPort() + " **");
-//			socket.close();
+			System.out.println("** Closing connection with " + socket.getInetAddress() +
+							   ":" + socket.getPort() + " **");
+			socket.close();
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
