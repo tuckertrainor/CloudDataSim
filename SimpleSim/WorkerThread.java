@@ -23,7 +23,7 @@ public class WorkerThread extends Thread {
 	private final ArrayList<ServerID> serverList;
 	private final int readSleep = 5; // number of milliseconds for a READ
 	private final int writeSleep = 5; // number of milliseconds for a WRITE
-	private SocketGroup sockList;
+	private SocketList sockList;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -153,8 +153,9 @@ public class WorkerThread extends Thread {
 					System.out.println("************************");
 					msg = new Message("DONE");
 					serverNum = socketList.nextElement();
-					sockList.getSocket(serverNum).output.writeObject(msg);
-					sockList.getSocket(serverNum).socket.close();
+					System.out.println(serverNum);
+					sockList.get(serverNum).output.writeObject(msg);
+					sockList.get(serverNum).socket.close();
 				}
 			}
 			
@@ -197,8 +198,8 @@ public class WorkerThread extends Thread {
 			
 			// send query
 			msg = new Message(query);
-			sockList.getSocket(otherServer).output.writeObject(msg);
-			resp = (Message)sockList.getSocket(otherServer).input.readObject();
+			sockList.get(otherServer).output.writeObject(msg);
+			resp = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
 							   " says: " + resp.theMessage);			
 			return true;
@@ -268,5 +269,44 @@ public class WorkerThread extends Thread {
 		System.out.println("checkPolicyWithCA() stub");
 		// call the CA server, get results of call back
 		return true;
+	}
+	
+	public class SocketList {
+		private Hashtable<Integer, SocketObj> list = new Hashtable<Integer, SocketObj>();
+		
+		public void addSocketObj(int serverNum, SocketObj so) {
+			list.put(serverNum, so);
+		}
+		
+		public boolean hasSocket(int serverNum) {
+			if (list.containsKey(serverNum)) {
+				return true;
+			}
+			return false;
+		}
+		
+		public SocketObj get(int serverNum) {
+			return list.get(serverNum);
+		}
+		
+		public int size() {
+			return list.size();
+		}
+		
+		public Enumeration<Integer> keys() {
+			return list.keys();
+		}
+	}
+	
+	public class SocketObj {
+		public Socket socket;
+		public ObjectOutputStream output;
+		public ObjectInputStream input;
+		
+		public SocketObj(Socket s, ObjectOutputStream oos, ObjectInputStream ois) {
+			socket = s;
+			output = oos;
+			input = ois;
+		}
 	}
 }
