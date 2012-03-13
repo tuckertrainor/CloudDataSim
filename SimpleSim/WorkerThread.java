@@ -183,15 +183,15 @@ public class WorkerThread extends Thread {
 		int port = serverList.get(otherServer).getPort();
 		
 		try {
-			// Check SocketGroup for an existing socket, else create and add new
-			if (!sockList.hasSocket(otherServer)) {
+			// Check SocketList for an existing socket, else create and add new
+			if (sockList.get(otherServer) == null) {
 				// Create new socket, add it to SocketGroup
 				System.out.println("Connecting to " + server +
 								   " on port " + port);
 				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(otherServer, new SocketObj(sock,
-																   new ObjectOutputStream(sock.getOutputStream()),	
-																   new ObjectInputStream(sock.getInputStream())));
+				sockList.addSocketObj(otherServer, new SocketObject(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),	
+																	new ObjectInputStream(sock.getInputStream())));
 			}
 
 			Message msg = null, resp = null;
@@ -272,9 +272,9 @@ public class WorkerThread extends Thread {
 	}
 	
 	public class SocketList {
-		private Hashtable<Integer, SocketObj> list = new Hashtable<Integer, SocketObj>();
+		private Hashtable<Integer, SocketObject> list = new Hashtable<Integer, SocketObject>();
 		
-		public void addSocketObj(int serverNum, SocketObj so) {
+		public void addSocketObj(int serverNum, SocketObject so) {
 			list.put(serverNum, so);
 		}
 		
@@ -285,7 +285,7 @@ public class WorkerThread extends Thread {
 			return false;
 		}
 		
-		public SocketObj get(int serverNum) {
+		public SocketObject get(int serverNum) {
 			return list.get(serverNum);
 		}
 		
@@ -296,14 +296,15 @@ public class WorkerThread extends Thread {
 		public Enumeration<Integer> keys() {
 			return list.keys();
 		}
+		
 	}
 	
-	public class SocketObj {
+	class SocketObject {
 		public Socket socket;
 		public ObjectOutputStream output;
 		public ObjectInputStream input;
 		
-		public SocketObj(Socket s, ObjectOutputStream oos, ObjectInputStream ois) {
+		public SocketObject(Socket s, ObjectOutputStream oos, ObjectInputStream ois) {
 			socket = s;
 			output = oos;
 			input = ois;
