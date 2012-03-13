@@ -61,6 +61,7 @@ public class RobotThread extends Thread {
 			if (!SocketGroup.hasSocket(primaryServer)) {
 				// Create new socket, add it to SocketGroup
 				Socket sock = new Socket(server, port);
+				sock.setKeepAlive(true);
 				System.out.println("Connected to " + server +
 								   " on port " + port);
 				SocketGroup.addSocketObj(primaryServer, new SocketObj(sock,
