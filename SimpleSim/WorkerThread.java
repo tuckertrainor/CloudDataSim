@@ -150,6 +150,7 @@ public class WorkerThread extends Thread {
 			if (sockList.size() > 0) {
 				int serverNum;
 				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					System.out.println("************************");
 					msg = new Message("DONE");
 					serverNum = socketList.nextElement();
 					sockList.getSocket(serverNum).output.writeObject(msg);
