@@ -264,9 +264,44 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if freshest policy is received/good, else false
 	 */
 	public boolean checkPolicyWithCA() {
-		System.out.println("checkPolicyWithCA() stub");
 		// call the CA server, get results of call back
-		return true;
+		int certAuthServerID = 0;
+		String server = serverList.get(certAuthServerID).getAddress();
+		int port = serverList.get(certAuthServerID).getPort();
+		
+		try {
+			// Check SocketList for an existing socket, else create and add new
+			if (!sockList.hasSocket(certAuthServerID)) {
+				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
+				Socket sock = new Socket(server, port);
+				sockList.addSocketObj(certAuthServerID, new SocketObject(sock,
+																		 new ObjectOutputStream(sock.getOutputStream()),	
+																		 new ObjectInputStream(sock.getInputStream())));
+			}
+			
+			Message msg = null, resp = null;
+			
+			// send query
+			msg = new Message("AUTH");
+			sockList.get(certAuthServerID).output.writeObject(msg);
+			resp = (Message)sockList.get(certAuthServerID).input.readObject();
+			System.out.println("CA Server says: " + resp.theMessage);
+			if (resp.theMessage.equals("ACK")) {
+				return true; // CA approves, authorization OK
+			}
+		}
+		catch (ConnectException ce) {
+			System.err.println(ce.getMessage() +
+							   ": Check CA server address and port number.");
+			ce.printStackTrace(System.err);
+		}
+		catch (Exception e) {
+			System.err.println("CA Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}		
+		return false; // ABORT or FAIL message rec'd
 	}
 	
 	public class SocketList {
