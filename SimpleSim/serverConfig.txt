@@ -1,5 +1,5 @@
 # <server number> <IP Address> <Port>
-# 0 is reserved for the Robot
+# 0 is reserved for the Certificate Authority CertAuthServer
 0 localhost 8000
 1 localhost 8001
 2 localhost 8002
