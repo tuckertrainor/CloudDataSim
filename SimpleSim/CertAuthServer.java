@@ -42,7 +42,7 @@ public class CertAuthServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				thread = new CertAuthThread(sock, serverNumber, serverList);
+				thread = new CertAuthThread(sock);
 				thread.start();
 			}
 		}
