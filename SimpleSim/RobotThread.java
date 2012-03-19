@@ -57,8 +57,8 @@ public class RobotThread extends Thread {
 
 			// Connect to the specified server
 			final Socket sock = new Socket(server, port);
-			System.out.println("Transaction " + transNumber +
-							   "Connected to " + server + " on port " + port);
+			System.out.println("RobotThread: Transaction " + transNumber +
+							   " connected to " + server + " on port " + port);
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
