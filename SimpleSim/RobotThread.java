@@ -77,7 +77,7 @@ public class RobotThread extends Thread {
 				resp = (Message)input.readObject();
 
 				if (resp.theMessage.equals("ACK")) {
-					System.out.println("RobotThread: query group processed");
+					// System.out.println("RobotThread: query group processed");
 				}
 				else if (resp.theMessage.substring(0,3).equals("ACS")) { // add to commitStack
 					// parse server number from message
