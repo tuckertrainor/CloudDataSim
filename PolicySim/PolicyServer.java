@@ -16,8 +16,8 @@ import java.util.ArrayList;
 
 public class PolicyServer {
 	final static int serverNumber = 0; // Default number for this server
-	static int minPolicySleep = 1000;
-	static int maxPolicySleep = 10000;
+	static int minPolicySleep;
+	static int maxPolicySleep;
 	
     public static void main(String[] args) {		
 		// Load server information from configuration file
