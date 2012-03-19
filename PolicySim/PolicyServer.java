@@ -35,6 +35,8 @@ public class PolicyServer {
 		try {
 			// Start the Policy version updater
 			PolicyUpdater updaterThread = new PolicyUpdater(minPolicySleep, maxPolicySleep);
+			updaterThread.start();
+			
 			// This is basically just listens for new client connections
 			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
 			
