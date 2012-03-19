@@ -1,7 +1,12 @@
-# <server number> <IP Address> <Port>
 # 0 is reserved for the Policy Server; entry requires a value for minimum
-# and maximum sleep times (in milliseconds) between Policy Version updates
+# and maximum sleep times (in milliseconds) between Policy Version updates.
+#
+# <server number> <IP Address> <Port> <min. sleep time> <max. sleep time>
 0 localhost 8000 1000 5000
+#
+# The rest of the entries are for CloudServer instances.
+#
+# <server number> <IP Address>
 1 localhost 8001
 2 localhost 8002
 3 localhost 8003
