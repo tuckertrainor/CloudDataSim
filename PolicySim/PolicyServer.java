@@ -2,8 +2,8 @@
  * File: PolicyServer.java
  * @author: Tucker Trainor <tmt33@pitt.edu>
  *
- * A simple server class to simulate a Certificate Authority. Accepts client
- * connections and forks CertAuthThreads to handle them.
+ * A simple server class to simulate a Policy Server. Accepts client
+ * connections and forks PolicyThreads to handle them.
  */
 
 import java.net.ServerSocket;
@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class PolicyServer {
-    public static void main(String[] args) {
-		int serverNumber = 0; // Default number for CA
-		
+	final static int serverNumber = 0; // Default number for this server
+	static int minPolicySleep = 1000;
+	static int maxPolicySleep = 10000;
+	
+    public static void main(String[] args) {		
 		// Load server information from configuration file
 		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
 		if (serverList == null) {
@@ -31,6 +33,8 @@ public class PolicyServer {
 		}
 		
 		try {
+			// Start the Policy version updater
+			PolicyUpdater updaterThread = new PolicyUpdater(minPolicySleep, maxPolicySleep);
 			// This is basically just listens for new client connections
 			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
 			
@@ -87,7 +91,12 @@ public class PolicyServer {
 					String triplet[] = line.split(" ");
 					configList.add(new ServerID(Integer.parseInt(triplet[0]),
 												triplet[1],
-												Integer.parseInt(triplet[2])));					
+												Integer.parseInt(triplet[2])));
+					if (Integer.parseInt(triplet[0]) == serverNumber) {
+						// Get minSleep, maxSleep
+						minPolicySleep = Integer.parseInt(triplet[3]);
+						maxPolicySleep = Integer.parseInt(triplet[4]);
+					}
 				}
 				catch (Exception e) {
 					System.out.println("Error while parsing \"" + filename +
