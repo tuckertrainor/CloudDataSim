@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class RobotThread extends Thread {
 	private final int transNumber;
@@ -91,6 +92,8 @@ public class RobotThread extends Thread {
 					// break; // ?
 				}
 				groupIndex++;
+				// Random pause after completing query qroup
+				Thread.sleep(1000);
 			}
 			
 			// Send message to WorkerThread to release it
