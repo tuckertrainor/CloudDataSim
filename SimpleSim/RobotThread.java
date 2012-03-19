@@ -23,6 +23,7 @@ public class RobotThread extends Thread {
     private final String transactions;
 	private final String server;
 	private final int port;
+	private final int maxPause;
 	private ArrayList<Integer> commitStack = new ArrayList<Integer>();
 
 	/**
@@ -34,12 +35,13 @@ public class RobotThread extends Thread {
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port) {
+	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _maxPause) {
 		primaryServer = _primaryServer;
 		transNumber = _transNumber;
 		transactions = _transactions;
 		server = _server;
 		port = _port;
+		maxPause = _maxPause;
 	}
 
 	/**
@@ -59,6 +61,9 @@ public class RobotThread extends Thread {
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+			
+			// Seed Random for pauses
+			Random pauseTime = new Random(new Date().getTime());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
@@ -93,7 +98,7 @@ public class RobotThread extends Thread {
 				}
 				groupIndex++;
 				// Random pause after completing query qroup
-				Thread.sleep(1000);
+				Thread.sleep(pauseTime.nextInt(maxPause));
 			}
 			
 			// Send message to WorkerThread to release it

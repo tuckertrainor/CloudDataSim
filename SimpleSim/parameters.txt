@@ -6,6 +6,8 @@ MQ 10
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
+# MP maxPause - maximum time in milliseconds of pause after each query group
+MP 3000
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345

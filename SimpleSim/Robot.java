@@ -32,6 +32,7 @@ public class Robot {
 	static int maxQueries;
 	static int maxServers;
 	static int maxDegree;
+	static int maxPause;
 	static long randomSeed;
 
 	/**
@@ -137,7 +138,8 @@ public class Robot {
 											 primaryServer,
 											 TransactionLog.entry.get(i).getQuerySet(),
 											 serverList.get(primaryServer).getAddress(),
-											 serverList.get(primaryServer).getPort());
+											 serverList.get(primaryServer).getPort(),
+											 maxPause);
 					thread.start();
 					ThreadCounter.addNewThread();
 					i++;
@@ -210,6 +212,9 @@ public class Robot {
 					}
 					else if (tuple[0].equals("MD")) {
 						maxDegree = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("MP")) {
+						maxPause = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("RS")) {
 						randomSeed = Long.parseLong(tuple[1]);
@@ -351,6 +356,8 @@ public class Robot {
 			outputBuf.write("MS=" + maxServers);
 			outputBuf.newLine();
 			outputBuf.write("MD=" + maxDegree);
+			outputBuf.newLine();
+			outputBuf.write("MP=" + maxPause);
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
