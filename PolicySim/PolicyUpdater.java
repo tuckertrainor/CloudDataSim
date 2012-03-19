@@ -33,6 +33,7 @@ public class PolicyUpdater extends Thread {
 			while (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
 				Thread.sleep(minSleep + refresh.nextInt(maxSleep - minSleep));
 				PolicyVersion.updatePolicy();
+				System.out.println("Policy version updated to v. " + PolicyVersion.getCurrent());
 			}
 		}
 		catch (Exception e) {
