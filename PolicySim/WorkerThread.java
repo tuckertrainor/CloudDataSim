@@ -24,6 +24,7 @@ public class WorkerThread extends Thread {
 	private final int readSleep = 5; // number of milliseconds for a READ
 	private final int writeSleep = 5; // number of milliseconds for a WRITE
 	private SocketList sockList = new SocketList();
+	private int transactionPolicyVersion;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -73,6 +74,9 @@ public class WorkerThread extends Thread {
 					String query[] = queryGroup[i].split(" ");
 					if (query[0].equals("B")) { // BEGIN
 						System.out.println("BEGIN transaction " + query[1]);
+						// Get the transaction's Policy version
+						transactionPolicyVersion = getCurrentPolicy();
+						System.out.println("Policy version set: " + transactionPolicyVersion);
 					}
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
