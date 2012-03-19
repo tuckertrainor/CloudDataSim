@@ -8,6 +8,9 @@
  * over the socket until the socket is closed.
  */
 
+/* TODO: randomize read/write sleep times, set up deferred policy check at end
+ */
+
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
