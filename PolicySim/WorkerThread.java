@@ -259,49 +259,49 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Calls the Certificate Authority for the freshest policy
+	 * Calls the Policy Server for the freshest policy
 	 *
-	 * @return boolean - true if freshest policy is received/good, else false
+	 * @return int - the current Policy version number
 	 */
-	public boolean checkPolicyWithCA() {
-		// call the CA server, get results of call back
-		int certAuthServerID = 0;
-		String server = serverList.get(certAuthServerID).getAddress();
-		int port = serverList.get(certAuthServerID).getPort();
+	public int getCurrentPolicy() {
+		int policyServerID = 0;
+		String server = serverList.get(policyServerID).getAddress();
+		int port = serverList.get(policyServerID).getPort();
 		
 		try {
 			// Check SocketList for an existing socket, else create and add new
-			if (!sockList.hasSocket(certAuthServerID)) {
+			if (!sockList.hasSocket(policyServerID)) {
 				// Create new socket, add it to SocketGroup
 				System.out.println("Connecting to " + server +
 								   " on port " + port);
 				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(certAuthServerID, new SocketObject(sock,
-																		 new ObjectOutputStream(sock.getOutputStream()),	
-																		 new ObjectInputStream(sock.getInputStream())));
+				sockList.addSocketObj(policyServerID, new SocketObject(sock,
+																	   new ObjectOutputStream(sock.getOutputStream()),	
+																	   new ObjectInputStream(sock.getInputStream())));
 			}
 			
 			Message msg = null, resp = null;
 			
-			// send query
-			msg = new Message("AUTH");
-			sockList.get(certAuthServerID).output.writeObject(msg);
-			resp = (Message)sockList.get(certAuthServerID).input.readObject();
-			System.out.println("CA Server says: " + resp.theMessage);
-			if (resp.theMessage.equals("ACK")) {
-				return true; // CA approves, authorization OK
+			// Get the current Policy version
+			msg = new Message("GET");
+			sockList.get(policyServerID).output.writeObject(msg);
+			resp = (Message)sockList.get(policyServerID).input.readObject();
+			System.out.println("Policy Server says: " + resp.theMessage);
+			String msgSplit[] = resp.theMessage.split(" ");
+			if (msgSplit[0].equals("VERSION")) {
+				return Integer.parseInt(msgSplit[1]); // return the version
 			}
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
-							   ": Check CA server address and port number.");
+							   ": Check Policy Server address and port number.");
 			ce.printStackTrace(System.err);
 		}
 		catch (Exception e) {
-			System.err.println("CA Error: " + e.getMessage());
+			System.err.println("Policy Server Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}		
-		return false; // ABORT or FAIL message rec'd
+		return 0; // ABORT or FAIL message rec'd
 	}
 	
 	public class SocketList {
