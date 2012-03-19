@@ -118,6 +118,5 @@ public class RobotThread extends Thread {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-
 	}
 }

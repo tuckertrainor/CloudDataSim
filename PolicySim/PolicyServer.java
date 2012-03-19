@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class PolicyServer {
-	
     public static void main(String[] args) {
 		int serverNumber = 0; // Default number for CA
 		
