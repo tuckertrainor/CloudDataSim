@@ -1,7 +1,7 @@
 # <server number> <IP Address> <Port>
 # 0 is reserved for the Policy Server; entry requires a value for minimum
-# and maximum sleep times between Policy Version updates
-0 localhost 8000
+# and maximum sleep times (in milliseconds) between Policy Version updates
+0 localhost 8000 1000 5000
 1 localhost 8001
 2 localhost 8002
 3 localhost 8003
