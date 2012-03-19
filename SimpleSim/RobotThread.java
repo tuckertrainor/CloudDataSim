@@ -57,7 +57,8 @@ public class RobotThread extends Thread {
 
 			// Connect to the specified server
 			final Socket sock = new Socket(server, port);
-			System.out.println("Connected to " + server + " on port " + port);
+			System.out.println("Transaction " + transNumber +
+							   "Connected to " + server + " on port " + port);
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
@@ -77,7 +78,7 @@ public class RobotThread extends Thread {
 				resp = (Message)input.readObject();
 
 				if (resp.theMessage.equals("ACK")) {
-					// System.out.println("RobotThread: query group processed");
+					Thread.yield();
 				}
 				else if (resp.theMessage.substring(0,3).equals("ACS")) { // add to commitStack
 					// parse server number from message
