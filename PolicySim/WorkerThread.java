@@ -84,6 +84,11 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
 						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+							// Check that if a fresh Policy version is needed, it is gotten
+							if (transactionPolicyVersion == 0) {
+								transactionPolicyVersion = refreshPolicy();
+							}
+							
 							if (accessData() == false) {
 								// message an error, abort transaction
 							}
@@ -109,6 +114,11 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("W")) { // WRITE
 						// Check server number, perform query or pass on
 						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+							// Check that if a fresh Policy version is needed, it is gotten
+							if (transactionPolicyVersion == 0) {
+								transactionPolicyVersion = refreshPolicy();
+							}
+
 							if (accessData() == false) {
 								// message an error, abort transaction
 							}
@@ -140,7 +150,8 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("POLICY")) { // POLICY
 						// Return Policy version on this server to caller
-						msgText = Integer.toString(transactionPolicyVersion);
+						System.out.println("*** POLICY CALL " + transactionPolicyVersion);
+						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
@@ -342,8 +353,10 @@ public class WorkerThread extends Thread {
 						resp = (Message)sockList.get(serverNum).input.readObject();
 						// Compare Policy versions
 						String msgSplit[] = resp.theMessage.split(" ");
+						System.out.println("*** " + msgSplit[0] + " " + msgSplit[1]);
 						if (msgSplit[0].equals("VERSION") && Integer.parseInt(msgSplit[1]) < masterPolicyVersion) {
 							stale++;
+							System.out.println("*** STALE INCREASED on " + serverNum);
 						}
 					}
 					catch (Exception e) {
