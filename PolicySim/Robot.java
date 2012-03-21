@@ -367,7 +367,8 @@ public class Robot {
 				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
 								TransactionLog.entry.get(i).getQuerySet() + "," +
 								TransactionLog.entry.get(i).getStartTime() + "," +
-								TransactionLog.entry.get(i).getEndTime());
+								TransactionLog.entry.get(i).getEndTime() + "," +
+								TransactionLog.entry.get(i).getStatus());
 				outputBuf.newLine();
 			}
 		}
