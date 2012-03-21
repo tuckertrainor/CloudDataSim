@@ -159,6 +159,7 @@ public class WorkerThread extends Thread {
 						// First, verify policy across servers
 						if (viewPolicyCheck() != 0) { // a server was not fresh
 							System.out.println("View Consistency Policy FAIL - transaction " + query[1]);
+							msgText = "ABORT POLICY_FAIL";
 						}
 						else {
 							System.out.println("View Consistency Policy OK - transaction " + query[1]);

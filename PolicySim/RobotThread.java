@@ -74,21 +74,29 @@ public class RobotThread extends Thread {
 				msg = new Message(queryGroups[groupIndex]);
 				output.writeObject(msg);
 				
-				// Get ACK and print
+				// Get response from WorkerThread
 				resp = (Message)input.readObject();
+				String respSplit[] = resp.theMessage.split(" ");
 
-				if (resp.theMessage.equals("ACK")) {
+				if (respSplit[0].equals("ACK")) {
 					Thread.yield();
 				}
-				else if (resp.theMessage.substring(0,3).equals("ACS")) { // add to commitStack
+				else if (respSplit[0].equals("ACS")) { // add to commitStack
 					// parse server number from message
-					String temp[] = resp.theMessage.split(" ");
-					int commitOnServer = Integer.parseInt(temp[1]);
+					int commitOnServer = Integer.parseInt(respSplit[1]);
 					if (!commitStack.contains(commitOnServer)) { // add if new #
 						commitStack.add(commitOnServer);
 					}
 				}
-				else if (resp.theMessage.equals("FIN")) {
+				else if (respSplit[0].equals("ABORT")) {
+					// Something did not validate
+					TransactionLog.entry.get(transNumber).setStatus(respSplit[1]);
+					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+					ThreadCounter.threadComplete(); // remove thread from active count
+					System.out.println("RobotThread: Transaction " + transNumber + " ABORT");
+					break;
+				}
+				else if (respSplit[0].equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + transNumber + " complete");
