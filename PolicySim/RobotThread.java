@@ -93,13 +93,15 @@ public class RobotThread extends Thread {
 					TransactionLog.entry.get(transNumber).setStatus(respSplit[1]);
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
-					System.out.println("RobotThread: Transaction " + transNumber + " ABORT");
+					System.out.println("RobotThread: Transaction " + transNumber + " " +
+									   TransactionLog.entry.get(transNumber).getStatus());
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
-					System.out.println("RobotThread: Transaction " + transNumber + " complete");
+					System.out.println("RobotThread: Transaction " + transNumber + " " +
+									   TransactionLog.entry.get(transNumber).getStatus());
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: Query handling error");
