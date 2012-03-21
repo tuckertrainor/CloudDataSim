@@ -139,11 +139,16 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("C")) { // COMMIT
-						// will need to keep list of all servers accessed, use it
-						// to finalize commit across servers
-						System.out.println("COMMIT STUB - transaction " + query[1]);
+						System.out.println("COMMIT - transaction " + query[1]);
 						
-						// call verifyIntegrity() here?
+						// First, verify policy across servers
+						if (viewPolicyCheck() != 0) { // a server was not fresh
+							System.out.println("View Consistency Policy FAIL - transaction " + query[1]);
+						}
+						else {
+							System.out.println("View Consistency Policy OK - transaction " + query[1]);
+							// call verifyIntegrity() here?
+						}
 					}
 					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 						// send exit flag to RobotThread
@@ -309,6 +314,41 @@ public class WorkerThread extends Thread {
 			e.printStackTrace(System.err);
 		}		
 		return 0; // ABORT or FAIL message rec'd
+	}
+	
+	/**
+	 * Checks all involved servers for Policy version freshness
+	 *
+	 * @return int - 0 if all servers are fresh, 1+ if not
+	 */
+	public int viewPolicyCheck() {
+		int masterPolicyVersion = refreshPolicy(); // store freshest policy
+		int stale = 0;
+		Message msg = null;
+		Message resp = null;
+		
+		if (sockList.size() > 0) {
+			int serverNum;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) {
+					try {
+						msg = new Message("POLICY");
+						sockList.get(serverNum).output.writeObject(msg);
+						resp = (Message)sockList.get(serverNum).input.readObject();
+						// Compare Policy versions
+						if (Integer.parseInt(resp.theMessage) < masterPolicyVersion) {
+							stale++;
+						}
+					}
+					catch (Exception e) {
+						System.err.println("Policy Check Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		return stale;
 	}
 	
 	public class SocketList {
