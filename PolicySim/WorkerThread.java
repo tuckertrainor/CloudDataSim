@@ -27,7 +27,7 @@ public class WorkerThread extends Thread {
 	private final int readSleep = 5; // number of milliseconds for a READ
 	private final int writeSleep = 5; // number of milliseconds for a WRITE
 	private SocketList sockList = new SocketList();
-	private int transactionPolicyVersion;
+	private int transactionPolicyVersion = 0;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -137,6 +137,10 @@ public class WorkerThread extends Thread {
 								System.out.println("ERROR in passQuery()");
 							}
 						}
+					}
+					else if (query[0].equals("POLICY")) { // POLICY
+						// Return Policy version on this server to caller
+						msgText = Integer.toString(transactionPolicyVersion);
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
@@ -331,7 +335,7 @@ public class WorkerThread extends Thread {
 			int serverNum;
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
 				serverNum = socketList.nextElement();
-				if (serverNum != 0) {
+				if (serverNum != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("POLICY");
 						sockList.get(serverNum).output.writeObject(msg);
