@@ -22,10 +22,11 @@ public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
     private final int serverNumber; // The number of this server
 	private final ArrayList<ServerID> serverList;
-	private final int readSleep = 5; // number of milliseconds for a READ
-	private final int writeSleep = 5; // number of milliseconds for a WRITE
+	private final int minSleep = 5; // minimum number of ms for a READ/WRITE
+	private final int maxSleep = 100; // maximum number of ms for a READ/WRITE
 	private SocketList sockList = new SocketList();
 	private int transactionPolicyVersion = 0;
+	private Random generator;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -45,6 +46,7 @@ public class WorkerThread extends Thread {
 	 * simply reads Message objects off of the socket.
 	 */
 	public void run() {
+		generator = new Random(new Date().getTime());
 		try {
 			// Print incoming message
 			System.out.println("** New connection from " + socket.getInetAddress() +
@@ -92,9 +94,7 @@ public class WorkerThread extends Thread {
 								// message an error, abort transaction
 							}
 							else {
-								// add time to counter or sleep
 								System.out.println("READ for transaction " + query[1]);
-								Thread.sleep(readSleep);
 							}
 						}
 						else { // pass to server
@@ -127,8 +127,6 @@ public class WorkerThread extends Thread {
 								
 								// tell RobotThread to add this server to its commitStack
 								msgText = "ACS " + query[2];
-
-								Thread.sleep(writeSleep);
 							}
 						}
 						else { // pass to server
@@ -258,6 +256,16 @@ public class WorkerThread extends Thread {
 	 */
 	public boolean accessData() {
 		System.out.println("accessData() stub");
+		
+		try {
+			// sleep for a random period of time
+			Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		
 		// perform random success operation
 		return true;
 	}
