@@ -341,7 +341,8 @@ public class WorkerThread extends Thread {
 						sockList.get(serverNum).output.writeObject(msg);
 						resp = (Message)sockList.get(serverNum).input.readObject();
 						// Compare Policy versions
-						if (Integer.parseInt(resp.theMessage) < masterPolicyVersion) {
+						String msgSplit[] = resp.theMessage.split(" ");
+						if (msgSplit[0].equals("VERSION") && Integer.parseInt(msgSplit[1]) < masterPolicyVersion) {
 							stale++;
 						}
 					}
