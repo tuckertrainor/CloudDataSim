@@ -78,7 +78,7 @@ public class WorkerThread extends Thread {
 					if (query[0].equals("B")) { // BEGIN
 						System.out.println("BEGIN transaction " + query[1]);
 						// Get the transaction's Policy version
-						transactionPolicyVersion = getCurrentPolicy();
+						transactionPolicyVersion = refreshPolicy();
 						System.out.println("Policy version set: " + transactionPolicyVersion);
 					}
 					else if (query[0].equals("R")) { // READ
@@ -270,7 +270,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return int - the current Policy version number
 	 */
-	public int getCurrentPolicy() {
+	public int refreshPolicy() {
 		int policyServerID = 0;
 		String server = serverList.get(policyServerID).getAddress();
 		int port = serverList.get(policyServerID).getPort();
