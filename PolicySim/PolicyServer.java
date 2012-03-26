@@ -6,6 +6,9 @@
  * connections and forks PolicyThreads to handle them.
  */
 
+/* TODO: change listener to client, send off threads to all active cloud servers
+ */
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.FileReader;
