@@ -8,7 +8,7 @@
  * over the socket until the socket is closed.
  */
 
-/* TODO: randomize read/write sleep times, set up deferred policy check at end
+/* TODO: Handle new Policy Version pushes - POLICYUPDATE
  */
 
 import java.lang.Thread;            // We will extend Java's base Thread class
@@ -66,6 +66,10 @@ public class WorkerThread extends Thread {
 				if (msg.theMessage.equals("DONE")) {
 					break;
 				}
+				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update
+					String msgSplit[] = msg.theMessage.split(" ");
+					my_tm.serverPolicyVersion = Integer.parseInt(msgSplit[1]);
+				}
 				
 				// Separate queries
 				String queryGroup[] = msg.theMessage.split(",");
@@ -74,8 +78,8 @@ public class WorkerThread extends Thread {
 					String query[] = queryGroup[i].split(" ");
 					if (query[0].equals("B")) { // BEGIN
 						System.out.println("BEGIN transaction " + query[1]);
-						// Get the transaction's Policy version
-						transactionPolicyVersion = refreshPolicy();
+						// Set the transaction's Policy version
+						transactionPolicyVersion = my_tm.serverPolicyVersion;
 						System.out.println("Policy version set: " + transactionPolicyVersion);
 					}
 					else if (query[0].equals("R")) { // READ
@@ -84,7 +88,7 @@ public class WorkerThread extends Thread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = refreshPolicy();
+								transactionPolicyVersion = my_tm.serverPolicyVersion;
 							}
 							
 							if (accessData() == false) {
@@ -112,7 +116,7 @@ public class WorkerThread extends Thread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = refreshPolicy();
+								transactionPolicyVersion = my_tm.serverPolicyVersion;
 							}
 
 							if (accessData() == false) {
@@ -290,58 +294,13 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Calls the Policy Server for the freshest policy
-	 *
-	 * @return int - the current Policy version number
-	 */
-	public int refreshPolicy() {
-		int policyServerID = 0;
-		String server = my_tm.serverList.get(policyServerID).getAddress();
-		int port = my_tm.serverList.get(policyServerID).getPort();
-		
-		try {
-			// Check SocketList for an existing socket, else create and add new
-			if (!sockList.hasSocket(policyServerID)) {
-				// Create new socket, add it to SocketGroup
-				System.out.println("Connecting to " + server +
-								   " on port " + port);
-				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(policyServerID, new SocketObject(sock,
-																	   new ObjectOutputStream(sock.getOutputStream()),	
-																	   new ObjectInputStream(sock.getInputStream())));
-			}
-			
-			Message msg = null, resp = null;
-			
-			// Get the current Policy version
-			msg = new Message("GET");
-			sockList.get(policyServerID).output.writeObject(msg);
-			resp = (Message)sockList.get(policyServerID).input.readObject();
-			System.out.println("Policy Server says: " + resp.theMessage);
-			String msgSplit[] = resp.theMessage.split(" ");
-			if (msgSplit[0].equals("VERSION")) {
-				return Integer.parseInt(msgSplit[1]); // return the version
-			}
-		}
-		catch (ConnectException ce) {
-			System.err.println(ce.getMessage() +
-							   ": Check Policy Server address and port number.");
-			ce.printStackTrace(System.err);
-		}
-		catch (Exception e) {
-			System.err.println("Policy Server Error: " + e.getMessage());
-			e.printStackTrace(System.err);
-		}		
-		return 0; // ABORT or FAIL message rec'd
-	}
-	
-	/**
 	 * Checks all involved servers for Policy version freshness
 	 *
 	 * @return int - 0 if all servers are fresh, 1+ if not
 	 */
 	public int viewPolicyCheck() {
-		int masterPolicyVersion = refreshPolicy(); // store freshest policy
+		int masterPolicyVersion = transactionPolicyVersion; // use main TM's policy for now
+//		int masterPolicyVersion = my_tm.serverPolicyVersion; // store freshest policy
 		int stale = 0;
 		Message msg = null;
 		Message resp = null;

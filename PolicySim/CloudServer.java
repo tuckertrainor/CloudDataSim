@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class CloudServer {
 	public static ArrayList<ServerID> serverList;
 	public int serverNumber;
+	public int serverPolicyVersion;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
