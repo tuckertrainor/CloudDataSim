@@ -20,8 +20,7 @@ import java.util.*;
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
-    private final int serverNumber; // The number of this server
-	private final ArrayList<ServerID> serverList;
+	private CloudServer my_tm; // The Transaction Manager that called the thread
 	private final int minSleep = 5; // minimum number of ms for a READ/WRITE
 	private final int maxSleep = 100; // maximum number of ms for a READ/WRITE
 	private SocketList sockList = new SocketList();
@@ -32,13 +31,11 @@ public class WorkerThread extends Thread {
 	 * Constructor that sets up the socket we'll chat over
 	 *
 	 * @param _socket - The socket passed in from the server
-	 * @param _serverNumber - The number assigned to the server that created thread
-	 * @param _serverList - the list of server IDs for connection
+	 * @param _my_tm - The Transaction Manager that called the thread
 	 */
-	public WorkerThread(Socket _socket, int _serverNumber, ArrayList<ServerID> _serverList) {
+	public WorkerThread(Socket _socket, CloudServer _my_tm) {
 		socket = _socket;
-		serverNumber = _serverNumber;
-		serverList = _serverList;
+		my_tm = _my_tm;
 	}
 
 	/**
@@ -83,7 +80,7 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
-						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
@@ -112,7 +109,7 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("W")) { // WRITE
 						// Check server number, perform query or pass on
-						if (Integer.parseInt(query[2]) == serverNumber) { // Perform query on this server
+						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
 								transactionPolicyVersion = refreshPolicy();
@@ -201,8 +198,8 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if query was successful, else false
 	 */
 	public boolean passQuery(int otherServer, String query) {
-		String server = serverList.get(otherServer).getAddress();
-		int port = serverList.get(otherServer).getPort();
+		String server = my_tm.serverList.get(otherServer).getAddress();
+		int port = my_tm.serverList.get(otherServer).getPort();
 		
 		try {
 			// Check SocketList for an existing socket, else create and add new
@@ -299,8 +296,8 @@ public class WorkerThread extends Thread {
 	 */
 	public int refreshPolicy() {
 		int policyServerID = 0;
-		String server = serverList.get(policyServerID).getAddress();
-		int port = serverList.get(policyServerID).getPort();
+		String server = my_tm.serverList.get(policyServerID).getAddress();
+		int port = my_tm.serverList.get(policyServerID).getPort();
 		
 		try {
 			// Check SocketList for an existing socket, else create and add new

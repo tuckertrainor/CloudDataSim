@@ -72,7 +72,7 @@ public class CloudServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				thread = new WorkerThread(sock, serverNumber, serverList);
+				thread = new WorkerThread(sock, this);
 				thread.start(); // Fork the thread
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled
