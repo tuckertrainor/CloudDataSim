@@ -17,9 +17,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class CloudServer {
+	public static ArrayList<ServerID> serverList;
+	public int serverNumber;
+	
+	public CloudServer(int _serverNumber) {
+		serverNumber = _serverNumber;
+	}
+
     /**
-     * Main routine. Just a dumb loop that keeps accepting new
-     * client connections.
+     * Main routine. Loads the parameters and starts the server.
      */
     public static void main(String[] args) {
 		int serverNumber = 0;
@@ -36,7 +42,7 @@ public class CloudServer {
 	    }
 		
 		// Load server information from configuration file
-		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
+		serverList = loadConfig("serverConfig.txt");
 		if (serverList == null) {
 			System.err.println("Error loading configuration file. Exiting.");
 			System.exit(-1);
@@ -45,7 +51,16 @@ public class CloudServer {
 			System.out.println("Configuration file loaded. Server " +
 							   serverNumber + " is ready.");
 		}
-
+		
+		CloudServer server = new CloudServer(serverNumber);
+		server.start();
+	}
+	
+    /**
+     * Server start routine. Just a dumb loop that keeps accepting new
+     * client connections.
+     */
+	public void start() {
 		try {
 			// This is basically just listens for new client connections
 			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
