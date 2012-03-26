@@ -8,7 +8,7 @@
  * over the socket until the socket is closed.
  */
 
-/* TODO: Handle new Policy Version pushes - POLICYUPDATE
+/* TODO: Handle new Policy Version pushes - POLICYUPDATE called from a policy thread
  */
 
 import java.lang.Thread;            // We will extend Java's base Thread class
