@@ -41,6 +41,11 @@ public class PolicyThread extends Thread {
 	 */
 	public void run() {
 		try {
+			if (minSleep + maxSleep > 0) { // sleep before push
+				Random generator = new Random(new Date().getTime());
+				Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
+			}
+			
 			final Socket socket = new Socket(address, port);
 			System.out.println("** Pushing Policy update to " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
@@ -52,11 +57,6 @@ public class PolicyThread extends Thread {
 			Message msg = null;
 			Message response = null;
 			
-			if (minSleep + maxSleep > 0) { // sleep before push
-				Random generator = new Random(new Date().getTime());
-				Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
-			}
-
 			msg = new Message("POLICYUPDATE " + version);
 			output.writeObject(msg);
 			response = (Message)input.readObject();

@@ -70,8 +70,8 @@ public class WorkerThread extends Thread {
 					String msgSplit[] = msg.theMessage.split(" ");
 					int update = Integer.parseInt(msgSplit[1]);
 					// Check that we aren't going backwards in a race condition
-					if (my_tm.serverPolicyVersion < update) {
-						my_tm.serverPolicyVersion = update;
+					if (my_tm.getPolicy() < update) {
+						my_tm.setPolicy(update);
 						System.out.println("Server Policy Version updated to v." + update);
 					}
 					output.writeObject(new Message(msgText));
@@ -86,7 +86,7 @@ public class WorkerThread extends Thread {
 					if (query[0].equals("B")) { // BEGIN
 						System.out.println("BEGIN transaction " + query[1]);
 						// Set the transaction's Policy version
-						transactionPolicyVersion = my_tm.serverPolicyVersion;
+						transactionPolicyVersion = my_tm.getPolicy();
 						System.out.println("Policy version set: " + transactionPolicyVersion);
 					}
 					else if (query[0].equals("R")) { // READ
@@ -95,7 +95,7 @@ public class WorkerThread extends Thread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = my_tm.serverPolicyVersion;
+								transactionPolicyVersion = my_tm.getPolicy();
 							}
 							
 							if (accessData() == false) {
@@ -123,7 +123,7 @@ public class WorkerThread extends Thread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = my_tm.serverPolicyVersion;
+								transactionPolicyVersion = my_tm.getPolicy();
 							}
 
 							if (accessData() == false) {
@@ -306,7 +306,7 @@ public class WorkerThread extends Thread {
 	 * @return int - 0 if all servers are fresh, 1+ if not
 	 */
 	public int viewPolicyCheck() {
-		int masterPolicyVersion = my_tm.serverPolicyVersion; // store freshest policy
+		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy
 		int stale = 0;
 		Message msg = null;
 		Message resp = null;

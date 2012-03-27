@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class CloudServer {
 	public static ArrayList<ServerID> serverList;
 	public int serverNumber;
-	public int serverPolicyVersion;
+	private int serverPolicyVersion;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
@@ -83,6 +83,14 @@ public class CloudServer {
 			e.printStackTrace(System.err);
 		}
     }
+	
+	public int getPolicy() {
+		return serverPolicyVersion;
+	}
+	
+	public void setPolicy(int update) {
+		serverPolicyVersion = update;
+	}
 	
 	/**
 	 * Loads the configuration file for this server
