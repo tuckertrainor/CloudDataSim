@@ -284,9 +284,10 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean getLocalAuth() {
-		System.out.println("getLocalAuth() stub");
-		// perform random success operation
-		return true;
+		if (transactionPolicyVersion == my_tm.getPolicy()) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
