@@ -1,8 +1,9 @@
 # 0 is reserved for the Policy Server; entry requires a value for minimum
-# and maximum sleep times (in milliseconds) between Policy Version updates.
+# and maximum sleep times (in milliseconds) between Policy Version updates,
+# minimum and maximum sleep times for update push to servers.
 #
-# <server number> <IP Address> <Port> <min. sleep time> <max. sleep time>
-0 localhost 8000 20000 30000
+# <server number> <IP Address> <Port> <min. update time> <max. update time> <min. push time> <max push time>
+0 localhost 8000 20000 30000 1000 5000
 #
 # The rest of the entries are for CloudServer instances.
 #

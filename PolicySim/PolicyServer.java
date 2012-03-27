@@ -2,27 +2,38 @@
  * File: PolicyServer.java
  * @author: Tucker Trainor <tmt33@pitt.edu>
  *
- * A simple server class to simulate a Policy Server. Accepts client
- * connections and forks PolicyThreads to handle them.
+ * A simple server class to simulate a Policy Server. Periodically sends policy
+ * updates to active servers.
  */
 
 /* TODO: change listener to client, send off threads to all active cloud servers
  */
 
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 public class PolicyServer {
 	final static int serverNumber = 0; // Default number for this server
-	static int minPolicySleep;
-	static int maxPolicySleep;
+	static int maxServers;
+	static int minPolicyUpdateSleep;
+	static int maxPolicyUpdateSleep;
+	static int minPolicyPushSleep;
+	static int maxPolicyPushSleep;
+	static int policyVersion = 1;
 	
     public static void main(String[] args) {		
+		// Load the parameters file to get maximum number of servers
+		if (loadParameters("parameters.txt")) {
+			System.out.println("Parameters file loaded.");
+		}
+		else {
+			System.err.println("Error loading parameters file. Exiting.");
+			System.exit(-1);
+		}
 		// Load server information from configuration file
 		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
 		if (serverList == null) {
@@ -35,24 +46,46 @@ public class PolicyServer {
 							   serverList.get(serverNumber).getPort() + ".");
 		}
 		
+		PolicyThread thread = null;
+		
+		// Send initial round of policy versions to servers immediately
 		try {
-			// Start the Policy version updater
-			PolicyUpdater updaterThread = new PolicyUpdater(minPolicySleep, maxPolicySleep);
-			updaterThread.start();
-			
-			// This is basically just listens for new client connections
-			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
-			
-			// A simple infinite loop to accept connections
-			Socket sock = null;
-			PolicyThread thread = null;
-			while(true) {
-				// Accept an incoming connection
-				sock = serverSock.accept();
-				// Create a thread to handle this connection
-				thread = new PolicyThread(sock);
+			for (int i = 1; i < maxServers; i++) {
+				thread = new PolicyThread(policyVersion,
+										  serverList.get(i).getAddress(),
+										  serverList.get(i).getPort(),
+										  0,
+										  0);
 				thread.start();
 			}
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+
+		// Create and seed random number generator
+		Random generator = new Random(new Date().getTime());
+		
+		// Start periodic updates
+		try {
+			// Start the Policy version updater
+			PolicyUpdater updaterThread = new PolicyUpdater(minPolicyUpdateSleep, maxPolicyUpdateSleep);
+			updaterThread.start();
+//			
+//			// This is basically just listens for new client connections
+//			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
+//			
+//			// A simple infinite loop to accept connections
+//			Socket sock = null;
+//			PolicyThread thread = null;
+//			while(true) {
+//				// Accept an incoming connection
+//				sock = serverSock.accept();
+//				// Create a thread to handle this connection
+//				thread = new PolicyThread(sock);
+//				thread.start();
+//			}
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -99,8 +132,10 @@ public class PolicyServer {
 												Integer.parseInt(triplet[2])));
 					if (Integer.parseInt(triplet[0]) == serverNumber) {
 						// Get minSleep, maxSleep
-						minPolicySleep = Integer.parseInt(triplet[3]);
-						maxPolicySleep = Integer.parseInt(triplet[4]);
+						minPolicyUpdateSleep = Integer.parseInt(triplet[3]);
+						maxPolicyUpdateSleep = Integer.parseInt(triplet[4]);
+						minPolicyPushSleep = Integer.parseInt(triplet[5]);
+						maxPolicyPushSleep = Integer.parseInt(triplet[6]);
 					}
 				}
 				catch (Exception e) {
@@ -133,5 +168,75 @@ public class PolicyServer {
 		}
 		
 		return configList;
+	}
+	
+	
+    /**
+     * Load a file containing the parameters and applicable data for the Robot
+     */
+	private static boolean loadParameters(String filename) {
+		BufferedReader inputBuf = null;
+		String line = null;
+		// use a try/catch block to open the input file with a FileReader
+		try {
+			inputBuf = new BufferedReader(new FileReader(filename));
+		}
+		catch (FileNotFoundException fnfe) {
+			// if the file is not found, exit the program
+			System.out.println("File \"" + filename + "\" not found. Exiting program.");
+			fnfe.printStackTrace();
+			return false;
+		}
+		
+		// Read and parse the contents of the file
+		try {
+			line = inputBuf.readLine();
+		}
+		catch (IOException ioe) {
+			System.out.println("IOException during readLine(). Exiting program.");
+			ioe.printStackTrace();
+			return false;
+		}
+		while (line != null) {
+			if (line.charAt(0) != '#') { // not a comment line
+				try {
+					String tuple[] = line.split(" ");
+					if (tuple[0].equals("MS")) {
+						maxServers = Integer.parseInt(tuple[1]);
+					}
+//					else if (tuple[0].equals("RS")) {
+//						randomSeed = Long.parseLong(tuple[1]);
+//					}
+				}
+				catch (Exception e) {
+					System.out.println("Error while parsing \"" + filename +
+									   "\".");
+					e.printStackTrace();
+					return false;
+				}
+			}
+			// get next line
+			try {
+				line = inputBuf.readLine();
+			}
+			catch (IOException ioe) {
+				System.out.println("IOException during readLine().");
+				ioe.printStackTrace();
+				return false;
+			}
+		}
+		
+		// close BufferedReader using a try/catch block
+		try {
+			inputBuf.close();
+		}
+		catch (IOException ioe) {
+			// if exception caught, exit the program
+			System.out.println("Error closing reader. Exiting program");
+			ioe.printStackTrace();
+			return false;
+		}
+		
+		return true; // success
 	}
 }
