@@ -41,14 +41,13 @@ public class PolicyThread extends Thread {
 	 */
 	public void run() {
 		try {
-			// Print incoming message
-			Socket socket = new Socket(address, port);
-			System.out.println("** Pushing policy update to " + socket.getInetAddress() +
+			final Socket socket = new Socket(address, port);
+			System.out.println("** Pushing Policy update to " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
 			
-			// Set up I/O streams with the calling thread
-			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 			
 			Message msg = null;
 			Message response = null;
@@ -58,14 +57,14 @@ public class PolicyThread extends Thread {
 				Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
 			}
 
-			output.writeObject(new Message("POLICYUPDATE " + version));
+			msg = new Message("POLICYUPDATE " + version);
+			output.writeObject(msg);
 			response = (Message)input.readObject();
 			if (!response.theMessage.equals("ACK")) {
-				System.out.println("Error: No ACK from " + socket.getInetAddress() +
+				System.out.println("Error: Incorrect ACK from " + socket.getInetAddress() +
 								   ":" + socket.getPort());
 			}
 
-			output.writeObject(new Message("DONE"));
 			socket.close();
 
 		}

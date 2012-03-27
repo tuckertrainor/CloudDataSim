@@ -72,7 +72,10 @@ public class WorkerThread extends Thread {
 					// Check that we aren't going backwards in a race condition
 					if (my_tm.serverPolicyVersion < update) {
 						my_tm.serverPolicyVersion = update;
+						System.out.println("Server Policy Version updated to v." + update);
 					}
+					output.writeObject(new Message(msgText));
+					break;
 				}
 				
 				// Separate queries

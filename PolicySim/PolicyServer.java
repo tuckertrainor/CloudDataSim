@@ -50,7 +50,7 @@ public class PolicyServer {
 		
 		// Send initial round of policy versions to servers immediately
 		try {
-			for (int i = 1; i < maxServers; i++) {
+			for (int i = 1; i <= maxServers; i++) {
 				thread = new PolicyThread(policyVersion,
 										  serverList.get(i).getAddress(),
 										  serverList.get(i).getPort(),
@@ -77,7 +77,7 @@ public class PolicyServer {
 				policyVersion++;
 				System.out.println("Policy version updated to v. " + policyVersion);
 				// Spread the word
-				for (int i = 1; i < maxServers; i++) {
+				for (int i = 1; i <= maxServers; i++) {
 					thread = new PolicyThread(policyVersion,
 											  serverList.get(i).getAddress(),
 											  serverList.get(i).getPort(),
