@@ -98,10 +98,15 @@ public class WorkerThread extends Thread {
 								transactionPolicyVersion = my_tm.getPolicy();
 							}
 							
-							if (accessData() == false) {
-								// message an error, abort transaction
+							// Check transaction policy against server policy
+							if (checkLocalAuth() == false) {
+								msgText = "ABORT LOCAL_POLICY_FAIL";
 							}
-							else {
+							// Check data access for error
+							else if (checkDataAccess() == false) {
+								msgText = "ABORT DATA_ACCESS_FAIL";
+							}
+							else { // OK to read
 								System.out.println("READ for transaction " + query[1]);
 							}
 						}
@@ -126,13 +131,16 @@ public class WorkerThread extends Thread {
 								transactionPolicyVersion = my_tm.getPolicy();
 							}
 
-							if (accessData() == false) {
-								// message an error, abort transaction
+							// Check transaction policy against server policy
+							if (checkLocalAuth() == false) {
+								msgText = "ABORT LOCAL_POLICY_FAIL";
 							}
-							else {
+							// Check data access for error
+							else if (checkDataAccess() == false) {
+								msgText = "ABORT DATA_ACCESS_FAIL";
+							}
+							else { // OK to write
 								System.out.println("WRITE for transaction " + query[1]);
-								// add time to counter or sleep
-								
 								// tell RobotThread to add this server to its commitStack
 								msgText = "ACS " + query[2];
 							}
@@ -154,7 +162,7 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("POLICY")) { // POLICY
-						// Return Policy version on this server to caller
+						// Return Policy version of this transaction to caller
 						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
 					else if (query[0].equals("C")) { // COMMIT
@@ -163,7 +171,7 @@ public class WorkerThread extends Thread {
 						// First, verify policy across servers
 						if (viewPolicyCheck() != 0) { // a server was not fresh
 							System.out.println("View Consistency Policy FAIL - transaction " + query[1]);
-							msgText = "ABORT POLICY_FAIL";
+							msgText = "ABORT VIEW_POLICY_FAIL";
 						}
 						else {
 							System.out.println("View Consistency Policy OK - transaction " + query[1]);
@@ -265,8 +273,8 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if access was successful, else false
 	 */
-	public boolean accessData() {
-		System.out.println("accessData() stub");
+	public boolean checkDataAccess() {
+		System.out.println("checkDataAccess() stub");
 		
 		try {
 			// sleep for a random period of time
@@ -286,7 +294,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
-	public boolean getLocalAuth() {
+	public boolean checkLocalAuth() {
 		if (transactionPolicyVersion == my_tm.getPolicy()) {
 			return true;
 		}
