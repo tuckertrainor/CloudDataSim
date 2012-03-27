@@ -55,7 +55,6 @@ public class PolicyServer {
 				thread = new PolicyThread(policyVersion,
 										  serverList.get(i).getAddress(),
 										  serverList.get(i).getPort(),
-										  0,
 										  0);
 				thread.start();
 			}
@@ -82,8 +81,7 @@ public class PolicyServer {
 					thread = new PolicyThread(policyVersion,
 											  serverList.get(i).getAddress(),
 											  serverList.get(i).getPort(),
-											  minPolicyPushSleep,
-											  maxPolicyPushSleep);
+											  minPolicyPushSleep + generator.nextInt(maxPolicyPushSleep - minPolicyPushSleep));
 					thread.start();
 				}
 			}

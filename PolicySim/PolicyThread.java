@@ -16,8 +16,7 @@ public class PolicyThread extends Thread {
     private final int version;
 	private final String address;
 	private final int port;
-	private final int minSleep;
-	private final int maxSleep;
+	private final int pushSleep;
 	
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -25,15 +24,13 @@ public class PolicyThread extends Thread {
 	 * @param _version
 	 * @param _address
 	 * @param _port
-	 * @param _minSleep
-	 * @param _maxSleep
+	 * @param _pushSleep
 	 */
-	public PolicyThread(int _version, String _address, int _port, int _minSleep, int _maxSleep) {
+	public PolicyThread(int _version, String _address, int _port, int _pushSleep) {
 		version = _version;
 		address = _address;
 		port = _port;
-		minSleep = _minSleep;
-		maxSleep = _maxSleep;
+		pushSleep = _pushSleep;
 	}
 	
 	/**
@@ -41,9 +38,8 @@ public class PolicyThread extends Thread {
 	 */
 	public void run() {
 		try {
-			if (minSleep + maxSleep > 0) { // sleep before push
-				Random generator = new Random(new Date().getTime());
-				Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
+			if (pushSleep > 0) { // sleep before push
+				Thread.sleep(pushSleep);
 			}
 			
 			final Socket socket = new Socket(address, port);

@@ -42,15 +42,15 @@ public class PolicyEngine {
 		}
 		
 		PolicyThread thread = null;
-		
+		int pushSleep = 0;
+
 		// Send initial round of policy versions to servers immediately
 		try {
 			for (int i = 1; i <= maxServers; i++) {
 				thread = new PolicyThread(policyVersion,
 										  serverList.get(i).getAddress(),
 										  serverList.get(i).getPort(),
-										  0,
-										  0);
+										  pushSleep);
 				thread.start();
 			}
 		}
@@ -73,11 +73,11 @@ public class PolicyEngine {
 				System.out.println("Policy version updated to v. " + policyVersion);
 				// Spread the word
 				for (int i = 1; i <= maxServers; i++) {
+					pushSleep = minPolicyPushSleep + generator.nextInt(maxPolicyPushSleep - minPolicyPushSleep);
 					thread = new PolicyThread(policyVersion,
 											  serverList.get(i).getAddress(),
 											  serverList.get(i).getPort(),
-											  minPolicyPushSleep,
-											  maxPolicyPushSleep);
+											  pushSleep);
 					thread.start();
 				}
 			}
