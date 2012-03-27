@@ -67,25 +67,25 @@ public class PolicyServer {
 		// Create and seed random number generator
 		Random generator = new Random(new Date().getTime());
 		
-		// Start periodic updates
+		// Start updates
 		try {
-			// Start the Policy version updater
-			PolicyUpdater updaterThread = new PolicyUpdater(minPolicyUpdateSleep, maxPolicyUpdateSleep);
-			updaterThread.start();
-//			
-//			// This is basically just listens for new client connections
-//			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
-//			
-//			// A simple infinite loop to accept connections
-//			Socket sock = null;
-//			PolicyThread thread = null;
-//			while(true) {
-//				// Accept an incoming connection
-//				sock = serverSock.accept();
-//				// Create a thread to handle this connection
-//				thread = new PolicyThread(sock);
-//				thread.start();
-//			}
+			// Loop periodic update pushes
+			while (policyVersion < Integer.MAX_VALUE) {
+				// Sleep
+				Thread.sleep(minPolicyUpdateSleep + generator.nextInt(maxPolicyUpdateSleep - minPolicyUpdateSleep));
+				// Update policy version
+				policyVersion++;
+				System.out.println("Policy version updated to v. " + policyVersion);
+				// Spread the word
+				for (int i = 1; i < maxServers; i++) {
+					thread = new PolicyThread(policyVersion,
+											  serverList.get(i).getAddress(),
+											  serverList.get(i).getPort(),
+											  minPolicyPushSleep,
+											  maxPolicyPushSleep);
+					thread.start();
+				}
+			}
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());

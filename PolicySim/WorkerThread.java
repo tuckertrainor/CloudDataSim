@@ -68,7 +68,11 @@ public class WorkerThread extends Thread {
 				}
 				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update
 					String msgSplit[] = msg.theMessage.split(" ");
-					my_tm.serverPolicyVersion = Integer.parseInt(msgSplit[1]);
+					int update = Integer.parseInt(msgSplit[1]);
+					// Check that we aren't going backwards in a race condition
+					if (my_tm.serverPolicyVersion < update) {
+						my_tm.serverPolicyVersion = update;
+					}
 				}
 				
 				// Separate queries

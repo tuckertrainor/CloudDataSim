@@ -2,7 +2,7 @@
  * File: PolicyThread.java
  * @author: Tucker Trainor <tmt33@pitt.edu>
  *
- * A simple server thread to handle Policy authorization calls.
+ * A thread to handle Policy updates to active CloudServers.
  */
 
 import java.lang.Thread;
