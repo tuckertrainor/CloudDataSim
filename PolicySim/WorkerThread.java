@@ -170,6 +170,9 @@ public class WorkerThread extends Thread {
 							// call verifyIntegrity() here?
 						}
 					}
+					else if (query[0].equals("S")) { // Sleep for debugging
+						Thread.sleep(Integer.parseInt(query[1]));
+					}
 					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 						// send exit flag to RobotThread
 						msgText = "FIN";
