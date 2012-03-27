@@ -90,7 +90,7 @@ public class RobotThread extends Thread {
 				}
 				else if (respSplit[0].equals("ABORT")) {
 					// Something did not validate
-					TransactionLog.entry.get(transNumber).setStatus(respSplit[1]);
+					TransactionLog.entry.get(transNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + transNumber + " " +

@@ -24,7 +24,7 @@ public class TransactionData {
 	public TransactionData(int _transNumber, String _querySet) {
 		transactionNumber = _transNumber;
 		querySet = _querySet;
-		status = "OK";
+		status = "COMMIT";
 	}
 	
 	public void setStartTime() {
