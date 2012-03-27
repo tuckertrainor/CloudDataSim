@@ -46,6 +46,7 @@ public class PolicyServer {
 							   serverList.get(serverNumber).getPort() + ".");
 		}
 		
+		System.out.println("Policy version set to v. " + policyVersion);
 		PolicyThread thread = null;
 		
 		// Send initial round of policy versions to servers immediately

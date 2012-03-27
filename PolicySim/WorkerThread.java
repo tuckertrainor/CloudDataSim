@@ -306,8 +306,8 @@ public class WorkerThread extends Thread {
 	 * @return int - 0 if all servers are fresh, 1+ if not
 	 */
 	public int viewPolicyCheck() {
-		int masterPolicyVersion = transactionPolicyVersion; // use main TM's policy for now
-//		int masterPolicyVersion = my_tm.serverPolicyVersion; // store freshest policy
+//		int masterPolicyVersion = transactionPolicyVersion; // use main TM's policy for now
+		int masterPolicyVersion = my_tm.serverPolicyVersion; // store freshest policy
 		int stale = 0;
 		Message msg = null;
 		Message resp = null;

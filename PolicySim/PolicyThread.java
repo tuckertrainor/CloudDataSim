@@ -66,7 +66,10 @@ public class PolicyThread extends Thread {
 			}
 
 			socket.close();
-
+		}
+		catch(ConnectException ce) {
+			System.out.println("** Connect Exception for " + address +
+							   ":" + port + " - could not push update **");
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
