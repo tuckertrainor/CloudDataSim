@@ -20,6 +20,7 @@ public class CloudServer {
 	public static ArrayList<ServerID> serverList;
 	public int serverNumber;
 	private int serverPolicyVersion;
+	private static boolean verbose = false;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
@@ -34,6 +35,19 @@ public class CloudServer {
 		if (args.length == 1) {
 			try {
 				serverNumber = Integer.parseInt(args[0]);
+			}
+			catch (Exception e) {
+				System.err.println("Error parsing argument. Please use valid integers.");
+				System.err.println("Usage: java CloudServer <Server Number>\n");
+				System.exit(-1);
+			}
+	    }
+		else if (args.length == 2) {
+			try {
+				serverNumber = Integer.parseInt(args[0]);
+				if (args[1].equalsIgnoreCase("V")) {
+					verbose = true;
+				}
 			}
 			catch (Exception e) {
 				System.err.println("Error parsing argument. Please use valid integers.");
@@ -73,7 +87,7 @@ public class CloudServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				thread = new WorkerThread(sock, this);
+				thread = new WorkerThread(sock, this, verbose);
 				thread.start(); // Fork the thread
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled

@@ -8,14 +8,13 @@
  * over the socket until the socket is closed.
  */
 
-/* TODO: Handle new Policy Version pushes - POLICYUPDATE called from a policy thread
- */
-
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
 import java.io.ObjectInputStream;   // For reading Java objects off of the wire
 import java.io.ObjectOutputStream;  // For writing Java objects to the wire
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 public class WorkerThread extends Thread {
@@ -26,6 +25,7 @@ public class WorkerThread extends Thread {
 	private SocketList sockList = new SocketList();
 	private int transactionPolicyVersion = 0;
 	private Random generator;
+	private boolean verbose;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -33,9 +33,10 @@ public class WorkerThread extends Thread {
 	 * @param _socket - The socket passed in from the server
 	 * @param _my_tm - The Transaction Manager that called the thread
 	 */
-	public WorkerThread(Socket _socket, CloudServer _my_tm) {
+	public WorkerThread(Socket _socket, CloudServer _my_tm, boolean _verbose) {
 		socket = _socket;
 		my_tm = _my_tm;
+		verbose = _verbose;
 	}
 
 	/**
@@ -44,6 +45,18 @@ public class WorkerThread extends Thread {
 	 */
 	public void run() {
 		generator = new Random(new Date().getTime());
+
+		PrintStream printStreamOriginal = System.out;
+		if (!verbose) {
+			System.setOut(new PrintStream(new OutputStream() {
+				public void close() {}
+				public void flush() {}
+				public void write(byte[] b) {}
+				public void write(byte[] b, int off, int len) {}
+				public void write(int b) {}
+			}));
+		}
+		
 		try {
 			// Print incoming message
 			System.out.println("** New connection from " + socket.getInetAddress() +
@@ -209,6 +222,8 @@ public class WorkerThread extends Thread {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		System.out.flush();
+		System.setOut(printStreamOriginal);
 	}
 
 	/**
