@@ -1,9 +1,9 @@
 # MT maxTransactions - number of transactions to perform
-MT 5
+MT 20
 # MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
 MQ 10
 # MS maxServers - number of servers available
-MS 3
+MS 2
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
 # MP maxPause - maximum time in milliseconds of pause after each query group
