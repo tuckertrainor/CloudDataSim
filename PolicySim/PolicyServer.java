@@ -7,6 +7,7 @@
  */
 
 import java.net.Socket;
+import java.net.ServerSocket;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -80,12 +81,43 @@ public class PolicyServer {
 					thread.start();
 				}
 			}
+			
+			// Close and cleanup
+			System.out.println("** Closing connection with " + socket.getInetAddress() +
+							   ":" + socket.getPort() + " **");
+			socket.close();
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		
+		PolicyServer server = new PolicyServer();
+		server.start();
     }
+	
+	public void start() {
+		try {
+			// This is basically just listens for new client connections
+			final ServerSocket serverSock = new ServerSocket(serverList.get(serverNumber).getPort());
+			
+			// A simple infinite loop to accept connections
+			Socket sock = null;
+			WorkerThread thread = null;
+			while(true) {
+				// Accept an incoming connection
+				sock = serverSock.accept();
+				// Create a thread to handle this connection
+				thread = new WorkerThread(sock, this, verbose);
+				thread.start(); // Fork the thread
+			}					// Loop to work on new connections while this
+			// the accept()ed connection is handled
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+	}
 	
 	/**
 	 * Loads the configuration file for this engine
