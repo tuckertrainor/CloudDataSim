@@ -108,6 +108,7 @@ public class CloudServer {
 	
 	public void setPolicy(int update) {
 		serverPolicyVersion = update;
+		System.out.println("Server Policy Version updated to v. " + update);
 	}
 	
 	public void callPolicyServer() {
