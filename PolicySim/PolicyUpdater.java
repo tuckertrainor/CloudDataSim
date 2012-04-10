@@ -11,23 +11,20 @@ import java.util.Date;
 import java.lang.Integer;
 
 public class PolicyUpdater extends Thread {
-    private final int minSleep;
-	private final int maxSleep;
 
 	/**
 	 * Constructor that sets up the thread
 	 *
-	 * @param _minSleep - The minimum amount of time between policy updates
-	 * @param _maxSleep - The maximum amount of time between policy updates
+	 * @param _my_ps
 	 */
-	public PolicyUpdater(int _minSleep, int _maxSleep) {
-		minSleep = _minSleep;
-		maxSleep = _maxSleep;
+	public PolicyUpdater(PolicyServer _my_ps) {
+		my_ps = _my_ps;
 	}
 
 	public void run() {
-		
 		PolicyThread thread = null;
+		int policyVersion = 0;
+		int pushSleep = 0;
 		
 		// Create and seed random number generator
 		Random generator = new Random(new Date().getTime());
@@ -35,44 +32,24 @@ public class PolicyUpdater extends Thread {
 		// Start updates
 		try {
 			// Loop periodic update pushes
-			while (policyVersion < Integer.MAX_VALUE) {
-				// Sleep
-				Thread.sleep(minPolicyUpdateSleep + generator.nextInt(maxPolicyUpdateSleep - minPolicyUpdateSleep));
+			while (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
+				// Sleep before updating Policy version
+				Thread.sleep(minPolicyUpdateSleep + generator.nextInt(my_ps.maxPolicyUpdateSleep - my_ps.minPolicyUpdateSleep));
 				// Update policy version
-				policyVersion++;
-				System.out.println("Policy version updated to v. " + policyVersion);
+				PolicyVersion.updatePolicy();
+				policyVersion = System.out.println("Policy version updated to v. " + PolicyVersion.getCurrent());
 				// Spread the word
-				for (int i = 1; i <= maxServers; i++) {
-					pushSleep = minPolicyPushSleep + generator.nextInt(maxPolicyPushSleep - minPolicyPushSleep);
+				for (int i = 1; i <= my_ps.maxServers; i++) {
+					pushSleep = my_ps.minPolicyPushSleep + generator.nextInt(my_ps.maxPolicyPushSleep - my_ps.minPolicyPushSleep);
 					thread = new PolicyThread(policyVersion,
-											  serverList.get(i).getAddress(),
-											  serverList.get(i).getPort(),
+											  my_ps.serverList.get(i).getAddress(),
+											  my_ps.serverList.get(i).getPort(),
 											  pushSleep);
 					thread.start();
 				}
 			}
-			
-			// Close and cleanup
-			System.out.println("** Closing connection with " + socket.getInetAddress() +
-							   ":" + socket.getPort() + " **");
-			socket.close();
 		}
 		catch(Exception e) {
-			System.err.println("Error: " + e.getMessage());
-			e.printStackTrace(System.err);
-		}
-
-		try {
-			// Create a Random generator for thread sleeping
-			Random refresh = new Random(new Date().getTime());
-			// Sleep a random amount of time, then update policy version
-			while (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
-				Thread.sleep(minSleep + refresh.nextInt(maxSleep - minSleep));
-				PolicyVersion.updatePolicy();
-				System.out.println("Policy version updated to v. " + PolicyVersion.getCurrent());
-			}
-		}
-		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
