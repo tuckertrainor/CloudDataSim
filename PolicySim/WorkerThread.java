@@ -133,6 +133,8 @@ public class WorkerThread extends Thread {
 								
 								// tell RobotThread to add this server to its commitStack
 								msgText = "ACS " + query[2];
+								// transaction is query[1]
+								// sequence is query[3]
 							}
 							else { // error in passQuery()
 								System.out.println("ERROR in passQuery()");
