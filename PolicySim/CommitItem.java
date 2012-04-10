@@ -6,12 +6,18 @@
  */
 
 public class CommitItem {
+	private int serverNumber;
 	private int transactionNumber;
 	private int sequenceNumber;
 	
-	public CommitItem (int trans, int seq) {
+	public CommitItem (int server, int trans, int seq) {
+		serverNumber = server;
 		transactionNumber = trans;
 		sequenceNumber = seq;
+	}
+	
+	public int getServer() {
+		return serverNumber;
 	}
 	
 	public int getTransaction() {
