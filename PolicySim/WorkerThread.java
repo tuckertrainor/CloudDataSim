@@ -132,9 +132,8 @@ public class WorkerThread extends Thread {
 												   " successful");
 								
 								// tell RobotThread to add this server to its commitStack
-								msgText = "ACS " + query[2];
-								// transaction is query[1]
-								// sequence is query[3]
+								// server is query[2], transaction is query[1], sequence is query[3]
+								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
 							else { // error in passQuery()
 								System.out.println("ERROR in passQuery()");
@@ -160,7 +159,8 @@ public class WorkerThread extends Thread {
 							else { // OK to write
 								System.out.println("WRITE for transaction " + query[1]);
 								// tell RobotThread to add this server to its commitStack
-								msgText = "ACS " + query[2];
+								// server is query[2], transaction is query[1], sequence is query[3]
+								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
 						}
 						else { // pass to server
