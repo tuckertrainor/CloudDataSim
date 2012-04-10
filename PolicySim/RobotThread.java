@@ -24,7 +24,7 @@ public class RobotThread extends Thread {
 	private final String server;
 	private final int port;
 	private final int maxPause;
-	private ArrayList<Integer> commitStack = new ArrayList<Integer>();
+	private ArrayList<CommitItem> commitStack = new ArrayList<CommitItem>();
 
 	/**
 	 * Constructor that sets up transaction communication
@@ -82,11 +82,10 @@ public class RobotThread extends Thread {
 					Thread.yield();
 				}
 				else if (respSplit[0].equals("ACS")) { // add to commitStack
-					// parse server number from message
-					int commitOnServer = Integer.parseInt(respSplit[1]);
-					if (!commitStack.contains(commitOnServer)) { // add if new #
-						commitStack.add(commitOnServer);
-					}
+					// parse data from message
+					commitStack.add(new CommitItem(Integer.parseInt(respSplit[1]),
+												   Integer.parseInt(respSplit[2]),
+												   Integer.parseInt(respSplit[3])));
 				}
 				else if (respSplit[0].equals("ABORT")) {
 					// Something did not validate
