@@ -13,7 +13,6 @@ import java.io.ObjectOutputStream;
 
 public class PolicyRequestThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
-	private PolicyServer my_ps; // The PolicyServer that called the thread
 	
 	/**
 	 * Constructor that sets up the thread
@@ -21,9 +20,8 @@ public class PolicyRequestThread extends Thread {
 	 * @param _socket
 	 * @param _my_ps
 	 */
-	public PolicyUpdater(Socket _socket, PolicyServer _my_ps) {
+	public PolicyRequestThread(Socket _socket) {
 		socket = _socket;
-		my_ps = _my_ps;
 	}
 	
 	public void run() {
@@ -44,12 +42,10 @@ public class PolicyRequestThread extends Thread {
 							   ":" + socket.getPort() + "] " + msg.theMessage);
 			
 			if (msg.theMessage.equals("CURRENTPOLICY")) {
-				msgText = "" + PolicyVersion.getCurrent();
-				output.writeObject(new Message(msgText));
+				output.writeObject(new Message("" + PolicyVersion.getCurrent()));
 			}
 			else {
-				msgText = "FAIL";
-				output.writeObject(new Message(msgText));
+				output.writeObject(new Message("FAIL"));
 			}
 			
 			// Close the connection

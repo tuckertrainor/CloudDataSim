@@ -52,7 +52,6 @@ public class PolicyServer {
 			e.printStackTrace(System.err);
 		}
 		
-		
 		PolicyServer server = new PolicyServer(this);
 		server.start();
     }
@@ -70,7 +69,7 @@ public class PolicyServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				prthread = new PolicyRequestThread(sock, this);
+				prthread = new PolicyRequestThread(sock);
 				prthread.start();
 			}
 		}
