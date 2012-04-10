@@ -22,7 +22,10 @@ public class PolicyServer {
 	static int minPolicyPushSleep;
 	static int maxPolicyPushSleep;
 	static ArrayList<ServerID> serverList;
-	
+
+	public PolicyServer() {
+	}
+
     public static void main(String[] args) {		
 		// Load the parameters file to get maximum number of servers
 		if (loadParameters("parameters.txt")) {
@@ -42,17 +45,18 @@ public class PolicyServer {
 			System.out.println("Configuration file loaded. Policy Engine is ready.");
 		}
 		
+		PolicyServer server = new PolicyServer();
+		
 		// Launch the Policy Updater
 		try {
-			PolicyUpdater puthread = new PolicyUpdater(this);
+			PolicyUpdater puthread = new PolicyUpdater(server);
 			puthread.start();
 		}
 		catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		
-		PolicyServer server = new PolicyServer(this);
+
 		server.start();
     }
 	

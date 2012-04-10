@@ -11,6 +11,7 @@ import java.util.Date;
 import java.lang.Integer;
 
 public class PolicyUpdater extends Thread {
+	private PolicyServer my_ps;
 
 	/**
 	 * Constructor that sets up the thread
@@ -34,10 +35,11 @@ public class PolicyUpdater extends Thread {
 			// Loop periodic update pushes
 			while (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
 				// Sleep before updating Policy version
-				Thread.sleep(minPolicyUpdateSleep + generator.nextInt(my_ps.maxPolicyUpdateSleep - my_ps.minPolicyUpdateSleep));
+				Thread.sleep(my_ps.minPolicyUpdateSleep + generator.nextInt(my_ps.maxPolicyUpdateSleep - my_ps.minPolicyUpdateSleep));
 				// Update policy version
 				PolicyVersion.updatePolicy();
-				policyVersion = System.out.println("Policy version updated to v. " + PolicyVersion.getCurrent());
+				policyVersion = PolicyVersion.getCurrent();
+				System.out.println("Policy version updated to v. " + policyVersion);
 				// Spread the word
 				for (int i = 1; i <= my_ps.maxServers; i++) {
 					pushSleep = my_ps.minPolicyPushSleep + generator.nextInt(my_ps.maxPolicyPushSleep - my_ps.minPolicyPushSleep);
