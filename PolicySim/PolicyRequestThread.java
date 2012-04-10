@@ -41,7 +41,7 @@ public class PolicyRequestThread extends Thread {
 			System.out.println("[" + socket.getInetAddress() +
 							   ":" + socket.getPort() + "] " + msg.theMessage);
 			
-			if (msg.theMessage.equals("CURRENTPOLICY")) {
+			if (msg.theMessage.equals("POLICYREQUEST")) {
 				output.writeObject(new Message("" + PolicyVersion.getCurrent()));
 			}
 			else {

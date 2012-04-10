@@ -8,12 +8,13 @@
  * WorkerThreads to handle the bulk of the work.
  */
 
-import java.net.ServerSocket;  // The server uses this to bind to a port
-import java.net.Socket;        // Incoming connections are represented as sockets
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+//import java.io.FileReader;
+//import java.io.BufferedReader;
+//import java.io.FileNotFoundException;
+//import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class CloudServer {
@@ -68,6 +69,9 @@ public class CloudServer {
 		}
 		
 		CloudServer server = new CloudServer(serverNumber);
+		// Set the currect policy on this server from the Policy Server
+		server.callPolicyServer();
+		// Start listening for client connections
 		server.start();
 	}
 	
@@ -92,7 +96,7 @@ public class CloudServer {
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
@@ -104,6 +108,34 @@ public class CloudServer {
 	
 	public void setPolicy(int update) {
 		serverPolicyVersion = update;
+	}
+	
+	public void callPolicyServer() {
+		try {
+			// Connect to the Policy Server
+			final Socket policySocket = new Socket(serverList.get(0).getAddress(),
+												   serverList.get(0).getPort());
+			System.out.println("CloudServer " + serverNumber + " calling Policy Server");
+			// Set up I/O streams with the server
+			final ObjectOutputStream output = new ObjectOutputStream(policySocket.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(policySocket.getInputStream());
+			// Send message
+			Message msg = new Message("POLICYREQUEST");
+			output.writeObject(msg);
+			// Receive response
+			msg = (Message)input.readObject();
+			if (msg.theMessage.equals("FAIL")) {
+				System.out.println("*** CloudServer Policy Request FAIL ***");
+			}
+			else {
+				setPolicy(Integer.parseInt(msg.theMessage));
+			}
+			policySocket.close();
+		}
+		catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 	
 	/**
