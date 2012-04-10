@@ -37,24 +37,23 @@ public class PolicyRequestThread extends Thread {
 			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 			
 			Message msg = null;
-			Message resp = null;
 
-			while (true) {
-				// Loop to read messages
-				String msgText = "ACK";
-				// Read and print message
-				msg = (Message)input.readObject();
-				System.out.println("[" + socket.getInetAddress() +
-								   ":" + socket.getPort() + "] " + msg.theMessage);
-				
-				if (msg.theMessage.equals("DONE")) {
-					break;
-				}
-				else if (msg.theMessage.indexOf("CURRENTPOLICY") != -1) {
-					msgText = "" + PolicyVersion.getCurrent();
-					output.writeObject(new Message(msgText));
-				}
+			// Read and print message
+			msg = (Message)input.readObject();
+			System.out.println("[" + socket.getInetAddress() +
+							   ":" + socket.getPort() + "] " + msg.theMessage);
+			
+			if (msg.theMessage.equals("CURRENTPOLICY")) {
+				msgText = "" + PolicyVersion.getCurrent();
+				output.writeObject(new Message(msgText));
 			}
+			else {
+				msgText = "FAIL";
+				output.writeObject(new Message(msgText));
+			}
+			
+			// Close the connection
+			socket.close();
 		}
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());

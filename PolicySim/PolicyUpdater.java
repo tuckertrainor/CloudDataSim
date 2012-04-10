@@ -26,6 +26,42 @@ public class PolicyUpdater extends Thread {
 	}
 
 	public void run() {
+		
+		PolicyThread thread = null;
+		
+		// Create and seed random number generator
+		Random generator = new Random(new Date().getTime());
+		
+		// Start updates
+		try {
+			// Loop periodic update pushes
+			while (policyVersion < Integer.MAX_VALUE) {
+				// Sleep
+				Thread.sleep(minPolicyUpdateSleep + generator.nextInt(maxPolicyUpdateSleep - minPolicyUpdateSleep));
+				// Update policy version
+				policyVersion++;
+				System.out.println("Policy version updated to v. " + policyVersion);
+				// Spread the word
+				for (int i = 1; i <= maxServers; i++) {
+					pushSleep = minPolicyPushSleep + generator.nextInt(maxPolicyPushSleep - minPolicyPushSleep);
+					thread = new PolicyThread(policyVersion,
+											  serverList.get(i).getAddress(),
+											  serverList.get(i).getPort(),
+											  pushSleep);
+					thread.start();
+				}
+			}
+			
+			// Close and cleanup
+			System.out.println("** Closing connection with " + socket.getInetAddress() +
+							   ":" + socket.getPort() + " **");
+			socket.close();
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+
 		try {
 			// Create a Random generator for thread sleeping
 			Random refresh = new Random(new Date().getTime());
