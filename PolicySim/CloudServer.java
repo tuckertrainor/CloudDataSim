@@ -10,10 +10,6 @@
 
 import java.net.ServerSocket;
 import java.net.Socket;
-//import java.io.FileReader;
-//import java.io.BufferedReader;
-//import java.io.FileNotFoundException;
-//import java.io.IOException;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -108,7 +104,9 @@ public class CloudServer {
 	
 	public void setPolicy(int update) {
 		serverPolicyVersion = update;
-		System.out.println("Server Policy Version updated to v. " + update);
+		if (verbose) {
+			System.out.println("Server Policy Version updated to v. " + update);
+		}
 	}
 	
 	public void callPolicyServer() {
@@ -116,7 +114,9 @@ public class CloudServer {
 			// Connect to the Policy Server
 			final Socket policySocket = new Socket(serverList.get(0).getAddress(),
 												   serverList.get(0).getPort());
-			System.out.println("CloudServer " + serverNumber + " calling Policy Server");
+			if (verbose) {
+				System.out.println("CloudServer " + serverNumber + " calling Policy Server");
+			}
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(policySocket.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(policySocket.getInputStream());
