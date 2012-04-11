@@ -244,14 +244,6 @@ public class WorkerThread extends Thread {
 					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 						// send exit flag to RobotThread
 						msgText = "FIN";
-						for (int j = 0; j < queryLog.size(); j++) {
-							System.out.print(j + ": ");
-							System.out.print(queryLog.get(j).getQueryType());
-							System.out.print(queryLog.get(j).getTransaction());
-							System.out.print(queryLog.get(j).getServer());
-							System.out.print(queryLog.get(j).getSequence());
-							System.out.println(queryLog.get(j).getPolicy());
-						}
 					}
 				}
 				// ACK completion of this query group
@@ -317,7 +309,6 @@ public class WorkerThread extends Thread {
 			msg = new Message("POLICY");
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
-			System.out.println("The POLICY MESSAGE: " + msg.theMessage + " QUERY: " + query);
 			String msgSplit[] = msg.theMessage.split(" ");
 			if (addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]))) {
 				return true;
@@ -358,7 +349,8 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean verifyIntegrity() {
-		System.out.println("verifyIntegrity() stub");
+		/* STUB */
+		
 		// perform random success operation
 		return true;
 	}
@@ -369,7 +361,7 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if access was successful, else false
 	 */
 	public boolean checkDataAccess() {
-		System.out.println("checkDataAccess() stub");
+		/* STUB */
 		
 		try {
 			// sleep for a random period of time
