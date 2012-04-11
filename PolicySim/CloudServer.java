@@ -66,7 +66,11 @@ public class CloudServer {
 		
 		CloudServer server = new CloudServer(serverNumber);
 		// Set the currect policy on this server from the Policy Server
-		server.callPolicyServer();
+		server.setPolicy(server.callPolicyServer());
+		if (server.serverPolicyVersion == 0) {
+			System.out.println("Error retrieving Policy Version from Policy Server");
+			System.exit(-1);
+		}
 		// Start listening for client connections
 		server.start();
 	}
@@ -109,7 +113,7 @@ public class CloudServer {
 		}
 	}
 	
-	public void callPolicyServer() {
+	public int callPolicyServer() {
 		try {
 			// Connect to the Policy Server
 			final Socket policySocket = new Socket(serverList.get(0).getAddress(),
@@ -129,14 +133,15 @@ public class CloudServer {
 				System.out.println("*** CloudServer Policy Request FAIL ***");
 			}
 			else {
-				setPolicy(Integer.parseInt(msg.theMessage));
+				policySocket.close();
+				return Integer.parseInt(msg.theMessage);
 			}
-			policySocket.close();
 		}
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		return 0; // FAIL
 	}
 	
 	/**
