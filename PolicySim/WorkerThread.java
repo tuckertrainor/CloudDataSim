@@ -23,6 +23,7 @@ public class WorkerThread extends Thread {
 	private final int minSleep = 5; // minimum number of ms for a READ/WRITE
 	private final int maxSleep = 100; // maximum number of ms for a READ/WRITE
 	private SocketList sockList = new SocketList();
+	private ArrayList<QueryRecord> queryLog = new ArrayList<QueryRecord>();
 	private int transactionPolicyVersion = 0;
 	private Random generator;
 	private boolean verbose;
@@ -273,7 +274,24 @@ public class WorkerThread extends Thread {
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
-		}		
+		}
+		return false;
+	}
+	
+	public boolean addToQueryLog(String query[], int policyVersion) {
+		try {
+			QueryRecord item = new QueryRecord(query[0],
+											   Integer.parseInt(query[1]),
+											   Integer.parseInt(query[2]),
+											   Integer.parseInt(query[3]),
+											   policyVersion);
+			queryLog.add(item);
+			return true;
+		}
+		catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 		return false;
 	}
 	
