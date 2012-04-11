@@ -457,6 +457,11 @@ public class WorkerThread extends Thread {
 		}
 		return stale;
 	}
+
+	public boolean secondChanceViewCheck() {
+		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy off main server
+		
+	}
 	
 	public class SocketList {
 		private Hashtable<Integer, SocketObject> list = new Hashtable<Integer, SocketObject>();
