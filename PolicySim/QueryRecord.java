@@ -39,4 +39,8 @@ public class QueryRecord {
 	public int getPolicy() {
 		return policyVersion;
 	}
+	
+	public String toString() {
+		return queryType + " " + transactionNumber + " " + serverNumber + " " + sequenceNumber + " " + policyVersion;
+	}
 }
