@@ -322,7 +322,7 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks the global policy for authorization to data
+	 * Checks the global policy version for authorization to data
 	 *
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
