@@ -459,11 +459,25 @@ public class WorkerThread extends Thread {
 	}
 
 	public boolean secondChanceViewCheck() {
-		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy off main server
+		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
 		
-		// local? checkGlobalAuth
-		
-		// other server? passQuery(<server number>, "A <masterPolicyVersion>")
+		for (int i = 0; i < queryLog.size(); i++) {
+			if (queryLog.get(i).getPolicy() != masterPolicyVersion) {
+				// Re-check authorization with new policy version
+				
+				// local? checkGlobalAuth
+				if (queryLog.get(i).getServer() == my_tm.serverNumber) {
+					if (checkGlobalAuth(masterPolicyVersion) == false) {
+						return false;
+					}
+				}
+				
+				
+				// other server? passQuery(<server number>, "A <masterPolicyVersion>")
+				
+			}
+		}
+		return true;
 	}
 	
 	public class SocketList {
