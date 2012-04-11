@@ -225,6 +225,16 @@ public class WorkerThread extends Thread {
 						// Return Policy version of this transaction to caller
 						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
+					else if (query[0].equals("A")) { // Re-authorize a query
+						// Query example: "A <global policy version>"
+						// May want to later add other fields for correctness
+						if (checkGlobalAuth(Integer.parseInt(query[1]))) {
+							msgText = "GLOBALPASS";
+						}
+						else {
+							msgText = "GLOBALFAIL";
+						}
+					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
