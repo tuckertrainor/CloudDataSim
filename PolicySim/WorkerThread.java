@@ -326,6 +326,19 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
+	public boolean checkGlobalAuth(int latestPolicy) {
+		// perform random success rate boolean
+		if (latestPolicy == latestPolicy) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Checks the global policy for authorization to data
+	 *
+	 * @return boolean - true if authorization check comes back OK, else false
+	 */
 	public boolean getPolicyAuth() {
 		System.out.println("getPolicyAuth() stub");
 		// perform random success operation
