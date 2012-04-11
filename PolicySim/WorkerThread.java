@@ -246,6 +246,10 @@ public class WorkerThread extends Thread {
 								System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
 								msgText = "ABORT VIEW_POLICY_FAIL";
 							}
+							else {
+								System.out.println("Second Chance View Consistency Policy OK - transaction " + query[1]);
+								// call verifyIntegrity() here?
+							}
 						}
 						else {
 							System.out.println("View Consistency Policy OK - transaction " + query[1]);

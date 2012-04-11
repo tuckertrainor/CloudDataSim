@@ -1,5 +1,5 @@
 # MT maxTransactions - number of transactions to perform
-MT 5
+MT 1
 # MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
 MQ 10
 # MS maxServers - number of servers available
