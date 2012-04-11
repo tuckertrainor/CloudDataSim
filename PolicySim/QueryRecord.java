@@ -37,6 +37,6 @@ public class QueryRecord {
 	}
 	
 	public int getPolicy() {
-		return sequenceNumber;
+		return policyVersion;
 	}
 }

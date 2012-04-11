@@ -226,8 +226,7 @@ public class WorkerThread extends Thread {
 						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
 					else if (query[0].equals("C")) { // COMMIT
-						System.out.println("COMMIT - transaction " + query[1] +
-										   " sequence " + query[3]);
+						System.out.println("COMMIT - transaction " + query[1]);
 						
 						// First, verify policy across servers
 						if (viewPolicyCheck() != 0) { // a server was not fresh
@@ -245,6 +244,14 @@ public class WorkerThread extends Thread {
 					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 						// send exit flag to RobotThread
 						msgText = "FIN";
+						for (int j = 0; j < queryLog.size(); j++) {
+							System.out.print(j + ": ");
+							System.out.print(queryLog.get(j).getQueryType());
+							System.out.print(queryLog.get(j).getTransaction());
+							System.out.print(queryLog.get(j).getServer());
+							System.out.print(queryLog.get(j).getSequence());
+							System.out.println(queryLog.get(j).getPolicy());
+						}
 					}
 				}
 				// ACK completion of this query group
@@ -310,6 +317,7 @@ public class WorkerThread extends Thread {
 			msg = new Message("POLICY");
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
+			System.out.println("The POLICY MESSAGE: " + msg.theMessage + " QUERY: " + query);
 			String msgSplit[] = msg.theMessage.split(" ");
 			if (addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]))) {
 				return true;
