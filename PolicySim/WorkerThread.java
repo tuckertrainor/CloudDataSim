@@ -132,7 +132,15 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3]);
 							}
 							else { // OK to read
-								
+								// Add to query log
+								if (addToQueryLog(query, transactionPolicyVersion)) {
+									System.out.println("Transaction " + query[1] +
+													   " sequence " + query[3] +
+													   " query logged.");
+								}
+								else {
+									System.out.println("Error logging query.");
+								}
 								System.out.println("READ for transaction " + query[1] +
 												   " sequence " + query[3]);
 							}
@@ -180,7 +188,14 @@ public class WorkerThread extends Thread {
 							}
 							else { // OK to write
 								// Add to query log
-								addToQueryLog(query, transactionPolicyVersion);
+								if (addToQueryLog(query, transactionPolicyVersion)) {
+									System.out.println("Transaction " + query[1] +
+													   " sequence " + query[3] +
+													   " query logged.");
+								}
+								else {
+									System.out.println("Error logging query.");
+								}
 								System.out.println("WRITE for transaction " + query[1] +
 												   " sequence " + query[3]);
 								// tell RobotThread to add this server to its commitStack
@@ -283,15 +298,22 @@ public class WorkerThread extends Thread {
 																	new ObjectInputStream(sock.getInputStream())));
 			}
 
-			Message msg = null, resp = null;
-			
 			// send query
+			Message msg = null;
 			msg = new Message(query);
 			sockList.get(otherServer).output.writeObject(msg);
-			resp = (Message)sockList.get(otherServer).input.readObject();
+			msg = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
-							   " says: " + resp.theMessage);			
-			return true;
+							   " says: " + msg.theMessage +
+							   " for passed query " + query);
+			// Get policy version and log the query
+			msg = new Message("POLICY");
+			sockList.get(otherServer).output.writeObject(msg);
+			msg = (Message)sockList.get(otherServer).input.readObject();
+			String msgSplit[] = msg.theMessage.split(" ");
+			if (addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]))) {
+				return true;
+			}
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
