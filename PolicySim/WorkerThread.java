@@ -132,6 +132,7 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3]);
 							}
 							else { // OK to read
+								
 								System.out.println("READ for transaction " + query[1] +
 												   " sequence " + query[3]);
 							}
@@ -178,6 +179,8 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3]);
 							}
 							else { // OK to write
+								// Add to query log
+								addToQueryLog(query, transactionPolicyVersion);
 								System.out.println("WRITE for transaction " + query[1] +
 												   " sequence " + query[3]);
 								// tell RobotThread to add this server to its commitStack
