@@ -461,6 +461,9 @@ public class WorkerThread extends Thread {
 	public boolean secondChanceViewCheck() {
 		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy off main server
 		
+		// local? checkGlobalAuth
+		
+		// other server? passQuery(<server number>, "A <masterPolicyVersion>")
 	}
 	
 	public class SocketList {
