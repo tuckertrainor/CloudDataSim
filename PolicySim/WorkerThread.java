@@ -240,8 +240,12 @@ public class WorkerThread extends Thread {
 						
 						// First, verify policy across servers
 						if (viewPolicyCheck() != 0) { // a server was not fresh
-							System.out.println("View Consistency Policy FAIL - transaction " + query[1]);
-							msgText = "ABORT VIEW_POLICY_FAIL";
+							System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+							System.out.println("*** Attempting Second Chance - transaction " + query[1] + " ***");
+							if (!secondChanceViewConsistencyCheck()) {
+								System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
+								msgText = "ABORT VIEW_POLICY_FAIL";
+							}
 						}
 						else {
 							System.out.println("View Consistency Policy OK - transaction " + query[1]);
@@ -458,23 +462,63 @@ public class WorkerThread extends Thread {
 		return stale;
 	}
 
-	public boolean secondChanceViewCheck() {
+	public boolean secondChanceViewConsistencyCheck() {
 		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
 		
 		for (int i = 0; i < queryLog.size(); i++) {
 			if (queryLog.get(i).getPolicy() != masterPolicyVersion) {
 				// Re-check authorization with new policy version
 				
-				// local? checkGlobalAuth
-				if (queryLog.get(i).getServer() == my_tm.serverNumber) {
+				if (queryLog.get(i).getServer() == my_tm.serverNumber) { // local check
 					if (checkGlobalAuth(masterPolicyVersion) == false) {
+						System.out.println("Global check FAIL: " + queryLog.get(i).toString() +
+										   " version: " + queryLog.get(i).getPolicy() +
+										   "\tGlobal version: " + masterPolicyVersion);
 						return false;
 					}
 				}
-				
-				
-				// other server? passQuery(<server number>, "A <masterPolicyVersion>")
-				
+				else { // other server? passQuery(<server number>, "A <masterPolicyVersion>")
+					int otherServer = queryLog.get(i).getServer();
+					String server = my_tm.serverList.get(otherServer).getAddress();
+					int port = my_tm.serverList.get(otherServer).getPort();
+					
+					try {
+						// Check SocketList for an existing socket, else create and add new
+						if (!sockList.hasSocket(otherServer)) {
+							// Create new socket, add it to SocketGroup
+							System.out.println("Connecting to " + server +
+											   " on port " + port);
+							Socket sock = new Socket(server, port);
+							sockList.addSocketObj(otherServer, new SocketObject(sock,
+																				new ObjectOutputStream(sock.getOutputStream()),	
+																				new ObjectInputStream(sock.getInputStream())));
+						}
+						
+						// Send query for global auth
+						Message msg = null;
+						msg = new Message("A " + masterPolicyVersion);
+						sockList.get(otherServer).output.writeObject(msg);
+						msg = (Message)sockList.get(otherServer).input.readObject();
+						System.out.println("Server " + otherServer +
+										   " says: " + msg.theMessage +
+										   " for passed query A " + masterPolicyVersion);
+						if (msg.theMessage.equals("GLOBALFAIL")) {
+							System.out.println("Global check FAIL: " + queryLog.get(i).toString() +
+											   " version: " + queryLog.get(i).getPolicy() +
+											   "\tGlobal version: " + masterPolicyVersion);
+							return false;
+						}
+					}
+					catch (ConnectException ce) {
+						System.err.println(ce.getMessage() +
+										   ": Check server address and port number.");
+						ce.printStackTrace(System.err);
+					}
+					catch (Exception e) {
+						System.err.println("Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
 			}
 		}
 		return true;
