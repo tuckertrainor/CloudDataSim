@@ -101,7 +101,9 @@ public class WorkerThread extends Thread {
 						System.out.println("BEGIN transaction " + query[1]);
 						// Set the transaction's Policy version
 						transactionPolicyVersion = my_tm.getPolicy();
-						System.out.println("Policy version set: " + transactionPolicyVersion);
+						System.out.println("Transaction " + query[1] +
+										   " Policy version set: " +
+										   transactionPolicyVersion);
 					}
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
@@ -110,25 +112,37 @@ public class WorkerThread extends Thread {
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
 								transactionPolicyVersion = my_tm.getPolicy();
+								System.out.println("Transaction " + query[1] +
+												   " Policy version set: " +
+												   transactionPolicyVersion);
 							}
 							
 							// Check transaction policy against server policy
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
+								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+												   "READ for transaction " + query[1] +
+												   " sequence " + query[3]);
 							}
 							// Check data access for error
 							else if (checkDataAccess() == false) {
 								msgText = "ABORT DATA_ACCESS_FAIL";
+								System.out.println("ABORT DATA_ACCESS_FAIL: " +
+												   "READ for transaction " + query[1] +
+												   " sequence " + query[3]);
 							}
 							else { // OK to read
-								System.out.println("READ for transaction " + query[1]);
+								System.out.println("READ for transaction " + query[1] +
+												   " sequence " + query[3]);
 							}
 						}
 						else { // pass to server
 							System.out.println("Pass READ of transaction " + query[1] +
+											   " sequence " + query[3] +
 											   " to server " + query[2]);
 							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
 								System.out.println("READ of transaction " + query[1] +
+												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   " successful");
 								
@@ -152,13 +166,20 @@ public class WorkerThread extends Thread {
 							// Check transaction policy against server policy
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
+								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+												   "WRITE for transaction " + query[1] +
+												   " sequence " + query[3]);
 							}
 							// Check data access for error
 							else if (checkDataAccess() == false) {
 								msgText = "ABORT DATA_ACCESS_FAIL";
+								System.out.println("ABORT DATA_ACCESS_FAIL: " +
+												   "WRITE for transaction " + query[1] +
+												   " sequence " + query[3]);
 							}
 							else { // OK to write
-								System.out.println("WRITE for transaction " + query[1]);
+								System.out.println("WRITE for transaction " + query[1] +
+												   " sequence " + query[3]);
 								// tell RobotThread to add this server to its commitStack
 								// server is query[2], transaction is query[1], sequence is query[3]
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
@@ -166,9 +187,11 @@ public class WorkerThread extends Thread {
 						}
 						else { // pass to server
 							System.out.println("Pass WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
 											   " to server " + query[2]);
 							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
 								System.out.println("WRITE of transaction " + query[1] +
+												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   " successful");
 								
@@ -185,7 +208,8 @@ public class WorkerThread extends Thread {
 						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
 					else if (query[0].equals("C")) { // COMMIT
-						System.out.println("COMMIT - transaction " + query[1]);
+						System.out.println("COMMIT - transaction " + query[1] +
+										   " sequence " + query[3]);
 						
 						// First, verify policy across servers
 						if (viewPolicyCheck() != 0) { // a server was not fresh
