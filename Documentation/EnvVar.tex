@@ -20,6 +20,33 @@
 \maketitle
 \section{Environment Variables}
 \subsection{Network Specific Variables}
-\subsection{Robot/Server Specific Variables}
-\subsection{Errata}
+Network Environments: \texttt{localhost} (one machine), LAN, WAN
+\begin{itemize}
+\item{}Delay before Policy Server updates are received by Cloud Servers: na, low, med
+\item{}Delay between a request for a Policy Version and receipt of current version: na, low, med
+\item{}Delay before Cloud Server receives queries from Robot: na, low, med
+\item{}Delay between messages between Robot Threads and Cloud Server Worker Threads: na, low, med
+\item{}Delay between messages between two Cloud Server Worker Threads: na, low, med
+\end{itemize}
+\subsection{Client/Server Specific Variables}
+\textbf{Client}: Robot, Robot Threads
+\begin{itemize}
+\item{}Frequency of transaction transmissions to Cloud Server
+\item{}Maximum number of concurrent threads at a given instance (multi-programming, parallelism)
+\item{}Whether or not a series of a specific query types (i.e., consecutive READs or WRITEs) are handled as a group or as discrete operations
+\item{}Whether or not significant delays between READs and WRITEs from the Robot side will be implemented to simulate actual usage by a human
+\end{itemize}
+\textbf{Server}: Cloud Server, Worker Threads
+\begin{itemize}
+\item{}Number of Cloud Servers utilized during a simulation
+\item{}Length of time for verifying integrity (during commit procedures, may not be implemented in this version of the simulation)
+\item{}Length of time for accessing and checking local data
+\item{}Length of time for Policy Version authorization checks - local, global, etc.
+\end{itemize}
+\textbf{Server}: Policy Server, Policy Updater, Policy Threads, Policy Request Threads
+\begin{itemize}
+\item{}Delay between Policy Version updates -- difference between short and long intervals
+\end{itemize}
+\subsection{Errata \& Observations}
+It is worth noting that the seeding of pseudorandom number generators itself is a variable. Simulations involving the variation of seed values only may be worth pursuing.
 \end{document}
