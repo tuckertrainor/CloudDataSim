@@ -14,39 +14,42 @@
 
 \title{Enforcing Policy and Data Consistency of Cloud Transactions: A Simulation}
 \author{Tucker Trainor\\\texttt{tmt33@pitt.edu}}
-\date{April 13, 2012} % Activate to display a given date or no date
+\date{April 14, 2012} % Activate to display a given date or no date
 
 \begin{document}
 \maketitle
 \section{Environment Variables}
-\subsection{Network Specific Variables}
-Network Environments: \texttt{localhost} (one machine), LAN, WAN
+\subsection{Network Latency Variables}
+Simulating interaction among servers in the Cloud requires careful attention to characteristics common to communication networks. We are particularly concerned with the effects of latency on the simulated performance of our algorithms and heuristics. As a typical scenario for Cloud transactions would take place over a wide area network (WAN), we should simulate delays between clients and servers to mimic real-world latency. A simulation done completely on a single machine (i.e., \texttt{localhost}), where latency is virtually negligible, inserting artificial delays between messages is necessary. A simulation done over a local area network (LAN) would also require some artificial delay between messages, though probably not as much of a time penalty as there would be for a \texttt{localhost}. The following are recognizable instances in our model where latency can be simulated via thread sleeping:
 \begin{itemize}
-\item{}Delay before Policy Server updates are received by Cloud Servers: na, low, med
-\item{}Delay between a request for a Policy Version and receipt of current version: na, low, med
-\item{}Delay before Cloud Server receives queries from Robot: na, low, med
-\item{}Delay between messages between Robot Threads and Cloud Server Worker Threads: na, low, med
-\item{}Delay between messages between two Cloud Server Worker Threads: na, low, med
+\item{}Delay before Policy Server updates are received by Cloud Servers
+\item{}Delay between a request for a Policy Version and receipt of current version
+\item{}Delay before Cloud Server receives queries from Robot
+\item{}Delay between messages between Robot Threads and Cloud Server Worker Threads
+\item{}Delay between messages between two Cloud Server Worker Threads
 \end{itemize}
 \subsection{Client/Server Specific Variables}
-\textbf{Client}: Robot, Robot Threads
+The client and server models offer scenarios where the frequency of certain operations, limits to performance, and hardware-based delays can be varied.
+\subsubsection{Client: Robot, Robot Threads}
 \begin{itemize}
 \item{}Frequency of transaction transmissions to Cloud Server
 \item{}Maximum number of concurrent threads at a given instance (multi-programming, parallelism)
 \item{}Whether or not a series of a specific query types (i.e., consecutive READs or WRITEs) are handled as a group or as discrete operations
 \item{}Whether or not significant delays between READs and WRITEs from the Robot side will be implemented to simulate actual usage by a human
 \end{itemize}
-\textbf{Server}: Cloud Server, Worker Threads
+\subsubsection{Server: Cloud Server, Worker Threads}
 \begin{itemize}
 \item{}Number of Cloud Servers utilized during a simulation
 \item{}Length of time for verifying integrity (during commit procedures, may not be implemented in this version of the simulation)
-\item{}Length of time for accessing and checking local data
-\item{}Length of time for Policy Version authorization checks - local, global, etc.
+\item{}Length of time for accessing and checking local data (e.g., disk reads and writes)
+\item{}Length of time for Policy Version authorization checks (e.g., local checking or calls from Worker Thread to Cloud Server for current Policy version)
 \end{itemize}
-\textbf{Server}: Policy Server, Policy Updater, Policy Threads, Policy Request Threads
+\subsubsection{Server: Policy Server, Policy Updater, Policy Threads, Policy Request Threads}
 \begin{itemize}
-\item{}Delay between Policy Version updates -- difference between short and long intervals
+\item{}Delay between Policy Version updates -- varying the frequency of Policy versions directly affects view consistency and global consistency
 \end{itemize}
 \subsection{Errata \& Observations}
+Any artificial pause or delay must be subject to a random amount of variation. Though there may not be much variance in the latency between two real-world nodes under certain conditions, there is always likely to be at least a few milliseconds on either side of its average latency, a variance that must be accounted for in our simulation. Similar variances should be accounted for in the client and server models as well.
+
 It is worth noting that the seeding of pseudorandom number generators itself is a variable. Simulations involving the variation of seed values only may be worth pursuing.
 \end{document}
