@@ -33,6 +33,7 @@ public class Robot {
 	static int maxServers;
 	static int maxDegree;
 	static int maxPause;
+	static int validationType;
 	static long randomSeed;
 
 	/**
@@ -90,7 +91,7 @@ public class Robot {
 		tData.setEndTime(0L);
 		TransactionLog.entry.add(tData);
 		for (int i = 1; i <= maxTransactions; i++) {
-			String newTrans = "B " + i;
+			String newTrans = "B " + i + validationType;
 			char prevQuery = 'B';
 			int queryServer = 0;
 			for (int j = 0; j < maxQueries; j++) {
@@ -217,6 +218,9 @@ public class Robot {
 					}
 					else if (tuple[0].equals("MP")) {
 						maxPause = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("VT")) {
+						validationType = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("RS")) {
 						randomSeed = Long.parseLong(tuple[1]);
@@ -360,6 +364,8 @@ public class Robot {
 			outputBuf.write("MD=" + maxDegree);
 			outputBuf.newLine();
 			outputBuf.write("MP=" + maxPause);
+			outputBuf.newLine();
+			outputBuf.write("VT=" + validationType);
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
