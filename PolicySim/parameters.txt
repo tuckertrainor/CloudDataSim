@@ -8,7 +8,7 @@ MS 2
 MD 10
 # MP maxPause - maximum time in milliseconds of pause after each query group
 MP 3000
-# VT validationType - 1 for view, 2 for global, 3 for both
+# VT verificationType - 1 for view, 2 for global, 3 for both
 VT 1
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!

@@ -69,7 +69,7 @@ public class WorkerThread extends Thread {
 
 			Message msg = null;
 			Message resp = null;
-			int validationType = 0;
+			int verificationType = 0;
 			
 			while (true) {
 				// Loop to read messages
@@ -106,32 +106,32 @@ public class WorkerThread extends Thread {
 						System.out.println("Transaction " + query[1] +
 										   " Policy version set: " +
 										   transactionPolicyVersion);
-						// Get the validation type
-						validationType = Integer.parseInt(query[2]);
-						switch (validationType) {
+						// Get the verification type
+						verificationType = Integer.parseInt(query[2]);
+						switch (verificationType) {
 							case 1:
 								System.out.println("Transaction " + query[1] +
-												   " Validation Type set: " +
+												   " Verification Type set: " +
 												   "View Consistency only");
 								break;
 							case 2:
 								System.out.println("Transaction " + query[1] +
-												   " Validation Type set: " +
+												   " Verification Type set: " +
 												   "Global Consistency only");
 								break;
 							case 3:
 								System.out.println("Transaction " + query[1] +
-												   " Validation Type set: " +
+												   " Verification Type set: " +
 												   "View Consistency and " +
 												   "Global Consistency");
 								break;
 							default:
 								// Something wrong happened, do #3
 								System.out.println("Transaction " + query[1] +
-												   " Default Validation Type set: " +
+												   " Default Verification Type set: " +
 												   "View Consistency and " +
 												   "Global Consistency");
-								validationType = 3;
+								verificationType = 3;
 								break;
 						}
 					}
@@ -268,7 +268,7 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
-						switch (validationType) {
+						switch (verificationType) {
 							case 1:
 								if (viewPolicyCheck() != 0) { // a server was not fresh
 									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
