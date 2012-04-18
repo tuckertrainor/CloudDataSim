@@ -268,22 +268,41 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
-						// First, verify policy across servers
-						if (viewPolicyCheck() != 0) { // a server was not fresh
-							System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-							System.out.println("*** Attempting Second Chance - transaction " + query[1] + " ***");
-							if (!secondChanceViewConsistencyCheck()) {
-								System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
-								msgText = "ABORT VIEW_POLICY_FAIL";
-							}
-							else {
-								System.out.println("Second Chance View Consistency Policy OK - transaction " + query[1]);
-								// call verifyIntegrity() here?
-							}
-						}
-						else {
-							System.out.println("View Consistency Policy OK - transaction " + query[1]);
-							// call verifyIntegrity() here?
+						switch (validationType) {
+							case 1:
+								if (viewPolicyCheck() != 0) { // a server was not fresh
+									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+									msgText = "ABORT VIEW_POLICY_FAIL";
+								}
+								else {
+									System.out.println("View Consistency Policy OK - transaction " + query[1]);
+								}
+								break;
+							case 2:
+								if (!secondChanceViewConsistencyCheck()) {
+									System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
+									msgText = "ABORT GLOBAL_POLICY_FAIL";
+								}
+								else {
+									System.out.println("Global Consistency Policy OK - transaction " + query[1]);
+								}
+								break;
+							case 3:
+								if (viewPolicyCheck() != 0) { // a server was not fresh
+									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+									System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
+									if (!secondChanceViewConsistencyCheck()) {
+										System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
+										msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
+									}
+									else {
+										System.out.println("Global Consistency Policy OK - transaction " + query[1]);
+									}
+								}
+								else {
+									System.out.println("View Consistency Policy OK - transaction " + query[1]);
+								}
+								break;
 						}
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
