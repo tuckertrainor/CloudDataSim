@@ -69,6 +69,8 @@ public class WorkerThread extends Thread {
 
 			Message msg = null;
 			Message resp = null;
+			int validationType = 0;
+			
 			while (true) {
 				// Loop to read messages
 				String msgText = "ACK";
@@ -104,6 +106,34 @@ public class WorkerThread extends Thread {
 						System.out.println("Transaction " + query[1] +
 										   " Policy version set: " +
 										   transactionPolicyVersion);
+						// Get the validation type
+						validationType = Integer.parseInt(query[2]);
+						switch (validationType) {
+							case 1:
+								System.out.println("Transaction " + query[1] +
+												   " Validation Type set: " +
+												   "View Consistency only");
+								break;
+							case 2:
+								System.out.println("Transaction " + query[1] +
+												   " Validation Type set: " +
+												   "Global Consistency only");
+								break;
+							case 3:
+								System.out.println("Transaction " + query[1] +
+												   " Validation Type set: " +
+												   "View Consistency and " +
+												   "Global Consistency");
+								break;
+							default:
+								// Something wrong happened, do #3
+								System.out.println("Transaction " + query[1] +
+												   " Default Validation Type set: " +
+												   "View Consistency and " +
+												   "Global Consistency");
+								validationType = 3;
+								break;
+						}
 					}
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
