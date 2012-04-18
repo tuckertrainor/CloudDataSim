@@ -13,15 +13,23 @@
 \setcounter{secnumdepth}{0}
 
 \title{Enforcing Policy and Data Consistency of Cloud Transactions: A Simulation}
-\author{Tucker Trainor\quad\texttt{tmt33@pitt.edu}}
-\date{February 22, 2012} % Activate to display a given date or no date
+\author{Tucker Trainor\\Department of Computer Science\\University of Pittsburgh\\Pittsburgh, PA 15260\\\texttt{tmt33@pitt.edu}}
+\date{April 23, 2012} % Activate to display a given date or no date
 
 \begin{document}
 \maketitle
-\section{Absract}
-\section{Model}
-\section{Implementation}
-\section{Simulation}
-\section{Results}
-\section{Observations \& Conclusions}
+\section{Abstract}
+In this section we elaborate on the title of the paper and briefly discuss the problem. After establishing the issues, we then hypothesize algorithms to solve them. Finally, we propose a series of simulations to determine the efficiency of our algorithms under variable conditions.
+\section{1. Model}
+In this section we introduce 2-phase validation (2PV) \cite{Iskander} and how validation factors into the different proofs of authorization. We describe in general terms the roles of clients, cloud servers, and policy servers. We then briefly illustrate the transactions between all parties and how the proofs alter their interactions and possible outcomes.
+\section{2. Implementation}
+In this section we describe the implementation of the model and algorithms that apply to it. The test environment is detailed, with details such as hardware and software (i.e., Java) touched upon. The different client/server modules and their child threads are described and their variables are listed. The effects of the variables on their respective modules are summarized in terms of relevance to the simulation.
+\section{3. Parameters \& Results}
+In this section we produce representations of the resulting data from the simulation. The parameters used for each set of simulations is listed and followed by the results. Each set of results is prefaced by the real-world environment that we attempted to simulate, along with explanations of specific decisions in parameter setting.
+\section{4. Conclusions \& Observations}
+In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
+% References
+\begin{thebibliography}{9}
+\bibitem{Iskander} Iskander \emph{et al.}, "Enforcing Policy and Data Consistency of Cloud Transactions," Department of Computer Science, University of Pittsburgh.
+\end{thebibliography}
 \end{document}
