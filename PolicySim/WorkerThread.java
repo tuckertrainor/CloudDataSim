@@ -279,7 +279,7 @@ public class WorkerThread extends Thread {
 								}
 								break;
 							case 2:
-								if (!secondChanceViewConsistencyCheck()) {
+								if (!globalPolicyCheck()) {
 									System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
 									msgText = "ABORT GLOBAL_POLICY_FAIL";
 								}
@@ -291,7 +291,7 @@ public class WorkerThread extends Thread {
 								if (viewPolicyCheck() != 0) { // a server was not fresh
 									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
 									System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
-									if (!secondChanceViewConsistencyCheck()) {
+									if (!globalPolicyCheck()) {
 										System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
 										msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
 									}
@@ -516,7 +516,7 @@ public class WorkerThread extends Thread {
 		return stale;
 	}
 
-	public boolean secondChanceViewConsistencyCheck() {
+	public boolean globalPolicyCheck() {
 		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
 		
 		for (int i = 0; i < queryLog.size(); i++) {
