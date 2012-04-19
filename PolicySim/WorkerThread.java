@@ -619,10 +619,10 @@ public class WorkerThread extends Thread {
 		return true;
 	}
 	
-	public void latencySleep(int min, int max) {
+	public void latencySleep() {
 		try {
 			// Sleep for a random period of time between min ms and max ms
-			Thread.sleep(min + generator.nextInt(max - min));
+			Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
 		}
 		catch(Exception e) {
 			System.err.println("latencySleep() Error: " + e.getMessage());

@@ -18,9 +18,9 @@ public class CloudServer {
 	public int serverNumber;
 	private int serverPolicyVersion;
 	public static boolean verbose = false;
-	private static int latencyMin;
-	private static int latencyMax;
-	private static int verificationType;
+	public static int latencyMin;
+	public static int latencyMax;
+	public static int verificationType;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
