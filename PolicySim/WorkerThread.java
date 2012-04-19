@@ -20,8 +20,6 @@ import java.util.*;
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
 	private CloudServer my_tm; // The Transaction Manager that called the thread
-	private final int minSleep = 5; // minimum number of ms for a READ/WRITE
-	private final int maxSleep = 100; // maximum number of ms for a READ/WRITE
 	private SocketList sockList = new SocketList();
 	private ArrayList<QueryRecord> queryLog = new ArrayList<QueryRecord>();
 	private int transactionPolicyVersion = 0;
@@ -162,6 +160,9 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3]);
 							}
 							else { // OK to read
+								System.out.println("READ for transaction " + query[1] +
+												   " sequence " + query[3]);
+								diskRead();
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -171,8 +172,6 @@ public class WorkerThread extends Thread {
 								else {
 									System.out.println("Error logging query.");
 								}
-								System.out.println("READ for transaction " + query[1] +
-												   " sequence " + query[3]);
 							}
 						}
 						else { // pass to server
@@ -217,6 +216,9 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3]);
 							}
 							else { // OK to write
+								System.out.println("WRITE for transaction " + query[1] +
+												   " sequence " + query[3]);
+								diskWrite();
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -226,8 +228,6 @@ public class WorkerThread extends Thread {
 								else {
 									System.out.println("Error logging query.");
 								}
-								System.out.println("WRITE for transaction " + query[1] +
-												   " sequence " + query[3]);
 								// tell RobotThread to add this server to its commitStack
 								// server is query[2], transaction is query[1], sequence is query[3]
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
@@ -422,6 +422,28 @@ public class WorkerThread extends Thread {
 		return true;
 	}
 
+	public void diskRead() {
+		try {
+			// sleep for a random period of time between 75ms and 125ms
+			Thread.sleep(75 + generator.nextInt(50));
+		}
+		catch(Exception e) {
+			System.err.println("diskRead() Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+	}
+	
+	public void diskWrite() {
+		try {
+			// sleep for a random period of time between 150ms and 225ms
+			Thread.sleep(150 + generator.nextInt(75));
+		}
+		catch(Exception e) {
+			System.err.println("diskWrite() Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+	}
+	
 	/**
 	 * Checks if accessing requested data was successful
 	 *
@@ -429,16 +451,6 @@ public class WorkerThread extends Thread {
 	 */
 	public boolean checkDataAccess() {
 		/* STUB */
-		
-		try {
-			// sleep for a random period of time
-			Thread.sleep(minSleep + generator.nextInt(maxSleep - minSleep));
-		}
-		catch(Exception e) {
-			System.err.println("Error: " + e.getMessage());
-			e.printStackTrace(System.err);
-		}
-		
 		// perform random success operation
 		return true;
 	}
