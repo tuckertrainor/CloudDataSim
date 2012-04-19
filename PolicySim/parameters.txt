@@ -15,6 +15,8 @@ LMIN 5
 LMAX 25
 # VT verificationType - 1 for view, 2 for global, 3 for both
 VT 1
+# ICSR - integrity check success rate
+ICSR 1.00
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345

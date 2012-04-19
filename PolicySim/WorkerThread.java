@@ -239,41 +239,46 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
-						switch (my_tm.verificationType) {
-							case 1:
-								if (viewPolicyCheck() != 0) { // a server was not fresh
-									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-									msgText = "ABORT VIEW_POLICY_FAIL";
-								}
-								else {
-									System.out.println("View Consistency Policy OK - transaction " + query[1]);
-								}
-								break;
-							case 2:
-								if (!globalPolicyCheck()) {
-									System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
-									msgText = "ABORT GLOBAL_POLICY_FAIL";
-								}
-								else {
-									System.out.println("Global Consistency Policy OK - transaction " + query[1]);
-								}
-								break;
-							case 3:
-								if (viewPolicyCheck() != 0) { // a server was not fresh
-									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-									System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
+						if (!integrityCheck()) { // Check data integrity for commit
+							msgText = "ABORT INTEGRITY_FAIL";
+						}
+						else {
+							switch (my_tm.verificationType) {
+								case 1:
+									if (viewPolicyCheck() != 0) { // a server was not fresh
+										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+										msgText = "ABORT VIEW_POLICY_FAIL";
+									}
+									else {
+										System.out.println("View Consistency Policy OK - transaction " + query[1]);
+									}
+									break;
+								case 2:
 									if (!globalPolicyCheck()) {
-										System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
-										msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
+										System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
+										msgText = "ABORT GLOBAL_POLICY_FAIL";
 									}
 									else {
 										System.out.println("Global Consistency Policy OK - transaction " + query[1]);
 									}
-								}
-								else {
-									System.out.println("View Consistency Policy OK - transaction " + query[1]);
-								}
-								break;
+									break;
+								case 3:
+									if (viewPolicyCheck() != 0) { // a server was not fresh
+										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+										System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
+										if (!globalPolicyCheck()) {
+											System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
+											msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
+										}
+										else {
+											System.out.println("Global Consistency Policy OK - transaction " + query[1]);
+										}
+									}
+									else {
+										System.out.println("View Consistency Policy OK - transaction " + query[1]);
+									}
+									break;
+							}
 						}
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
@@ -390,7 +395,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
-	public boolean verifyIntegrity() {
+	public boolean integrityCheck() {
 		try {
 			// sleep for a random period of time between 150ms and 225ms
 			Thread.sleep(150 + generator.nextInt(75));
@@ -485,8 +490,8 @@ public class WorkerThread extends Thread {
 	 */
 	public boolean getPolicyAuth() {
 		System.out.println("getPolicyAuth() stub");
-		// perform random success operation
-		return true;
+		// Perform random success operation
+		return coinToss(my_tm.integrityCheckSuccessRate);
 	}
 	
 	/**
