@@ -25,7 +25,7 @@ public class PolicyUpdater extends Thread {
 	public void run() {
 		PolicyThread thread = null;
 		int policyVersion = 0;
-		int pushSleep = 0;
+		int latency = 0;
 		
 		// Create and seed random number generator
 		Random generator = new Random(new Date().getTime());
@@ -42,11 +42,11 @@ public class PolicyUpdater extends Thread {
 				System.out.println("Policy version updated to v. " + policyVersion);
 				// Spread the word
 				for (int i = 1; i <= my_ps.maxServers; i++) {
-					pushSleep = my_ps.minPolicyPushSleep + generator.nextInt(my_ps.maxPolicyPushSleep - my_ps.minPolicyPushSleep);
+					latency = my_ps.latencyMin + generator.nextInt(my_ps.latencyMax - my_ps.latencyMin);
 					thread = new PolicyThread(policyVersion,
 											  my_ps.serverList.get(i).getAddress(),
 											  my_ps.serverList.get(i).getPort(),
-											  pushSleep);
+											  latency);
 					thread.start();
 				}
 			}
