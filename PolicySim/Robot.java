@@ -38,6 +38,8 @@ public class Robot {
 	static int verificationType;
 	static float integrityCheckSuccessRate;
 	static float commitSuccessRate;
+	static float localAuthSuccessRate;
+	static float globalAuthSuccessRate;
 	static Random generator;
 	static long randomSeed;
 
@@ -385,6 +387,10 @@ public class Robot {
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
 			outputBuf.newLine();
 			outputBuf.write("CSR=" + commitSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("LASR=" + localAuthSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("GASR=" + globalAuthSuccessRate);
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();

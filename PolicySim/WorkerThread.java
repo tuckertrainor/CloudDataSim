@@ -468,11 +468,8 @@ public class WorkerThread extends Thread {
 			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		// perform random success rate boolean
-		if (true) {
-			return true;
-		}
-		return false;
+		// Perform random success operation
+		return coinToss(my_tm.localAuthSuccessRate);
 	}
 	
 	/**
@@ -489,11 +486,8 @@ public class WorkerThread extends Thread {
 			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		// Perform random success rate boolean
-		if (latestPolicy == latestPolicy) {
-			return true;
-		}
-		return false;
+		// Perform random success operation
+		return coinToss(my_tm.globalAuthSuccessRate);
 	}
 	
 	/**

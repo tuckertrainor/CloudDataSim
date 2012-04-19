@@ -23,6 +23,8 @@ public class CloudServer {
 	public static int verificationType;
 	public static float integrityCheckSuccessRate;
 	public static float commitSuccessRate;
+	public static float localAuthSuccessRate;
+	public static float globalAuthSuccessRate;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
@@ -272,6 +274,12 @@ public class CloudServer {
 					}
 					else if (tuple[0].equals("CSR")) {
 						commitSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("LASR")) {
+						localAuthSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("GASR")) {
+						globalAuthSuccessRate = Float.parseFloat(tuple[1]);
 					}
 				}
 				catch (Exception e) {

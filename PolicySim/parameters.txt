@@ -15,10 +15,14 @@ LMIN 5
 LMAX 25
 # VT verificationType - 1 for view, 2 for global, 3 for both
 VT 1
-# ICSR - integrity check success rate
+# ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
-# CSR - commit success rate
+# CSR - commit success rate (0.00 to 1.00)
 CSR 1.00
+# LASR - local authorization success rate per query (0.00 to 1.00)
+LASR 1.00
+# GASR - global authorization success rate per query (0.00 to 1.00)
+GASR 1.00
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345
