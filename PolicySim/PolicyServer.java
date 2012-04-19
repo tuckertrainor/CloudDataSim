@@ -17,12 +17,10 @@ import java.util.*;
 public class PolicyServer {
 	final static int serverNumber = 0; // Default number for this server
 	static int maxServers;
-	static int minPolicyUpdateSleep;
-	static int maxPolicyUpdateSleep;
-	static int minPolicyPushSleep;
-	static int maxPolicyPushSleep;
 	static int latencyMin;
 	static int latencyMax;
+	static int policyUpdateMin;
+	static int policyUpdateMax;
 	static ArrayList<ServerID> serverList;
 
 	public PolicyServer() {
@@ -122,13 +120,6 @@ public class PolicyServer {
 					configList.add(new ServerID(Integer.parseInt(triplet[0]),
 												triplet[1],
 												Integer.parseInt(triplet[2])));
-					if (Integer.parseInt(triplet[0]) == serverNumber) {
-						// Get minSleep, maxSleep
-						minPolicyUpdateSleep = Integer.parseInt(triplet[3]);
-						maxPolicyUpdateSleep = Integer.parseInt(triplet[4]);
-						minPolicyPushSleep = Integer.parseInt(triplet[5]);
-						maxPolicyPushSleep = Integer.parseInt(triplet[6]);
-					}
 				}
 				catch (Exception e) {
 					System.out.println("Error while parsing \"" + filename +
@@ -200,6 +191,12 @@ public class PolicyServer {
 					}
 					else if (tuple[0].equals("LMAX")) {
 						latencyMax = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("PMIN")) {
+						policyUpdateMin = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("PMAX")) {
+						policyUpdateMax = Integer.parseInt(tuple[1]);
 					}
 				}
 				catch (Exception e) {

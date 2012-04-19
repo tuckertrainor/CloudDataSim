@@ -40,8 +40,10 @@ public class Robot {
 	static float commitSuccessRate;
 	static float localAuthSuccessRate;
 	static float globalAuthSuccessRate;
-	static Random generator;
+	static int policyUpdateMin;
+	static int policyUpdateMax;
 	static long randomSeed;
+	static Random generator;
 
 	/**
 	 * Main method.
@@ -391,6 +393,10 @@ public class Robot {
 			outputBuf.write("LASR=" + localAuthSuccessRate);
 			outputBuf.newLine();
 			outputBuf.write("GASR=" + globalAuthSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("PMIN=" + policyUpdateMin);
+			outputBuf.newLine();
+			outputBuf.write("PMAX=" + policyUpdateMax);
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
