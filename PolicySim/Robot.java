@@ -94,7 +94,7 @@ public class Robot {
 		tData.setEndTime(0L);
 		TransactionLog.entry.add(tData);
 		for (int i = 1; i <= maxTransactions; i++) {
-			String newTrans = "B " + i + " " + verificationType;
+			String newTrans = "B " + i;
 			char prevQuery = 'B';
 			int queryServer = 0;
 			for (int j = 0; j < maxQueries; j++) {

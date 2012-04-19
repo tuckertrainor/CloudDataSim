@@ -103,34 +103,6 @@ public class WorkerThread extends Thread {
 						System.out.println("Transaction " + query[1] +
 										   " Policy version set: " +
 										   transactionPolicyVersion);
-						// Get the verification type
-						verificationType = Integer.parseInt(query[2]);
-						switch (verificationType) {
-							case 1:
-								System.out.println("Transaction " + query[1] +
-												   " Verification Type set: " +
-												   "View Consistency only");
-								break;
-							case 2:
-								System.out.println("Transaction " + query[1] +
-												   " Verification Type set: " +
-												   "Global Consistency only");
-								break;
-							case 3:
-								System.out.println("Transaction " + query[1] +
-												   " Verification Type set: " +
-												   "View Consistency and " +
-												   "Global Consistency");
-								break;
-							default:
-								// Something wrong happened, do #3
-								System.out.println("Transaction " + query[1] +
-												   " Default Verification Type set: " +
-												   "View Consistency and " +
-												   "Global Consistency");
-								verificationType = 3;
-								break;
-						}
 					}
 					else if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
@@ -267,7 +239,7 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
-						switch (verificationType) {
+						switch (my_tm.verificationType) {
 							case 1:
 								if (viewPolicyCheck() != 0) { // a server was not fresh
 									System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
