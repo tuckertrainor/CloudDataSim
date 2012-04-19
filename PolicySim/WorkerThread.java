@@ -467,6 +467,14 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkLocalAuth() {
+		try {
+			// sleep for a random period of time between 50ms and 150ms
+			Thread.sleep(50 + generator.nextInt(100));
+		}
+		catch(Exception e) {
+			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 		// perform random success rate boolean
 		if (true) {
 			return true;
@@ -480,7 +488,15 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkGlobalAuth(int latestPolicy) {
-		// perform random success rate boolean
+		try {
+			// Sleep for a random period of time between 50ms and 150ms
+			Thread.sleep(50 + generator.nextInt(100));
+		}
+		catch(Exception e) {
+			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		// Perform random success rate boolean
 		if (latestPolicy == latestPolicy) {
 			return true;
 		}
@@ -601,6 +617,17 @@ public class WorkerThread extends Thread {
 			return false;
 		}
 		return true;
+	}
+	
+	public void latencySleep(int min, int max) {
+		try {
+			// Sleep for a random period of time between min ms and max ms
+			Thread.sleep(min + generator.nextInt(max - min));
+		}
+		catch(Exception e) {
+			System.err.println("latencySleep() Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 	
 	public class SocketList {
