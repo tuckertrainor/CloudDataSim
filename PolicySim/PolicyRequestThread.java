@@ -13,15 +13,17 @@ import java.io.ObjectOutputStream;
 
 public class PolicyRequestThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
+	private final int latency;
 	
 	/**
 	 * Constructor that sets up the thread
 	 *
 	 * @param _socket
-	 * @param _my_ps
+	 * @param _latency
 	 */
-	public PolicyRequestThread(Socket _socket) {
+	public PolicyRequestThread(Socket _socket, int _latency) {
 		socket = _socket;
+		latency = _latency;		
 	}
 	
 	public void run() {
@@ -42,6 +44,14 @@ public class PolicyRequestThread extends Thread {
 							   ":" + socket.getPort() + "] " + msg.theMessage);
 			
 			if (msg.theMessage.equals("POLICYREQUEST")) {
+				// Sleep to simulate latency
+				try {
+					Thread.sleep(latency);
+				}
+				catch(Exception e) {
+					System.err.println("latencySleep() Error: " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
 				output.writeObject(new Message("" + PolicyVersion.getCurrent()));
 			}
 			else {
