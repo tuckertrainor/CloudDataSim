@@ -16,7 +16,7 @@ public class PolicyThread extends Thread {
     private final int version;
 	private final String address;
 	private final int port;
-	private final int pushSleep;
+	private final int latency;
 	
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -26,11 +26,11 @@ public class PolicyThread extends Thread {
 	 * @param _port
 	 * @param _pushSleep
 	 */
-	public PolicyThread(int _version, String _address, int _port, int _pushSleep) {
+	public PolicyThread(int _version, String _address, int _port, int _latency) {
 		version = _version;
 		address = _address;
 		port = _port;
-		pushSleep = _pushSleep;
+		latency = _latency;
 	}
 	
 	/**
@@ -38,10 +38,6 @@ public class PolicyThread extends Thread {
 	 */
 	public void run() {
 		try {
-			if (pushSleep > 0) { // sleep before push
-				Thread.sleep(pushSleep);
-			}
-			
 			final Socket socket = new Socket(address, port);
 			System.out.println("** Pushing Policy update to " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
@@ -53,6 +49,14 @@ public class PolicyThread extends Thread {
 			Message msg = null;
 			Message response = null;
 			
+			// Sleep to simulate latency
+			try {
+				Thread.sleep(latency);
+			}
+			catch(Exception e) {
+				System.err.println("latencySleep() Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 			msg = new Message("POLICYUPDATE " + version);
 			output.writeObject(msg);
 			response = (Message)input.readObject();
