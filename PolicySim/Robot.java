@@ -371,9 +371,9 @@ public class Robot {
 			outputBuf.newLine();
 			for (int i = 1; i <= maxTransactions; i++) {
 				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
-								TransactionLog.entry.get(i).getQuerySet() + "," +
-								TransactionLog.entry.get(i).getStartTime() + "," +
-								TransactionLog.entry.get(i).getEndTime() + "," +
+								TransactionLog.entry.get(i).getQuerySet() + "\t" +
+								TransactionLog.entry.get(i).getStartTime() + "\t" +
+								TransactionLog.entry.get(i).getEndTime() + "\t" +
 								TransactionLog.entry.get(i).getStatus());
 				outputBuf.newLine();
 			}
