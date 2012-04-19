@@ -8,8 +8,6 @@
  * over the socket until the socket is closed.
  */
 
-/* TODO: get latency sleep from parameters (will need to load them) and set
- * variables appropriately, make calls before messages out */
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
@@ -88,6 +86,7 @@ public class WorkerThread extends Thread {
 						my_tm.setPolicy(update);
 						System.out.println("Server Policy Version updated to v." + update);
 					}
+					latencySleep(); // Simulate latency
 					output.writeObject(new Message(msgText));
 					break;
 				}
@@ -313,6 +312,7 @@ public class WorkerThread extends Thread {
 						msgText = "FIN";
 					}
 				}
+				latencySleep(); // Simulate latency
 				// ACK completion of this query group
 				output.writeObject(new Message(msgText));
 			}
@@ -322,6 +322,7 @@ public class WorkerThread extends Thread {
 				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
 					msg = new Message("DONE");
 					serverNum = socketList.nextElement();
+					latencySleep(); // Simulate latency
 					sockList.get(serverNum).output.writeObject(msg);
 					sockList.get(serverNum).socket.close();
 				}
@@ -367,6 +368,7 @@ public class WorkerThread extends Thread {
 			// send query
 			Message msg = null;
 			msg = new Message(query);
+			latencySleep(); // Simulate latency
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
@@ -374,6 +376,7 @@ public class WorkerThread extends Thread {
 							   " for passed query " + query);
 			// Get policy version and log the query
 			msg = new Message("POLICY");
+			latencySleep(); // Simulate latency
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
 			String msgSplit[] = msg.theMessage.split(" ");
@@ -532,6 +535,7 @@ public class WorkerThread extends Thread {
 				if (serverNum != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("POLICY");
+						latencySleep(); // Simulate latency
 						sockList.get(serverNum).output.writeObject(msg);
 						resp = (Message)sockList.get(serverNum).input.readObject();
 						// Compare Policy versions
@@ -585,6 +589,7 @@ public class WorkerThread extends Thread {
 						// Send query for global auth
 						Message msg = null;
 						msg = new Message("A " + masterPolicyVersion);
+						latencySleep(); // Simulate latency
 						sockList.get(otherServer).output.writeObject(msg);
 						msg = (Message)sockList.get(otherServer).input.readObject();
 						System.out.println("Server " + otherServer +
