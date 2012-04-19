@@ -17,7 +17,7 @@ public class CloudServer {
 	public static ArrayList<ServerID> serverList;
 	public int serverNumber;
 	private int serverPolicyVersion;
-	private static boolean verbose = false;
+	public static boolean verbose = false;
 	private static int latencyMin;
 	private static int latencyMax;
 	private static int verificationType;
@@ -103,7 +103,7 @@ public class CloudServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				thread = new WorkerThread(sock, this, verbose);
+				thread = new WorkerThread(sock, this);
 				thread.start(); // Fork the thread
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled

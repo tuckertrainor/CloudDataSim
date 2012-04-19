@@ -26,7 +26,6 @@ public class WorkerThread extends Thread {
 	private ArrayList<QueryRecord> queryLog = new ArrayList<QueryRecord>();
 	private int transactionPolicyVersion = 0;
 	private Random generator;
-	private boolean verbose;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -34,10 +33,9 @@ public class WorkerThread extends Thread {
 	 * @param _socket - The socket passed in from the server
 	 * @param _my_tm - The Transaction Manager that called the thread
 	 */
-	public WorkerThread(Socket _socket, CloudServer _my_tm, boolean _verbose) {
+	public WorkerThread(Socket _socket, CloudServer _my_tm) {
 		socket = _socket;
 		my_tm = _my_tm;
-		verbose = _verbose;
 	}
 
 	/**
@@ -48,7 +46,7 @@ public class WorkerThread extends Thread {
 		generator = new Random(new Date().getTime());
 
 		PrintStream printStreamOriginal = System.out;
-		if (!verbose) {
+		if (!my_tm.verbose) {
 			System.setOut(new PrintStream(new OutputStream() {
 				public void close() {}
 				public void flush() {}
