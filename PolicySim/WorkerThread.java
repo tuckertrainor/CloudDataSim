@@ -8,6 +8,8 @@
  * over the socket until the socket is closed.
  */
 
+/* TODO: get latency sleep from parameters (will need to load them) and set
+ * variables appropriately, make calls before messages out */
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
