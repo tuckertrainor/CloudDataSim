@@ -416,8 +416,14 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean verifyIntegrity() {
-		/* STUB */
-		
+		try {
+			// sleep for a random period of time between 150ms and 225ms
+			Thread.sleep(150 + generator.nextInt(75));
+		}
+		catch(Exception e) {
+			System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 		// perform random success operation
 		return true;
 	}
@@ -586,6 +592,13 @@ public class WorkerThread extends Thread {
 					}
 				}
 			}
+		}
+		return true;
+	}
+
+	public boolean coinToss(float successRate) {
+		if (generator.nextFloat() > successRate) {
+			return false;
 		}
 		return true;
 	}
