@@ -33,6 +33,8 @@ public class Robot {
 	static int maxServers;
 	static int maxDegree;
 	static int maxPause;
+	static int latencyMin;
+	static int latencyMax;
 	static int verificationType;
 	static long randomSeed;
 
@@ -219,6 +221,12 @@ public class Robot {
 					else if (tuple[0].equals("MP")) {
 						maxPause = Integer.parseInt(tuple[1]);
 					}
+					else if (tuple[0].equals("LMIN")) {
+						latencyMin = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("LMAX")) {
+						latencyMax = Integer.parseInt(tuple[1]);
+					}
 					else if (tuple[0].equals("VT")) {
 						verificationType = Integer.parseInt(tuple[1]);
 					}
@@ -364,6 +372,10 @@ public class Robot {
 			outputBuf.write("MD=" + maxDegree);
 			outputBuf.newLine();
 			outputBuf.write("MP=" + maxPause);
+			outputBuf.newLine();
+			outputBuf.write("LMIN=" + latencyMin);
+			outputBuf.newLine();
+			outputBuf.write("LMAX=" + latencyMax);
 			outputBuf.newLine();
 			outputBuf.write("VT=" + verificationType);
 			outputBuf.newLine();
