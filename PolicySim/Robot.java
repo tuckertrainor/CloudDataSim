@@ -36,6 +36,7 @@ public class Robot {
 	static int latencyMin;
 	static int latencyMax;
 	static int verificationType;
+	static Random generator;
 	static long randomSeed;
 
 	/**
@@ -87,7 +88,7 @@ public class Robot {
 		}
 		
 		// Build a series of transactions using parameters
-		Random generator = new Random(randomSeed);
+		generator = new Random(randomSeed);
 		TransactionData tData = new TransactionData(0, "ZERO");
 		tData.setStartTime();
 		tData.setEndTime(0L);
@@ -407,5 +408,16 @@ public class Robot {
 		}
 		
 		return success;
+	}
+	
+	public static void latencySleep() {
+		try {
+			// Sleep for a random period of time between min ms and max ms
+			Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
+		}
+		catch(Exception e) {
+			System.err.println("latencySleep() Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
 	}
 }
