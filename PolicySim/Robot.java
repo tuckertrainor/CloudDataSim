@@ -135,18 +135,17 @@ public class Robot {
 		try {
 			RobotThread thread = null;
 			int i = 1;
-			Random spawnDelay = new Random(new Date().getTime());
 			
 			while (ThreadCounter.threadCount < maxTransactions) {
 				if (ThreadCounter.activeThreads < maxDegree) {
-					Thread.sleep(spawnDelay.nextInt(1000));
 					TransactionLog.entry.get(i).setStartTime();
 					thread = new RobotThread(i,
 											 primaryServer,
 											 TransactionLog.entry.get(i).getQuerySet(),
 											 serverList.get(primaryServer).getAddress(),
 											 serverList.get(primaryServer).getPort(),
-											 maxPause);
+											 latencyMin,
+											 latencyMax);
 					thread.start();
 					ThreadCounter.addNewThread();
 					i++;
