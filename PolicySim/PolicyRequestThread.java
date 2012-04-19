@@ -10,10 +10,13 @@ import java.net.Socket;
 import java.net.ConnectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Date;
+import java.util.Random;
 
 public class PolicyRequestThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
-	private final int latency;
+	private final int latencyMin;
+	private final int latencyMax;
 	
 	/**
 	 * Constructor that sets up the thread
@@ -21,13 +24,16 @@ public class PolicyRequestThread extends Thread {
 	 * @param _socket
 	 * @param _latency
 	 */
-	public PolicyRequestThread(Socket _socket, int _latency) {
+	public PolicyRequestThread(Socket _socket, int _lMin, int _lMax) {
 		socket = _socket;
-		latency = _latency;		
+		latencyMin = _lMin;
+		latencyMax = _lMax;
 	}
 	
 	public void run() {
 		try {
+			// Create and seed random number generator
+			Random generator = new Random(new Date().getTime());
 			// Print incoming message
 			System.out.println("** Policy Version request from " + socket.getInetAddress() +
 							   ":" + socket.getPort() + " **");
@@ -46,7 +52,7 @@ public class PolicyRequestThread extends Thread {
 			if (msg.theMessage.equals("POLICYREQUEST")) {
 				// Sleep to simulate latency
 				try {
-					Thread.sleep(latency);
+					Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
 				}
 				catch(Exception e) {
 					System.err.println("latencySleep() Error: " + e.getMessage());

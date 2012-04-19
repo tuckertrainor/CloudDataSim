@@ -75,7 +75,7 @@ public class PolicyServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				prthread = new PolicyRequestThread(sock);
+				prthread = new PolicyRequestThread(sock, latencyMin, latencyMax);
 				prthread.start();
 			}
 		}
