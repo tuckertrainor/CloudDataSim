@@ -18,6 +18,9 @@ public class CloudServer {
 	public int serverNumber;
 	private int serverPolicyVersion;
 	private static boolean verbose = false;
+	private static int latencyMin;
+	private static int latencyMax;
+	private static int verificationType;
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
@@ -64,6 +67,15 @@ public class CloudServer {
 							   serverNumber + " is ready.");
 		}
 		
+		// Load the parameters for this simulation
+		if (loadParameters("parameters.txt")) {
+			System.out.println("Parameters file read successfully.");
+		}
+		else {
+			System.err.println("Error loading parameters file. Exiting.");
+			System.exit(-1);
+		}
+
 		CloudServer server = new CloudServer(serverNumber);
 		// Set the currect policy on this server from the Policy Server
 		server.setPolicy(server.callPolicyServer());
@@ -212,5 +224,77 @@ public class CloudServer {
 		}
 
 		return configList;
+	}
+	
+    /**
+     * Load a file containing the parameters and applicable data for the Robot
+     */
+	private static boolean loadParameters(String filename) {
+		BufferedReader inputBuf = null;
+		String line = null;
+		// use a try/catch block to open the input file with a FileReader
+		try {
+			inputBuf = new BufferedReader(new FileReader(filename));
+		}
+		catch (FileNotFoundException fnfe) {
+			// if the file is not found, exit the program
+			System.out.println("File \"" + filename + "\" not found. Exiting program.");
+			fnfe.printStackTrace();
+			return false;
+		}
+		
+		// Read and parse the contents of the file
+		try {
+			line = inputBuf.readLine();
+		}
+		catch (IOException ioe) {
+			System.out.println("IOException during readLine(). Exiting program.");
+			ioe.printStackTrace();
+			return false;
+		}
+		while (line != null) {
+			if (line.charAt(0) != '#') { // not a comment line
+				try {
+					String tuple[] = line.split(" ");
+					if (tuple[0].equals("LMIN")) {
+						latencyMin = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("LMAX")) {
+						latencyMax = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("VT")) {
+						verificationType = Integer.parseInt(tuple[1]);
+					}
+				}
+				catch (Exception e) {
+					System.out.println("Error while parsing \"" + filename +
+									   "\".");
+					e.printStackTrace();
+					return false;
+				}
+			}
+			// get next line
+			try {
+				line = inputBuf.readLine();
+			}
+			catch (IOException ioe) {
+				System.out.println("IOException during readLine().");
+				ioe.printStackTrace();
+				return false;
+			}
+		}
+		
+		// close BufferedReader using a try/catch block
+		try {
+			inputBuf.close();
+		}
+		catch (IOException ioe) {
+			// if exception caught, exit the program
+			System.out.println("Error closing reader. Exiting program");
+			ioe.printStackTrace();
+			return false;
+		}
+		
+		return true; // success
 	}
 }
