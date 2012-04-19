@@ -242,6 +242,9 @@ public class WorkerThread extends Thread {
 						if (!integrityCheck()) { // Check data integrity for commit
 							msgText = "ABORT INTEGRITY_FAIL";
 						}
+						else if (!commitCheck()) { // Check commit success
+							msgText = "ABORT COMMIT_FAIL";
+						}
 						else {
 							switch (my_tm.verificationType) {
 								case 1:
@@ -406,6 +409,16 @@ public class WorkerThread extends Thread {
 		}
 		// perform random success operation
 		return true;
+	}
+	
+	/**
+	 * Does a random chance of successful commit
+	 *
+	 * @return boolean - true if commit is OK, else false
+	 */
+	public boolean commitCheck() {
+		// Perform random success operation
+		return coinToss(my_tm.commitSuccessRate);
 	}
 
 	public void diskRead() {

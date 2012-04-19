@@ -37,6 +37,7 @@ public class Robot {
 	static int latencyMax;
 	static int verificationType;
 	static float integrityCheckSuccessRate;
+	static float commitSuccessRate;
 	static Random generator;
 	static long randomSeed;
 
@@ -382,6 +383,8 @@ public class Robot {
 			outputBuf.write("VT=" + verificationType);
 			outputBuf.newLine();
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("CSR=" + commitSuccessRate);
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
