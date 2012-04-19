@@ -23,8 +23,11 @@ public class RobotThread extends Thread {
     private final String transactions;
 	private final String server;
 	private final int port;
+	private final int latencyMin;
+	private final int latencyMax;
 	private final int maxPause;
 	private ArrayList<CommitItem> commitStack = new ArrayList<CommitItem>();
+	private Random generator;
 
 	/**
 	 * Constructor that sets up transaction communication
@@ -35,12 +38,14 @@ public class RobotThread extends Thread {
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _maxPause) {
+	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, int _maxPause) {
 		primaryServer = _primaryServer;
 		transNumber = _transNumber;
 		transactions = _transactions;
 		server = _server;
 		port = _port;
+		latencyMin = _lMin;
+		latencyMax = _lMax;
 		maxPause = _maxPause;
 	}
 
@@ -63,14 +68,15 @@ public class RobotThread extends Thread {
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
-			// Seed Random for pauses
-			Random pauseTime = new Random(new Date().getTime());
+			// Seed Random for latency, pauses
+			generator = new Random(new Date().getTime());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
 				Message msg = null, resp = null;
 
-				// Send message
+				// Send message after latencySleep()
+				latencySleep();
 				msg = new Message(queryGroups[groupIndex]);
 				output.writeObject(msg);
 				
@@ -108,10 +114,11 @@ public class RobotThread extends Thread {
 				}
 				groupIndex++;
 				// Random pause after completing query qroup
-				Thread.sleep(pauseTime.nextInt(maxPause));
+				Thread.sleep(generator.nextInt(maxPause));
 			}
 			
 			// Send message to WorkerThread to release it
+			latencySleep();
 			Message msg = new Message("DONE");
 			output.writeObject(msg);
 			
@@ -128,4 +135,16 @@ public class RobotThread extends Thread {
 			e.printStackTrace(System.err);
 		}
 	}
+	
+	public void latencySleep() {
+		try {
+			// Sleep for a random period of time between min ms and max ms
+			Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
+		}
+		catch(Exception e) {
+			System.err.println("latencySleep() Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+	}
+
 }

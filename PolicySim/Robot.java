@@ -145,7 +145,8 @@ public class Robot {
 											 serverList.get(primaryServer).getAddress(),
 											 serverList.get(primaryServer).getPort(),
 											 latencyMin,
-											 latencyMax);
+											 latencyMax,
+											 maxPause);
 					thread.start();
 					ThreadCounter.addNewThread();
 					i++;
@@ -407,16 +408,5 @@ public class Robot {
 		}
 		
 		return success;
-	}
-	
-	public static void latencySleep() {
-		try {
-			// Sleep for a random period of time between min ms and max ms
-			Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
-		}
-		catch(Exception e) {
-			System.err.println("latencySleep() Error: " + e.getMessage());
-			e.printStackTrace(System.err);
-		}
 	}
 }
