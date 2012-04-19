@@ -49,15 +49,16 @@ public class PolicyRequestThread extends Thread {
 			System.out.println("[" + socket.getInetAddress() +
 							   ":" + socket.getPort() + "] " + msg.theMessage);
 			
+			// Sleep to simulate latency of response
+			try {
+				Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
+			}
+			catch(Exception e) {
+				System.err.println("latencySleep() Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+			
 			if (msg.theMessage.equals("POLICYREQUEST")) {
-				// Sleep to simulate latency
-				try {
-					Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
-				}
-				catch(Exception e) {
-					System.err.println("latencySleep() Error: " + e.getMessage());
-					e.printStackTrace(System.err);
-				}
 				output.writeObject(new Message("" + PolicyVersion.getCurrent()));
 			}
 			else {
