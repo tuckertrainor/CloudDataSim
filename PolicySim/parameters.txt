@@ -13,7 +13,7 @@ MP 3000
 LMIN 5
 # LMAX latencyMax - maximum delay due to latency
 LMAX 25
-# VT verificationType - 1 for view, 2 for global, 3 for both
+# VT verificationType - 0 for none, 1 for view, 2 for global, 3 for both
 VT 1
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00

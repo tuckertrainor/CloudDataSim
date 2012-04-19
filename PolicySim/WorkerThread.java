@@ -247,6 +247,9 @@ public class WorkerThread extends Thread {
 						}
 						else {
 							switch (my_tm.verificationType) {
+								case 0:
+									System.out.println("No View or Global Consistency required for transaction " + query[1]);
+									break;
 								case 1:
 									if (viewPolicyCheck() != 0) { // a server was not fresh
 										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
