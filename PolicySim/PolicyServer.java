@@ -21,6 +21,8 @@ public class PolicyServer {
 	static int maxPolicyUpdateSleep;
 	static int minPolicyPushSleep;
 	static int maxPolicyPushSleep;
+	static int latencyMin;
+	static int latencyMax;
 	static ArrayList<ServerID> serverList;
 
 	public PolicyServer() {
@@ -192,6 +194,12 @@ public class PolicyServer {
 					String tuple[] = line.split(" ");
 					if (tuple[0].equals("MS")) {
 						maxServers = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("LMIN")) {
+						latencyMin = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("LMAX")) {
+						latencyMax = Integer.parseInt(tuple[1]);
 					}
 				}
 				catch (Exception e) {
