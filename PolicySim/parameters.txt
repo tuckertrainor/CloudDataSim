@@ -9,6 +9,10 @@ MS 2
 MD 10
 # MP maxPause - maximum time in milliseconds of pause after each query group
 MP 3000
+# LMIN latencyMin - minimum delay due to latency
+LMIN 5
+# LMAX latencyMax - maximum delay due to latency
+LMAX 25
 # VT verificationType - 1 for view, 2 for global, 3 for both
 VT 1
 # RS randomSeed - long integer for seeding PRNG
