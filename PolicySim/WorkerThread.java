@@ -251,7 +251,7 @@ public class WorkerThread extends Thread {
 									System.out.println("No View or Global Consistency required for transaction " + query[1]);
 									break;
 								case 1:
-									if (viewPolicyCheck() != 0) { // a server was not fresh
+									if (viewConsistencyCheck() != 0) { // a server was not fresh
 										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
 										msgText = "ABORT VIEW_POLICY_FAIL";
 									}
@@ -260,7 +260,7 @@ public class WorkerThread extends Thread {
 									}
 									break;
 								case 2:
-									if (!globalPolicyCheck()) {
+									if (!globalConsistencyCheck()) {
 										System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
 										msgText = "ABORT GLOBAL_POLICY_FAIL";
 									}
@@ -269,10 +269,10 @@ public class WorkerThread extends Thread {
 									}
 									break;
 								case 3:
-									if (viewPolicyCheck() != 0) { // a server was not fresh
+									if (viewConsistencyCheck() != 0) { // a server was not fresh
 										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
 										System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
-										if (!globalPolicyCheck()) {
+										if (!globalConsistencyCheck()) {
 											System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
 											msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
 										}
@@ -486,9 +486,13 @@ public class WorkerThread extends Thread {
 			Thread.sleep(50 + generator.nextInt(100));
 		}
 		catch(Exception e) {
-			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+			System.err.println("checkGlobalAuth() Sleep Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		// Currently we aren't actually checking the Policy version, instead
+		// we are randomly generating successes and failures according to
+		// parameters.
+		
 		// Perform random success operation
 		return coinToss(my_tm.globalAuthSuccessRate);
 	}
@@ -509,7 +513,7 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return int - 0 if all servers are fresh, 1+ if not
 	 */
-	public int viewPolicyCheck() {
+	public int viewConsistencyCheck() {
 		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy
 		int stale = 0;
 		Message msg = null;
@@ -541,7 +545,7 @@ public class WorkerThread extends Thread {
 		return stale;
 	}
 
-	public boolean globalPolicyCheck() {
+	public boolean globalConsistencyCheck() {
 		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
 		
 		for (int i = 0; i < queryLog.size(); i++) {
@@ -550,7 +554,7 @@ public class WorkerThread extends Thread {
 				
 				if (queryLog.get(i).getServer() == my_tm.serverNumber) { // local check
 					if (checkGlobalAuth(masterPolicyVersion) == false) {
-						System.out.println("Global check FAIL: " + queryLog.get(i).toString() +
+						System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
 										   " version: " + queryLog.get(i).getPolicy() +
 										   "\tGlobal version: " + masterPolicyVersion);
 						return false;
@@ -583,7 +587,7 @@ public class WorkerThread extends Thread {
 										   " says: " + msg.theMessage +
 										   " for passed query A " + masterPolicyVersion);
 						if (msg.theMessage.equals("GLOBALFAIL")) {
-							System.out.println("Global check FAIL: " + queryLog.get(i).toString() +
+							System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
 											   " version: " + queryLog.get(i).getPolicy() +
 											   "\tGlobal version: " + masterPolicyVersion);
 							return false;
