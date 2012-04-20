@@ -237,6 +237,24 @@ public class Robot {
 					else if (tuple[0].equals("VT")) {
 						verificationType = Integer.parseInt(tuple[1]);
 					}
+					else if (tuple[0].equals("ICSR")) {
+						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("CSR")) {
+						commitSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("LASR")) {
+						localAuthSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("GASR")) {
+						globalAuthSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("PMIN")) {
+						policyUpdateMin = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("PMAX")) {
+						policyUpdateMax = Integer.parseInt(tuple[1]);
+					}
 					else if (tuple[0].equals("RS")) {
 						randomSeed = Long.parseLong(tuple[1]);
 					}

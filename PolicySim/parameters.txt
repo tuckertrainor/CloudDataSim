@@ -4,7 +4,7 @@ MT 1
 # MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
 MQ 10
 # MS maxServers - number of servers available
-MS 2
+MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
 # MP maxPause - maximum time in milliseconds of pause after each query group
@@ -14,7 +14,7 @@ LMIN 5
 # LMAX latencyMax - maximum delay due to latency
 LMAX 25
 # VT verificationType - 0 for none, 1 for view, 2 for global, 3 for both
-VT 1
+VT 2
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # CSR - commit success rate (0.00 to 1.00)
