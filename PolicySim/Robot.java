@@ -37,7 +37,6 @@ public class Robot {
 	static int latencyMax;
 	static int verificationType;
 	static float integrityCheckSuccessRate;
-	static float commitSuccessRate;
 	static float localAuthSuccessRate;
 	static float globalAuthSuccessRate;
 	static int policyUpdateMin;
@@ -240,9 +239,6 @@ public class Robot {
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
 					}
-					else if (tuple[0].equals("CSR")) {
-						commitSuccessRate = Float.parseFloat(tuple[1]);
-					}
 					else if (tuple[0].equals("LASR")) {
 						localAuthSuccessRate = Float.parseFloat(tuple[1]);
 					}
@@ -405,8 +401,6 @@ public class Robot {
 			outputBuf.write("VT=" + verificationType);
 			outputBuf.newLine();
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
-			outputBuf.newLine();
-			outputBuf.write("CSR=" + commitSuccessRate);
 			outputBuf.newLine();
 			outputBuf.write("LASR=" + localAuthSuccessRate);
 			outputBuf.newLine();

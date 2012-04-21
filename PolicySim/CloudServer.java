@@ -22,7 +22,6 @@ public class CloudServer {
 	public static int latencyMax;
 	public static int verificationType;
 	public static float integrityCheckSuccessRate;
-	public static float commitSuccessRate;
 	public static float localAuthSuccessRate;
 	public static float globalAuthSuccessRate;
 	
@@ -271,9 +270,6 @@ public class CloudServer {
 					}
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
-					}
-					else if (tuple[0].equals("CSR")) {
-						commitSuccessRate = Float.parseFloat(tuple[1]);
 					}
 					else if (tuple[0].equals("LASR")) {
 						localAuthSuccessRate = Float.parseFloat(tuple[1]);

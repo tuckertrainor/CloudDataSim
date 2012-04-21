@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 5
 # MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
 MQ 10
 # MS maxServers - number of servers available
@@ -10,23 +10,21 @@ MD 10
 # MP maxPause - maximum time in milliseconds of pause after each query group
 MP 3000
 # LMIN latencyMin - minimum delay due to latency
-LMIN 5
+LMIN 25
 # LMAX latencyMax - maximum delay due to latency
-LMAX 25
+LMAX 100
 # VT verificationType - 0 for none, 1 for view, 2 for global, 3 for both
-VT 2
+VT 1
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
-# CSR - commit success rate (0.00 to 1.00)
-CSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
 LASR 1.00
 # GASR - global authorization success rate per query (0.00 to 1.00)
 GASR 1.00
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
-PMIN 30000
+PMIN 60000
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
-PMAX 45000
+PMAX 90000
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345
