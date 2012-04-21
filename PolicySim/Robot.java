@@ -30,6 +30,7 @@ import java.util.Date;
 public class Robot {
 	static int maxTransactions;
 	static int maxQueries;
+	static int minQueries;
 	static int maxServers;
 	static int maxDegree;
 	static int maxPause;
@@ -98,11 +99,17 @@ public class Robot {
 		tData.setStartTime();
 		tData.setEndTime(0L);
 		TransactionLog.entry.add(tData);
+		String newTrans;
+		char prevQuery;
+		int queryServer;
+		int operations;
 		for (int i = 1; i <= maxTransactions; i++) {
-			String newTrans = "B " + i;
-			char prevQuery = 'B';
-			int queryServer = 0;
-			for (int j = 0; j < maxQueries; j++) {
+			newTrans = "B " + i;
+			prevQuery = 'B';
+			queryServer = 0;
+			// Get random number of queries for this transaction
+			operations = minQueries + generator.nextInt(maxQueries - minQueries);
+			for (int j = 0; j < operations; j++) {
 				String newQuery = new String();
 				// make READ or WRITE
 				if (generator.nextBoolean()) {
@@ -215,7 +222,10 @@ public class Robot {
 						maxTransactions = Integer.parseInt(tuple[1]);
 						ThreadCounter.maxThreads = maxTransactions;
 					}
-					else if (tuple[0].equals("MQ")) {
+					else if (tuple[0].equals("QMIN")) {
+						minQueries = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("QMAX")) {
 						maxQueries = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("MS")) {
@@ -386,7 +396,9 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("MT=" + maxTransactions);
 			outputBuf.newLine();
-			outputBuf.write("MQ=" + maxQueries);
+			outputBuf.write("QMIN=" + minQueries);
+			outputBuf.newLine();
+			outputBuf.write("QMAX=" + maxQueries);
 			outputBuf.newLine();
 			outputBuf.write("MS=" + maxServers);
 			outputBuf.newLine();

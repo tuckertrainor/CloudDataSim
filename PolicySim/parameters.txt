@@ -1,8 +1,10 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
 MT 5
-# MQ maxQueries - maximum number of queries (READ/WRITE) per transaction
-MQ 10
+# QMIN maxQueries - minimum number of queries (READ/WRITE) per transaction
+QMIN 8
+# QMAX maxQueries - maximum number of queries (READ/WRITE) per transaction
+QMAX 15
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
