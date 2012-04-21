@@ -15,8 +15,9 @@ MP 3000
 LMIN 25
 # LMAX latencyMax - maximum delay due to latency
 LMAX 100
-# VT verificationType - 0 for none, 1 for view, 2 for global, 3 for both
-VT 1
+# VT verificationType - 0 for 2PC, 1 for 2PC w/local authoriztion,
+# 2 for view consistency, 3 for global consisitency, 4 for both 2 and 3
+VT 0
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)

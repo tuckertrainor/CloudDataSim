@@ -245,9 +245,10 @@ public class WorkerThread extends Thread {
 						else {
 							switch (my_tm.verificationType) {
 								case 0:
+								case 1:
 									System.out.println("No View or Global Consistency required for transaction " + query[1]);
 									break;
-								case 1:
+								case 2:
 									if (viewConsistencyCheck() != 0) { // a server was not fresh
 										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
 										msgText = "ABORT VIEW_POLICY_FAIL";
@@ -256,7 +257,7 @@ public class WorkerThread extends Thread {
 										System.out.println("View Consistency Policy OK - transaction " + query[1]);
 									}
 									break;
-								case 2:
+								case 3:
 									if (!globalConsistencyCheck()) {
 										System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
 										msgText = "ABORT GLOBAL_POLICY_FAIL";
@@ -265,7 +266,7 @@ public class WorkerThread extends Thread {
 										System.out.println("Global Consistency Policy OK - transaction " + query[1]);
 									}
 									break;
-								case 3:
+								case 4:
 									if (viewConsistencyCheck() != 0) { // a server was not fresh
 										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
 										System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
@@ -450,16 +451,21 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkLocalAuth() {
-		try {
-			// sleep for a random period of time between 50ms and 150ms
-			Thread.sleep(50 + generator.nextInt(100));
+		if (my_tm.verificationType > 0) { // requires local authorization
+			try {
+				// sleep for a random period of time between 50ms and 150ms
+				Thread.sleep(50 + generator.nextInt(100));
+			}
+			catch(Exception e) {
+				System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+			// Perform random success operation
+			return coinToss(my_tm.localAuthSuccessRate);
 		}
-		catch(Exception e) {
-			System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else { // just 2PC, no check needed
+			return true;
 		}
-		// Perform random success operation
-		return coinToss(my_tm.localAuthSuccessRate);
 	}
 	
 	/**
