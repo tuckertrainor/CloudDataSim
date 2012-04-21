@@ -22,8 +22,6 @@ VT 0
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
 LASR 1.00
-# GASR - global authorization success rate per query (0.00 to 1.00)
-GASR 1.00
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
 PMIN 60000
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms

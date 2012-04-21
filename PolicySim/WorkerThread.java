@@ -8,6 +8,9 @@
  * over the socket until the socket is closed.
  */
 
+/* TODO: is view consistency using the TM's server policy as its baseline, or
+ * its worker thread's starting policy? */
+
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
@@ -228,8 +231,8 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("A")) { // Re-authorize a query
 						// Query example: "A <global policy version>"
-						// May want to later add other fields for correctness
-						if (checkGlobalAuth(Integer.parseInt(query[1]))) {
+						// Retrieve policy version: Integer.parseInt(query[1])
+						if (checkLocalAuth()) {
 							msgText = "GLOBALPASS";
 						}
 						else {
@@ -469,34 +472,12 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks the global policy version for authorization to data
-	 *
-	 * @return boolean - true if authorization check comes back OK, else false
-	 */
-	public boolean checkGlobalAuth(int latestPolicy) {
-		try {
-			// Sleep for a random period of time between 50ms and 150ms
-			Thread.sleep(50 + generator.nextInt(100));
-		}
-		catch(Exception e) {
-			System.err.println("checkGlobalAuth() Sleep Error: " + e.getMessage());
-			e.printStackTrace(System.err);
-		}
-		// Currently we aren't actually checking the Policy version, instead
-		// we are randomly generating successes and failures according to
-		// parameters.
-		
-		// Perform random success operation
-		return coinToss(my_tm.globalAuthSuccessRate);
-	}
-	
-	/**
 	 * Checks all involved servers for Policy version freshness
 	 *
 	 * @return int - 0 if all servers are fresh, 1+ if not
 	 */
 	public int viewConsistencyCheck() {
-		int masterPolicyVersion = my_tm.getPolicy(); // store freshest policy
+		int masterPolicyVersion = my_tm.getPolicy(); // store current policy on server
 		int stale = 0;
 		Message msg = null;
 		Message resp = null;
@@ -532,10 +513,9 @@ public class WorkerThread extends Thread {
 		
 		for (int i = 0; i < queryLog.size(); i++) {
 			if (queryLog.get(i).getPolicy() != masterPolicyVersion) {
-				// Re-check authorization with new policy version
-				
+				// Re-check authorization with new policy version				
 				if (queryLog.get(i).getServer() == my_tm.serverNumber) { // local check
-					if (checkGlobalAuth(masterPolicyVersion) == false) {
+					if (checkLocalAuth() == false) {
 						System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
 										   " version: " + queryLog.get(i).getPolicy() +
 										   "\tGlobal version: " + masterPolicyVersion);

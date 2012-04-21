@@ -416,8 +416,6 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("LASR=" + localAuthSuccessRate);
 			outputBuf.newLine();
-			outputBuf.write("GASR=" + globalAuthSuccessRate);
-			outputBuf.newLine();
 			outputBuf.write("PMIN=" + policyUpdateMin);
 			outputBuf.newLine();
 			outputBuf.write("PMAX=" + policyUpdateMax);
