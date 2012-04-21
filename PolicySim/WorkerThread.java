@@ -491,17 +491,6 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks the global policy for authorization to data
-	 *
-	 * @return boolean - true if authorization check comes back OK, else false
-	 */
-	public boolean getPolicyAuth() {
-		System.out.println("getPolicyAuth() stub");
-		// Perform random success operation
-		return coinToss(my_tm.integrityCheckSuccessRate);
-	}
-	
-	/**
 	 * Checks all involved servers for Policy version freshness
 	 *
 	 * @return int - 0 if all servers are fresh, 1+ if not
