@@ -53,9 +53,10 @@ public class Robot {
 	 */
     public static void main(String[] args) {
 		// Error checking for arguments
-		if (args.length != 1) {
+		if (args.length < 1 || args.length > 2) {
 			System.err.println("Improper argument count.");
-			System.err.println("Usage: java Robot <Server number to first contact>\n");
+			System.err.println("Usage: java Robot <Server number to first contact> or");
+			System.err.println("Usage: java Robot <Server number to first contact> <Random Seed>");
 			System.exit(-1);
 	    }
 		
@@ -89,8 +90,23 @@ public class Robot {
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument. Please use a valid integer.");
-			System.err.println("Usage: java Robot <Server number to first contact>\n");
+			System.err.println("Usage: java Robot <Server number to first contact> or");
+			System.err.println("Usage: java Robot <Server number to first contact> <Random seed>\n");
 			System.exit(-1);
+		}
+		
+		
+		// Check arg[1] for existence, set seed if so
+		if (args.length == 2) {
+			try {
+				randomSeed = Long.parseLong(args[1]);
+			}
+			catch (Exception e) {
+				System.err.println("Error parsing argument. Please use a valid integer.");
+				System.err.println("Usage: java Robot <Server number to first contact> or");
+				System.err.println("Usage: java Robot <Server number to first contact> <Random seed>\n");
+				System.exit(-1);
+			}
 		}
 		
 		// Build a series of transactions using parameters
