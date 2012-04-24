@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 100
 # QMIN maxQueries - minimum number of queries (READ/WRITE) per transaction
 QMIN 8
 # QMAX maxQueries - maximum number of queries (READ/WRITE) per transaction
@@ -9,8 +9,6 @@ QMAX 15
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
-# MP maxPause - maximum time in milliseconds of pause after each query group
-MP 3000
 # LMIN latencyMin - minimum delay due to latency
 LMIN 5
 # LMAX latencyMax - maximum delay due to latency
