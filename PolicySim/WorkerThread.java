@@ -422,24 +422,34 @@ public class WorkerThread extends Thread {
 	}
 
 	public void diskRead() {
-		try {
-			// sleep for a random period of time between 75ms and 125ms
-			Thread.sleep(75 + generator.nextInt(50));
+		if (my_tm.threadSleep) {
+			try {
+				// sleep for a random period of time between 75ms and 125ms
+				Thread.sleep(75 + generator.nextInt(50));
+			}
+			catch(Exception e) {
+				System.err.println("diskRead() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
-		catch(Exception e) {
-			System.err.println("diskRead() Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else {
+			totalSleepTime += 75 + generator.nextInt(50);
 		}
 	}
 	
 	public void diskWrite() {
-		try {
-			// sleep for a random period of time between 150ms and 225ms
-			Thread.sleep(150 + generator.nextInt(75));
+		if (my_tm.threadSleep) {
+			try {
+				// sleep for a random period of time between 150ms and 225ms
+				Thread.sleep(150 + generator.nextInt(75));
+			}
+			catch(Exception e) {
+				System.err.println("diskWrite() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
-		catch(Exception e) {
-			System.err.println("diskWrite() Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else {
+			totalSleepTime += 150 + generator.nextInt(75);
 		}
 	}
 	
@@ -461,13 +471,18 @@ public class WorkerThread extends Thread {
 	 */
 	public boolean checkLocalAuth() {
 		if (my_tm.verificationType > 0) { // requires local authorization
-			try {
-				// sleep for a random period of time between 50ms and 150ms
-				Thread.sleep(50 + generator.nextInt(100));
+			if (my_tm.threadSleep) {
+				try {
+					// sleep for a random period of time between 50ms and 150ms
+					Thread.sleep(50 + generator.nextInt(100));
+				}
+				catch(Exception e) {
+					System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
 			}
-			catch(Exception e) {
-				System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
-				e.printStackTrace(System.err);
+			else {
+				totalSleepTime += 50 + generator.nextInt(100);
 			}
 			// Perform random success operation
 			return coinToss(my_tm.localAuthSuccessRate);
