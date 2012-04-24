@@ -26,7 +26,6 @@ public class RobotThread extends Thread {
 	private final int latencyMin;
 	private final int latencyMax;
 	private final boolean threadSleep;
-	private final int maxPause;
 	private ArrayList<CommitItem> commitStack = new ArrayList<CommitItem>();
 	private Random generator;
 
@@ -39,7 +38,7 @@ public class RobotThread extends Thread {
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep, int _maxPause) {
+	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep) {
 		primaryServer = _primaryServer;
 		transNumber = _transNumber;
 		transactions = _transactions;
@@ -48,7 +47,6 @@ public class RobotThread extends Thread {
 		latencyMin = _lMin;
 		latencyMax = _lMax;
 		threadSleep = _threadSleep;
-		maxPause = _maxPause;
 	}
 
 	/**
@@ -115,8 +113,6 @@ public class RobotThread extends Thread {
 					// break; // ?
 				}
 				groupIndex++;
-				// Random pause after completing query qroup
-				Thread.sleep(generator.nextInt(maxPause));
 			}
 			
 			// Send message to WorkerThread to release it

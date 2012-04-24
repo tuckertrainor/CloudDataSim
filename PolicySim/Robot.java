@@ -33,7 +33,6 @@ public class Robot {
 	static int minQueries;
 	static int maxServers;
 	static int maxDegree;
-	static int maxPause;
 	static int latencyMin;
 	static int latencyMax;
 	static boolean threadSleep;
@@ -175,8 +174,7 @@ public class Robot {
 											 serverList.get(primaryServer).getPort(),
 											 latencyMin,
 											 latencyMax,
-											 threadSleep,
-											 maxPause);
+											 threadSleep);
 					thread.start();
 					ThreadCounter.addNewThread();
 					i++;
@@ -251,9 +249,6 @@ public class Robot {
 					}
 					else if (tuple[0].equals("MD")) {
 						maxDegree = Integer.parseInt(tuple[1]);
-					}
-					else if (tuple[0].equals("MP")) {
-						maxPause = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("LMIN")) {
 						latencyMin = Integer.parseInt(tuple[1]);
@@ -424,8 +419,6 @@ public class Robot {
 			outputBuf.write("MS=" + maxServers);
 			outputBuf.newLine();
 			outputBuf.write("MD=" + maxDegree);
-			outputBuf.newLine();
-			outputBuf.write("MP=" + maxPause);
 			outputBuf.newLine();
 			outputBuf.write("LMIN=" + latencyMin);
 			outputBuf.newLine();
