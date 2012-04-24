@@ -149,7 +149,7 @@ public class WorkerThread extends Thread {
 								}
 							}
 						}
-						else { // pass to server
+						else { // Pass to server
 							System.out.println("Pass READ of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
@@ -158,8 +158,15 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   " successful");
+								// Add to totalSleepTime if necessary
+								if (!my_tm.threadSleep) {
+									// Add databaseRead() time
+									totalSleepTime += 75 + generator.nextInt(50);
+									// Add return latency
+									totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+								}
 								
-								// tell RobotThread to add this server to its commitStack
+								// Tell RobotThread to add this server to its commitStack
 								// server is query[2], transaction is query[1], sequence is query[3]
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
@@ -203,12 +210,12 @@ public class WorkerThread extends Thread {
 								else {
 									System.out.println("Error logging query.");
 								}
-								// tell RobotThread to add this server to its commitStack
+								// Tell RobotThread to add this server to its commitStack
 								// server is query[2], transaction is query[1], sequence is query[3]
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
 						}
-						else { // pass to server
+						else { // Tass to server
 							System.out.println("Pass WRITE of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
@@ -217,8 +224,15 @@ public class WorkerThread extends Thread {
 												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   " successful");
-								
-								// tell RobotThread to add this server to its commitStack
+								// Add to totalSleepTime if necessary
+								if (!my_tm.threadSleep) {
+									// Add databaseWrite() time
+									totalSleepTime += 150 + generator.nextInt(75);
+									// Add return latency
+									totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+								}
+
+								// Tell RobotThread to add this server to its commitStack
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
 							else { // error in passQuery()
@@ -516,6 +530,13 @@ public class WorkerThread extends Thread {
 						latencySleep(); // Simulate latency
 						sockList.get(serverNum).output.writeObject(msg);
 						resp = (Message)sockList.get(serverNum).input.readObject();
+						// Add to totalSleepTime if necessary
+						if (!my_tm.threadSleep) {
+							// Add checkLocalAuth() time
+							totalSleepTime += 50 + generator.nextInt(100);
+							// Add return latency
+							totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+						}
 						// Compare Policy versions
 						String msgSplit[] = resp.theMessage.split(" ");
 						if (msgSplit[0].equals("VERSION") && Integer.parseInt(msgSplit[1]) < masterPolicyVersion) {
@@ -569,6 +590,14 @@ public class WorkerThread extends Thread {
 						latencySleep(); // Simulate latency
 						sockList.get(otherServer).output.writeObject(msg);
 						msg = (Message)sockList.get(otherServer).input.readObject();
+						// Add to totalSleepTime if necessary
+						if (!my_tm.threadSleep) {
+							// Add checkLocalAuth() time
+							totalSleepTime += 50 + generator.nextInt(100);
+							// Add return latency
+							totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+						}
+
 						System.out.println("Server " + otherServer +
 										   " says: " + msg.theMessage +
 										   " for passed query A " + masterPolicyVersion);
