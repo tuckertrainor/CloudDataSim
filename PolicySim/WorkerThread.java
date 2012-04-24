@@ -137,7 +137,7 @@ public class WorkerThread extends Thread {
 							else { // OK to read
 								System.out.println("READ for transaction " + query[1] +
 												   " sequence " + query[3]);
-								diskRead();
+								databaseRead();
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -193,7 +193,7 @@ public class WorkerThread extends Thread {
 							else { // OK to write
 								System.out.println("WRITE for transaction " + query[1] +
 												   " sequence " + query[3]);
-								diskWrite();
+								databaseWrite();
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -424,14 +424,14 @@ public class WorkerThread extends Thread {
 		return coinToss(my_tm.integrityCheckSuccessRate);
 	}
 
-	public void diskRead() {
+	public void databaseRead() {
 		if (my_tm.threadSleep) {
 			try {
 				// sleep for a random period of time between 75ms and 125ms
 				Thread.sleep(75 + generator.nextInt(50));
 			}
 			catch(Exception e) {
-				System.err.println("diskRead() Sleep Error: " + e.getMessage());
+				System.err.println("databaseRead() Sleep Error: " + e.getMessage());
 				e.printStackTrace(System.err);
 			}
 		}
@@ -440,14 +440,14 @@ public class WorkerThread extends Thread {
 		}
 	}
 	
-	public void diskWrite() {
+	public void databaseWrite() {
 		if (my_tm.threadSleep) {
 			try {
 				// sleep for a random period of time between 150ms and 225ms
 				Thread.sleep(150 + generator.nextInt(75));
 			}
 			catch(Exception e) {
-				System.err.println("diskWrite() Sleep Error: " + e.getMessage());
+				System.err.println("databaseWrite() Sleep Error: " + e.getMessage());
 				e.printStackTrace(System.err);
 			}
 		}
