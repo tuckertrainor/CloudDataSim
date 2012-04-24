@@ -381,6 +381,11 @@ public class WorkerThread extends Thread {
 			latencySleep(); // Simulate latency
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
+			// Add to totalSleepTime if necessary
+			if (!my_tm.threadSleep) {
+				// Add return latency
+				totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+			}
 			String msgSplit[] = msg.theMessage.split(" ");
 			if (addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]))) {
 				return true;
