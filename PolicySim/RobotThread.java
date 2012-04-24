@@ -103,7 +103,12 @@ public class RobotThread extends Thread {
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
+					// Set the end time of the transaction
 					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+					// If there was not thread sleeping, get the time used by the TM
+					if (!threadSleep) {
+						TransactionLog.entry.get(transNumber).addSleepTime(Integer.parseInt(respSplit[1]));
+					}
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + transNumber + " " +
 									   TransactionLog.entry.get(transNumber).getStatus());

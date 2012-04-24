@@ -295,6 +295,9 @@ public class WorkerThread extends Thread {
 					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
 						// send exit flag to RobotThread
 						msgText = "FIN";
+						if (!my_tm.threadSleep) { // append total sleep time to message
+							msgText += " " + totalSleepTime;
+						}
 					}
 				}
 				latencySleep(); // Simulate latency
