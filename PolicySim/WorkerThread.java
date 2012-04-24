@@ -26,6 +26,7 @@ public class WorkerThread extends Thread {
 	private SocketList sockList = new SocketList();
 	private ArrayList<QueryRecord> queryLog = new ArrayList<QueryRecord>();
 	private int transactionPolicyVersion = 0;
+	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
 
 	/**
@@ -578,13 +579,19 @@ public class WorkerThread extends Thread {
 	}
 	
 	public void latencySleep() {
-		try {
-			// Sleep for a random period of time between min ms and max ms
-			Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
+		int latency = my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+		if (my_tm.threadSleep) {
+			try {
+				// Sleep for a random period of time between min ms and max ms
+				Thread.sleep(latency);
+			}
+			catch(Exception e) {
+				System.err.println("latencySleep() Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
-		catch(Exception e) {
-			System.err.println("latencySleep() Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else {
+			totalSleepTime += latency;
 		}
 	}
 	
