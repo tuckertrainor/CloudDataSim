@@ -258,7 +258,6 @@ public class Robot {
 					}
 					else if (tuple[0].equals("SLEEP")) {
 						threadSleep = Boolean.parseBoolean(tuple[1]);
-						System.out.println(threadSleep);
 					}
 					else if (tuple[0].equals("VT")) {
 						verificationType = Integer.parseInt(tuple[1]);
