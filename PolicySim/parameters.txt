@@ -25,7 +25,7 @@ LASR 0.99
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
 PMIN 1150
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
-PMAX 1151
+PMAX 1150
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 74855
