@@ -404,16 +404,21 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean integrityCheck() {
-		try {
-			// sleep for a random period of time between 150ms and 225ms
-			Thread.sleep(150 + generator.nextInt(75));
+		if (my_tm.threadSleep) {
+			try {
+				// sleep for a random period of time between 150ms and 225ms
+				Thread.sleep(150 + generator.nextInt(75));
+			}
+			catch(Exception e) {
+				System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
-		catch(Exception e) {
-			System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else {
+			totalSleepTime += 150 + generator.nextInt(75);
 		}
 		// perform random success operation
-		return true;
+		return coinToss(my_tm.integrityCheckSuccessRate);
 	}
 
 	public void diskRead() {
@@ -579,11 +584,10 @@ public class WorkerThread extends Thread {
 	}
 	
 	public void latencySleep() {
-		int latency = my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
 		if (my_tm.threadSleep) {
 			try {
 				// Sleep for a random period of time between min ms and max ms
-				Thread.sleep(latency);
+				Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
 			}
 			catch(Exception e) {
 				System.err.println("latencySleep() Error: " + e.getMessage());
@@ -591,7 +595,7 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else {
-			totalSleepTime += latency;
+			totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
 		}
 	}
 	
