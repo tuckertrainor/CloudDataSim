@@ -14,7 +14,7 @@ LMIN 5
 # LMAX latencyMax - maximum delay due to latency
 LMAX 25
 # SLEEP threadSleep - boolean for whether or not to thread sleep or use sum
-SLEEP false
+SLEEP true
 # VT verificationType - 0 for 2PC, 1 for 2PC w/local authorization,
 # 2 for view consistency, 3 for global consistency, 4 for both 2 and 3
 VT 0

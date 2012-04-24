@@ -69,8 +69,8 @@ public class TransactionData {
 		return endTime - startTime;
 	}
 	
-	public long getSleepTime() {
-		return endTime;
+	public int getSleepTime() {
+		return sleepTime;
 	}
 	
 	public String getStatus() {
