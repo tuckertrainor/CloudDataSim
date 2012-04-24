@@ -25,6 +25,7 @@ public class RobotThread extends Thread {
 	private final int port;
 	private final int latencyMin;
 	private final int latencyMax;
+	private final boolean threadSleep;
 	private final int maxPause;
 	private ArrayList<CommitItem> commitStack = new ArrayList<CommitItem>();
 	private Random generator;
@@ -38,7 +39,7 @@ public class RobotThread extends Thread {
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, int _maxPause) {
+	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep, int _maxPause) {
 		primaryServer = _primaryServer;
 		transNumber = _transNumber;
 		transactions = _transactions;
@@ -46,6 +47,7 @@ public class RobotThread extends Thread {
 		port = _port;
 		latencyMin = _lMin;
 		latencyMax = _lMax;
+		threadSleep = _threadSleep;
 		maxPause = _maxPause;
 	}
 
@@ -137,13 +139,19 @@ public class RobotThread extends Thread {
 	}
 	
 	public void latencySleep() {
-		try {
-			// Sleep for a random period of time between min ms and max ms
-			Thread.sleep(latencyMin + generator.nextInt(latencyMax - latencyMin));
+		int latency = latencyMin + generator.nextInt(latencyMax - latencyMin);
+		if (threadSleep) {
+			try {
+				// Sleep for a random period of time between min ms and max ms
+				Thread.sleep(latency);
+			}
+			catch(Exception e) {
+				System.err.println("latencySleep() Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
-		catch(Exception e) {
-			System.err.println("latencySleep() Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		else { // add int amount to log entry
+			TransactionLog.entry.get(transNumber).addSleepTime(latency);
 		}
 	}
 

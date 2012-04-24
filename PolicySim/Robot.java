@@ -36,6 +36,7 @@ public class Robot {
 	static int maxPause;
 	static int latencyMin;
 	static int latencyMax;
+	static boolean threadSleep;
 	static int verificationType;
 	static float integrityCheckSuccessRate;
 	static float localAuthSuccessRate;
@@ -174,6 +175,7 @@ public class Robot {
 											 serverList.get(primaryServer).getPort(),
 											 latencyMin,
 											 latencyMax,
+											 threadSleep,
 											 maxPause);
 					thread.start();
 					ThreadCounter.addNewThread();
@@ -258,6 +260,9 @@ public class Robot {
 					}
 					else if (tuple[0].equals("LMAX")) {
 						latencyMax = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("SLEEP")) {
+						threadSleep = Boolean.parseBoolean(tuple[1]);
 					}
 					else if (tuple[0].equals("VT")) {
 						verificationType = Integer.parseInt(tuple[1]);
@@ -426,6 +431,8 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("LMAX=" + latencyMax);
 			outputBuf.newLine();
+			outputBuf.write("SLEEP=" + threadSleep);
+			outputBuf.newLine();
 			outputBuf.write("VT=" + verificationType);
 			outputBuf.newLine();
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
@@ -438,13 +445,28 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
-			for (int i = 1; i <= maxTransactions; i++) {
-				outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
-								TransactionLog.entry.get(i).getQuerySet() + "\t" +
-								TransactionLog.entry.get(i).getStartTime() + "\t" +
-								TransactionLog.entry.get(i).getEndTime() + "\t" +
-								TransactionLog.entry.get(i).getStatus());
-				outputBuf.newLine();
+			if (threadSleep) {
+				for (int i = 1; i <= maxTransactions; i++) {
+					outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
+									TransactionLog.entry.get(i).getQuerySet() + "\t" +
+									TransactionLog.entry.get(i).getStartTime() + "\t" +
+									TransactionLog.entry.get(i).getEndTime() + "\t" +
+									TransactionLog.entry.get(i).getDuration() + "\t" +
+									TransactionLog.entry.get(i).getStatus());
+					outputBuf.newLine();
+				}
+			}
+			else { // output sleep time in data
+				for (int i = 1; i <= maxTransactions; i++) {
+					outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
+									TransactionLog.entry.get(i).getQuerySet() + "\t" +
+									TransactionLog.entry.get(i).getStartTime() + "\t" +
+									TransactionLog.entry.get(i).getEndTime() + "\t" +
+									TransactionLog.entry.get(i).getDuration() + "\t" +
+									TransactionLog.entry.get(i).getSleepTime() + "\t" +
+									TransactionLog.entry.get(i).getStatus());
+					outputBuf.newLine();
+				}
 			}
 		}
 		catch(IOException ioe) {

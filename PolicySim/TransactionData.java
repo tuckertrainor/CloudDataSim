@@ -13,6 +13,7 @@ public class TransactionData {
 	private String querySet;
 	private long startTime;
 	private	long endTime;
+	private int sleepTime;
 	private String status;
 	
 	/**
@@ -24,6 +25,7 @@ public class TransactionData {
 	public TransactionData(int _transNumber, String _querySet) {
 		transactionNumber = _transNumber;
 		querySet = _querySet;
+		sleepTime = 0;
 		status = "COMMIT";
 	}
 	
@@ -37,6 +39,10 @@ public class TransactionData {
 	
 	public void setEndTime(long _endTime) {
 		endTime = _endTime;
+	}
+	
+	public void addSleepTime(int sleepAmount) {
+		sleepTime += sleepAmount;
 	}
 	
 	public void setStatus(String _status) {
@@ -56,6 +62,14 @@ public class TransactionData {
 	}
 	
 	public long getEndTime() {
+		return endTime;
+	}
+	
+	public long getDuration() {
+		return endTime - sleepTime;
+	}
+	
+	public long getSleepTime() {
 		return endTime;
 	}
 	
