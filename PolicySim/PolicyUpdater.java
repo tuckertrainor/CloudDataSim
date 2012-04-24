@@ -35,7 +35,12 @@ public class PolicyUpdater extends Thread {
 			// Loop periodic update pushes
 			while (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
 				// Sleep before updating Policy version
-				Thread.sleep(my_ps.policyUpdateMin + generator.nextInt(my_ps.policyUpdateMax - my_ps.policyUpdateMin));
+				if (my_ps.policyUpdateMax > my_ps.policyUpdateMin) { // frequency is a range
+					Thread.sleep(my_ps.policyUpdateMin + generator.nextInt(my_ps.policyUpdateMax - my_ps.policyUpdateMin));
+				}
+				else { // frequency is a constant
+					Thread.sleep(my_ps.policyUpdateMax);
+				}
 				// Update policy version
 				PolicyVersion.updatePolicy();
 				policyVersion = PolicyVersion.getCurrent();
