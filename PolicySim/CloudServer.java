@@ -67,13 +67,13 @@ public class CloudServer {
 			System.exit(-1);
 		}
 		else {
-			System.out.println("Configuration file loaded. Server " +
-							   serverNumber + " is ready.");
+			System.out.println("Configuration file loaded.");
 		}
 		
 		// Load the parameters for this simulation
 		if (loadParameters("parameters.txt")) {
 			System.out.println("Parameters file read successfully.");
+			System.out.println("Server " + serverNumber + " is ready.");
 		}
 		else {
 			System.err.println("Error loading parameters file. Exiting.");
