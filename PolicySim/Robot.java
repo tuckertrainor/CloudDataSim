@@ -53,10 +53,9 @@ public class Robot {
 	 */
     public static void main(String[] args) {
 		// Error checking for arguments
-		if (args.length < 1 || args.length > 2) {
+		if (args.length < 1 || args.length > 5 || args.length == 3) {
 			System.err.println("Improper argument count.");
-			System.err.println("Usage: java Robot <Server number to first contact> or");
-			System.err.println("Usage: java Robot <Server number to first contact> <Random Seed>");
+			argsError();
 			System.exit(-1);
 	    }
 		
@@ -79,34 +78,32 @@ public class Robot {
 			System.out.println("Server configuration file read successfully.");
 		}
 		
-		// Check arg[0] for proper value, range
 		int primaryServer = 0;
-		try {
-			primaryServer = Integer.parseInt(args[0]);
-			if (primaryServer < 1 || primaryServer >= serverList.size()) {
-				System.err.println("Error in server number. Please check server configuration.");
+		switch (args.length) {
+			case 1:
+				primaryServer = getTM(serverList, args[0]);
+				break;
+			case 2:
+				primaryServer = getTM(serverList, args[0]);
+				randomSeed = getSeed(args[1]);
+				break;
+			case 4:
+				primaryServer = getTM(serverList, args[0]);
+				randomSeed = getSeed(args[1]);
+				minQueries = getQmin(args[2]);
+				maxQueries = getQmax(minQueries, args[3]);
+				break;
+			case 5:
+				primaryServer = getTM(serverList, args[0]);
+				randomSeed = getSeed(args[1]);
+				minQueries = getQmin(args[2]);
+				maxQueries = getQmax(minQueries, args[3]);
+				verificationType = getVT(args[4]);
+				break;
+			default: // We should never reach here, but just in case
+				System.err.println("Default case reached in switch. Exiting.");
 				System.exit(-1);
-			}
-		}
-		catch (Exception e) {
-			System.err.println("Error parsing argument. Please use a valid integer.");
-			System.err.println("Usage: java Robot <Server number to first contact> or");
-			System.err.println("Usage: java Robot <Server number to first contact> <Random seed>\n");
-			System.exit(-1);
-		}
-		
-		
-		// Check arg[1] for existence, set seed if so
-		if (args.length == 2) {
-			try {
-				randomSeed = Long.parseLong(args[1]);
-			}
-			catch (Exception e) {
-				System.err.println("Error parsing argument. Please use a valid integer.");
-				System.err.println("Usage: java Robot <Server number to first contact> or");
-				System.err.println("Usage: java Robot <Server number to first contact> <Random seed>\n");
-				System.exit(-1);
-			}
+				break;
 		}
 		
 		// Build a series of transactions using parameters
@@ -311,6 +308,96 @@ public class Robot {
 		}
 		
 		return true; // success
+	}
+	
+	public static void argsError() {
+		System.err.println("Usage: java Robot <TM Number> or");
+		System.err.println("Usage: java Robot <TM Number> <Seed> or");
+		System.err.println("Usage: java Robot <TM Number> <Seed> <QMIN> <QMAX> or");
+		System.err.println("Usage: java Robot <TM Number> <Seed> <QMIN> <QMAX> <VT>\n");
+	}
+	
+	public static int getTM(ArrayList<ServerID> _serverList, String str) {
+		int number = 0;
+		// Check arg for proper value, range
+		try {
+			number = Integer.parseInt(str);
+			if (number < 1 || number >= _serverList.size()) {
+				System.err.println("Error in server number. Please check server configuration.");
+				System.exit(-1);
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for TM. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+		return number;
+	}
+		
+	public static long getSeed(String str) {
+		try {
+			return Long.parseLong(str);
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for seed. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+		return 0L;
+	}
+	
+	public static int getQmin(String str) {
+		int min = 0;
+		// Check arg for proper value, range
+		try {
+			min = Integer.parseInt(str);
+			if (min < 1) {
+				System.err.println("Error in QMIN. Please set a minimum of at least 1.");
+				System.exit(-1);
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for QMIN. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+		return min;
+	}
+	
+	public static int getQmax(int min, String str) {
+		int max = 0;
+		// Check arg for proper value, range
+		try {
+			max = Integer.parseInt(str);
+			if (max < min) {
+				System.err.println("Error in QMAX. Please set a value equal to or greater than QMIN.");
+				System.exit(-1);
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for QMAX. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+		return max;
+	}
+	public static int getVT(String str) {
+		int number = -1;
+		// Check arg for proper value, range
+		try {
+			number = Integer.parseInt(str);
+			if (number < 0 || number > 4) {
+				System.err.println("Error in VT. Please set a value in the range of 0 - 4.");
+				System.exit(-1);
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for VT. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+		return number;
 	}
 	
 	/**
