@@ -100,7 +100,8 @@ public class WorkerThread extends Thread {
 					my_tm.verificationType = Integer.parseInt(msgSplit[4]);
 					my_tm.integrityCheckSuccessRate = Float.parseFloat(msgSplit[5]);
 					my_tm.localAuthSuccessRate = Float.parseFloat(msgSplit[6]);
-					System.out.println("Server parameters updated.");
+					System.out.println("Server parameters updated:");
+					System.out.println(msg.theMessage);
 					// No artificial latency needed, send ACK
 					output.writeObject(new Message(msgText));
 					break;
