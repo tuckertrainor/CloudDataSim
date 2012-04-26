@@ -8,9 +8,6 @@
  * over the socket until the socket is closed.
  */
 
-/* TODO: is view consistency using the TM's server policy as its baseline, or
- * its worker thread's starting policy? */
-
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
@@ -91,6 +88,20 @@ public class WorkerThread extends Thread {
 						System.out.println("Server Policy Version updated to v." + update);
 					}
 					latencySleep(); // Simulate latency
+					output.writeObject(new Message(msgText));
+					break;
+				}
+				else if (msg.theMessage.indexOf("PARAMETERS") != -1) { // Configuration change
+					// PARAMETERS <LMIN> <LMAX> <SLEEP> <VT> <ICSR> <LASR>
+					String msgSplit[] = msg.theMessage.split(" ");
+					my_tm.latencyMin = Integer.parseInt(msgSplit[1]);
+					my_tm.latencyMax = Integer.parseInt(msgSplit[2]);
+					my_tm.threadSleep = Boolean.parseBoolean(msgSplit[3]);
+					my_tm.verificationType = Integer.parseInt(msgSplit[4]);
+					my_tm.integrityCheckSuccessRate = Float.parseFloat(msgSplit[5]);
+					my_tm.localAuthSuccessRate = Float.parseFloat(msgSplit[6]);
+					System.out.println("Server parameters updated.");
+					// No artificial latency needed, send ACK
 					output.writeObject(new Message(msgText));
 					break;
 				}
