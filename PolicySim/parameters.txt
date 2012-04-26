@@ -1,10 +1,10 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
-MT 1000
+MT 10
 # QMIN maxQueries - minimum number of queries (READ/WRITE) per transaction
-QMIN 31
+QMIN 8
 # QMAX maxQueries - maximum number of queries (READ/WRITE) per transaction
-QMAX 50
+QMAX 15
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
@@ -17,7 +17,7 @@ LMAX 25
 SLEEP true
 # VT verificationType - 0 for 2PC, 1 for 2PC w/local authorization,
 # 2 for view consistency, 3 for global consistency, 4 for both 2 and 3
-VT 2
+VT 0
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
