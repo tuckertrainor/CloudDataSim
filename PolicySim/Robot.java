@@ -85,25 +85,31 @@ public class Robot {
 				break;
 			case 2:
 				primaryServer = getTM(serverList, args[0]);
-				randomSeed = getSeed(args[1]);
+				setSeed(args[1]);
 				break;
 			case 4:
 				primaryServer = getTM(serverList, args[0]);
-				randomSeed = getSeed(args[1]);
-				minQueries = getQmin(args[2]);
-				maxQueries = getQmax(minQueries, args[3]);
+				setSeed(args[1]);
+				setQmin(args[2]);
+				setQmax(minQueries, args[3]);
 				break;
 			case 5:
 				primaryServer = getTM(serverList, args[0]);
-				randomSeed = getSeed(args[1]);
-				minQueries = getQmin(args[2]);
-				maxQueries = getQmax(minQueries, args[3]);
-				verificationType = getVT(args[4]);
+				setSeed(args[1]);
+				setQmin(args[2]);
+				setQmax(minQueries, args[3]);
+				setVT(args[4]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
 				System.exit(-1);
 				break;
+		}
+		
+		// Push parameters to active servers
+		if (!parameterPush(serverList)) {
+			System.err.println("Error pushing parameters. Exiting.");
+			System.exit(-1);
 		}
 		
 		// Build a series of transactions using parameters
@@ -335,19 +341,18 @@ public class Robot {
 		return number;
 	}
 		
-	public static long getSeed(String str) {
+	public static void setSeed(String str) {
 		try {
-			return Long.parseLong(str);
+			randomSeed = Long.parseLong(str);
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for seed. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
-		return 0L;
 	}
 	
-	public static int getQmin(String str) {
+	public static void setQmin(String str) {
 		int min = 0;
 		// Check arg for proper value, range
 		try {
@@ -356,16 +361,16 @@ public class Robot {
 				System.err.println("Error in QMIN. Please set a minimum of at least 1.");
 				System.exit(-1);
 			}
+			minQueries = min;
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for QMIN. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
-		return min;
 	}
 	
-	public static int getQmax(int min, String str) {
+	public static void setQmax(int min, String str) {
 		int max = 0;
 		// Check arg for proper value, range
 		try {
@@ -374,15 +379,16 @@ public class Robot {
 				System.err.println("Error in QMAX. Please set a value equal to or greater than QMIN.");
 				System.exit(-1);
 			}
+			maxQueries = max;
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for QMAX. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
-		return max;
 	}
-	public static int getVT(String str) {
+	
+	public static void setVT(String str) {
 		int number = -1;
 		// Check arg for proper value, range
 		try {
@@ -391,13 +397,60 @@ public class Robot {
 				System.err.println("Error in VT. Please set a value in the range of 0 - 4.");
 				System.exit(-1);
 			}
+			verificationType = number;
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for VT. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
-		return number;
+	}
+
+	public static boolean parameterPush(ArrayList<ServerID> list) {
+		Socket socket;
+		ObjectOutputStream output;
+		ObjectInputStream input;
+		for (int i = 1; i <= maxServers; i++) {
+			try {
+				socket = new Socket(list.get(i).getAddress(), list.get(i).getPort());
+				// Set up I/O streams with the server
+				output = new ObjectOutputStream(socket.getOutputStream());
+				input = new ObjectInputStream(socket.getInputStream());
+				
+				Message msg = new Message("PARAMETERS " +
+										  latencyMin + " " +
+										  latencyMax + " " +
+										  threadSleep + " " +
+										  verificationType + " " +
+										  integrityCheckSuccessRate	+ " " +
+										  localAuthSuccessRate);
+				output.writeObject(msg);
+				msg = (Message)input.readObject();
+				if (!msg.theMessage.equals("ACK")) {
+					System.err.println("Error: Incorrect ACK from " + socket.getInetAddress() +
+									   ":" + socket.getPort());
+					System.err.println("Could not push parameters to server " + i + ". Exiting.");
+					socket.close();
+					return false;
+				}
+				else { // Success
+					System.out.println("Parameters successfully pushed to server " + i + ".");
+				}
+				socket.close();
+			}
+			catch(ConnectException ce) {
+				System.out.println("** Connect Exception for " + list.get(i).getAddress() +
+								   ":" + list.get(i).getPort() +
+								   " - could not push parameters **");
+				return false;
+			}
+			catch(Exception e) {
+				System.err.println("Error during parameters push: " + e.getMessage());
+				e.printStackTrace(System.err);
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**
