@@ -53,7 +53,7 @@ We represent transaction cost as the time in milliseconds that a transaction req
 \end{center}
 \end{figure}
 
-For short length transactions we observed a 2PC baseline cost of 2,610 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate as a baseline, we observed a cost of 3,698 ms, rounded to the nearest integer. Figure \ref{ShortD} shows the results of the 2PV protocols against the baseline values.
+For short length transactions we observed a 2PC baseline cost of 2,610 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization (2PCLA) success rate as a baseline, we observed a cost of 3,698 ms, rounded to the nearest integer. Figure \ref{ShortD} shows the results of the 2PV protocols against the baseline values. We observe view consistency perform no successful commits at 1,150 ms but performing successful commits at 2,300 ms and above. View consistency begins with a cost of 2,920 ms, approximately 12\% higher than the 2PC baseline and approximately 21\% lower than the 2PCLA baseline. By the 9,200 ms frequency, view consistency nearly equals the 2PCLA baseline (3,705 ms versus 3,698 ms) and only rises slightly for the remaining frequency points. Global consistency and view consistency second chance show parallel performance throughout the graph, beginning at slightly more than 5,000 ms (about 35\% higher than the 2PCLA baseline) and closely approaching the 2PCLA baseline by the 36,800 ms update frequency. At that frequency point, all three implementations are less then 5\% above the 2PCLA baseline.
 % Cost
 \begin{figure}[h]
 \begin{center}
