@@ -21,7 +21,7 @@
 \section{Abstract}
 With an increase in services offering data storage in the cloud comes an increase in scrutiny over the security of that data. Narrowing our focus on distributed transactional database systems deployed over cloud servers, we can look at how distribution of user authorization policies affects the trustworthiness of transactions. If policy versions are in an inconsistent state across the cloud servers utilized during that transaction, how can we be sure that the transaction is trusted? A proposed solution lies in the use of Two-Phase Validation protocols \cite{Iskander}, a modified version of basic Two-Phase Commit protocols. We can simulate the protocol's deferred proofs of authorization to quantify the cost of implementing the protocol in terms of time cost and commit success rate.
 \section{1. Model}
-In this section we introduce 2-phase validation (2PV) \cite{Iskander} and how validation factors into the different proofs of authorization. We describe in general terms the roles of clients, cloud servers, and policy servers. We then briefly illustrate the transactions between all parties and how the proofs alter their interactions and possible outcomes.
+In this section we introduce two-phase validation (2PV) \cite{Iskander} and how validation factors into the different proofs of authorization. We describe in general terms the roles of clients, cloud servers, and policy servers. We then briefly illustrate the transactions between all parties and how the proofs alter their interactions and possible outcomes.
 \subsection{A. Protocols}
 To model the simulation, we begin by examining Two-Phase Validation (2PV) and deferred proofs of authorization and determine what we will require to accurately produce a scenario in which their performance can be measured.
 % explain 2PV, deferred proofs, view and global consistency
@@ -29,42 +29,55 @@ Deferred proofs of authorization  define a situation where policy validation occ
 
 For view consistency to be true, each server which took part in the transaction must have the same stored policy, i.e., the policy versions should be internally consistent across all servers involved in the transaction \cite{Iskander}. In 2PV, we use a collection phase to gather the policy versions from the servers, and a validation phase to determine whether or not the servers are in agreement. In our model, if the policy versions are not consistent amongst all servers, then the transaction is aborted. If the view is consistent, then the transaction is allowed to commit. View consistency is quick in terms of checking validity but suffers from an inherent weakness in terms of policy freshness. Once the policy used for validation is set at the beginning of each server's role in the transaction, any updates to policy versions that occur after that point are not taken into account. As is common in the realm of computer science, speed is gained at the cost of security.
 
-Global consistency involves a more stringent approach to validation to eliminate the weakness noted above for view consistency. At the validation phase, the policy versions collected from each server are compared to the latest policy version globally available from the originator of policies. Using the latest policy for validation purposes is an improvement of the trust level that view consistency provides. Additionally, instead of aborting the transaction in the case of any server's policy not matching the latest policy version, we use the latest version to execute a new local authorization check on each operation performed during the transaction that used an earlier policy for the local authorization check during the initial run of the transaction. As each server records all operations, it can execute local authorizations from its records without repeating the entire transaction. If all operations in the transaction are locally authorized by the latest policy version, then the transaction is allowed to commit. Otherwise, the transaction is aborted. Due to the possibility of running a series of local authorizations, global consistency is likely to be more costly in terms of time when compared to view consistency. However, by offering an alternative to an abort after server policy inconsistency, successful commits may improve under certain conditions.
+Global consistency involves a more stringent approach to validation to eliminate the weakness noted above for view consistency. At the validation phase, the policy versions collected from each server are compared to the latest policy version globally available from the originator of policies. Using the latest policy for validation purposes is an improvement of the trust level that view consistency provides. Additionally, instead of aborting the transaction in the case of any server's policy not matching the latest policy version, we use the latest version to execute a new local authorization check on each operation performed during the transaction that used an earlier policy for the local authorization check during the initial run of the transaction. As each server records all operations, it can execute local authorizations from its records without repeating the entire transaction. If all operations in the transaction are locally authorized by the latest policy version, then the transaction is allowed to commit. Otherwise, the transaction is aborted. Due to the possibility of running a series of local authorizations again at commit time, global consistency is likely to be more costly in terms of time when compared to view consistency. However, by offering an alternative to an abort after server policy inconsistency, successful commits may improve under certain conditions.
+
+We can also create a protocol that combines the strengths of both view consistency and global consistency. Called view consistency with second chance global consistency, the protocol allows a transaction to check for view consistency at first, and if that fails then it can invoke a global consistency check to possibly save the transaction from aborting. Thus, the transaction has the ability to quickly be validated for commit via view consistency, but is possibly saved from an initial abort by a global consistency check. We suspect that time cost may increase when transactions are subject to both consistency checks, but commit success rates will improve over view consistency checks only.
 \subsection{B. Transaction Flow}
 clients, servers, transaction flow
+
+To benchmark these protocols, we will record the interaction between experimental clients and servers as they process sample transactions. A robot-controlled client will send transactions to one of several cloud data servers. This primary server will serve as a transaction manager for the entire transaction, routing operations requiring other cloud data servers to those servers as necessary. The transaction manager is also responsible for collection and validation phases of any 2PC and 2PV
 \section{2. Experimental Testbed}
 In this section we describe the implementation of the model and algorithms that apply to it. The test environment is detailed, with details such as hardware and software (i.e., Java) touched upon. The different client/server modules and their child threads are described and their variables are listed. The effects of the variables on their respective modules are summarized in terms of relevance to the simulation.
 \subsection{Parameters}
 \section{3. Experiments}
 In this section we produce representations of the resulting data from the simulation. The parameters used for each set of simulations is listed and followed by the results. Each set of results is prefaced by the real-world environment that we attempted to simulate, along with explanations of specific decisions in parameter setting.
-\subsection{Performance evaluation}
-describe graphs
+\subsection{A. Performance evaluation}
+\subsubsection{Transaction Cost}
+We represent transaction cost as the time in milliseconds that a transaction requires for completion. We performed simulations of all protocols for short transactions (see fig. \ref{ShortD}), medium transactions (see fig. \ref{MediumD}), and long transactions (see fig. \ref{LongD}). We began with a policy update frequency of 1,150 ms and doubled the frequency for each subsequent set of runs up to 36,800 ms. For each simulation we averaged the duration of each successfully committed transaction to provide a value of cost for view consistency, global consistency, and view consistency with second chance global consistency.
 % Cost
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{ShortD.eps}
 \caption{Short Transaction Cost}
 \label{ShortD}
 \end{center}
 \end{figure}
+
+For short length transactions we observed a 2PC baseline cost of 2,610 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate as a baseline, we observed a cost of 3,698 ms, rounded to the nearest integer. Figure \ref{ShortD} shows the results of the 2PV protocols against the baseline values.
 % Cost
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{MediumD.eps}
 \caption{Medium Transaction Cost}
 \label{MediumD}
 \end{center}
 \end{figure}
+
+For medium length transactions we observed a 2PC baseline cost of 5,015 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate as a baseline, we observed a cost of 7,279 ms, rounded to the nearest integer. Figure \ref{MediumD} shows the results of the 2PV protocols against the baseline values.
 % Cost
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{LongD.eps}
 \caption{Long Transaction Cost}
 \label{LongD}
 \end{center}
 \end{figure}
+
+For long length transactions we observed a 2PC baseline cost of 8,688 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate as a baseline, we observed a cost of 12,742 ms, rounded to the nearest integer. Figure \ref{LongD} shows the results of the 2PV protocols against the baseline values.
+\subsubsection{Successful Commit Ratio}
+We represent the commit success ratio as the number of commits divided by the total number of transactions attempted. We performed simulations of all protocols for short transactions (see fig. \ref{ShortC}), medium transactions (see fig. \ref{MediumC}), and long transactions operations each (see fig. \ref{LongC}). We began with a policy update frequency of 1,150 ms and doubled the amount for each subsequent set of runs up to 36,800 ms.
 % Success
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{ShortC.eps}
 \caption{Short Transaction Commit Success Ratio}
@@ -72,7 +85,7 @@ describe graphs
 \end{center}
 \end{figure}
 % Success
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{MediumC.eps}
 \caption{Medium Transaction Commit Success Ratio}
@@ -80,15 +93,17 @@ describe graphs
 \end{center}
 \end{figure}
 % Success
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{LongC.eps}
 \caption{Long Transaction Commit Success Ratio}
 \label{LongC}
 \end{center}
 \end{figure}
+\subsubsection{Transaction Throughput}
+We represent transaction throughput as the number of commits in a simulation run divided by the time in milliseconds of the duration of that simulation run. We performed simulations of all protocols for short transactions (see fig. \ref{ShortT}), medium transactions (see fig. \ref{MediumT}), and long transactions (see fig. \ref{LongT}). We began with a policy update frequency of 1,150 ms and doubled the amount for each subsequent set of runs up to 36,800 ms.
 %Throughput
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{ShortT.eps}
 \caption{Short Transaction Throughput}
@@ -96,7 +111,7 @@ describe graphs
 \end{center}
 \end{figure}
 %Throughput
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{MediumT.eps}
 \caption{Medium Transaction Throughput}
@@ -104,14 +119,14 @@ describe graphs
 \end{center}
 \end{figure}
 %Throughput
-\begin{figure}[htbp]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{LongT.eps}
 \caption{Long Transaction Throughput}
-\label{Long T}
+\label{LongT}
 \end{center}
 \end{figure}
-\subsection{Sensitivity analysis}
+\subsection{B. Sensitivity analysis}
 give analysis
 \section{4. Conclusions \& Observations}
 In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
