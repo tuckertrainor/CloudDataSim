@@ -18,7 +18,6 @@
 
 % TODO:
 % redo or toss experimental testbed intro paragraph
-% finish cloud server and start policy server testbed info
 % intro experiments section and detail parameters and environment
 % sensitivity analysis
 % conclusions and observations
@@ -52,7 +51,7 @@ The \texttt{Robot} requires command line input for the simulation to begin. At m
 
 The \texttt{CloudServer} class and its helper classes perform the bulk of the work in the simulation. The \texttt{CloudServer} class itself is mainly used for loading server parameters and listening for connections from \texttt{RobotThread}s. These connections are handed off to the \texttt{WorkerThread} class, which implements the protocols and returns progress data to its associated \texttt{RobotThread}. If the \texttt{WorkerThread} is passed an operation that needs to be processed on another server, it opens a new connection with that server if one has not been created already. Each new socket connection created by a \texttt{WorkerThread} is stored in that \texttt{WorkerThread}'s own instance of a \texttt{SocketGroup}. If any subsequent communications with a server that has had its connection stored in the \texttt{SocketGroup} can easily be reestablished by retrieving the stored socket from the \texttt{SocketGroup}. As a \texttt{WorkerThread} processes operations, it stores information about each one in a list of \texttt{OperationRecord}s. The list is necessary when performing global consistency checks, as the policy version used for local authorization is one of the data items stored in an \texttt{OperationRecord}.
 
-Launching a \texttt{CloudServer}
+Launching a \texttt{CloudServer} requires a single command line argument of an integer. The integer is a unique identifier for the server, as it refers to the IP address and port number for that server which the \texttt{Robot} and other servers will establish a connection with. The integers and their corresponding IP addresses and ports are stored in a configuration file named \texttt{serverConfig.txt} which is read in by all major classes.
 
 The \texttt{PolicyServer} class and its associated classes are responsible for propagating policy version updates. The \texttt{PolicyServer} class itself is has two duties; one is accepting and responding to \texttt{CloudServer} requests for current policy versions, the other is launching the \texttt{PolicyUpdater} class that updates the policy version in a frequency passed by the parameters file. When a new policy version is issued and stored in the public \texttt{PolicyVersion} class, the \texttt{PolicyUpdater} spawns \texttt{PolicyThread}s to push the policy version to all available \texttt{CloudServer}s. Requests for the current policy version are handled by \texttt{PolicyRequestThread}s.
 \subsection{Parameters}
@@ -70,7 +69,9 @@ The parameters used in the simulation are stored in a text file named \texttt{pa
 \item{}\texttt{randomSeed} is a Long-type integer used to seed the \texttt{Robot}'s random number generator. This parameter can be set by the \texttt{Robot} via the command line.
 \end{itemize}
 \subsection{Sample Transaction Flow}
+A typical transaction begins in the \texttt{Robot}, where a series of random operations are assembled and and passed to a spawned \texttt{RobotThread}. The \texttt{RobotThread} connects with the TM, which passes it to a \texttt{WorkerThread}. The \texttt{RobotThread} then begins sending the \texttt{WorkerThread} operations one at a time, in order. The \texttt{WorkerThread} will then determine if the operation is to be processed on its own server or on another server; if it is the latter, the \texttt{WorkerThread} passes the operation to the appropriate server and waits for the results of the operation. The \texttt{WorkerThread} handles READ and WRITE operations by performing a check of local authorization, which is simulated using the \texttt{localAuthorizationSuccessRate} for probability of granting authorization; a denial of authorization forces the transaction to ABORT. When the \texttt{WorkerThread} reaches a COMMIT operation, it simulates an integrity check against the \texttt{integrityCheckSuccessRate}, which if successful proceeds to the 2PV protocol as specified in the parameters.
 
+If the transaction is to use view consistency, the 
 \section{3. Experiments}
 %%% Redo the opening paragraph
 %In this section we produce representations of the resulting data from the simulation. The parameters used for each set of simulations is listed and followed by the results. Each set of results is prefaced by the real-world environment that we attempted to simulate, along with explanations of specific decisions in parameter setting.
