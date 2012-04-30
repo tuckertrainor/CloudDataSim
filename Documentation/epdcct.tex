@@ -42,12 +42,15 @@ To benchmark these protocols, we will record the interaction between experimenta
 \section{2. Experimental Testbed}
 In this section we describe the implementation of the model and algorithms that apply to it. The test environment is detailed, with details such as hardware and software (i.e., Java) touched upon. The different client/server modules and their child threads are described and their variables are listed. The effects of the variables on their respective modules are summarized in terms of relevance to the simulation.
 \subsection{Parameters}
+txn lengths
+
+update freq.
 \section{3. Experiments}
 %%% Redo the opening paragraph
 In this section we produce representations of the resulting data from the simulation. The parameters used for each set of simulations is listed and followed by the results. Each set of results is prefaced by the real-world environment that we attempted to simulate, along with explanations of specific decisions in parameter setting.
 \subsection{A. Performance evaluation}
 \subsubsection{Transaction Cost}
-We represent transaction cost as the time in milliseconds that a transaction requires for completion. We performed simulations of all protocols for short transactions (see fig. \ref{ShortD}), medium transactions (see fig. \ref{MediumD}), and long transactions (see fig. \ref{LongD}). We began with a policy update frequency of 1,150 ms and doubled the frequency for each subsequent set of runs up to 36,800 ms. For each simulation we averaged the duration of each successfully committed transaction to provide a value of cost for view consistency, global consistency, and view consistency with second chance global consistency.
+We represent transaction cost as the time in milliseconds that a transaction requires for completion. We performed simulations of all protocols for short transactions (see fig. \ref{ShortD}), medium transactions (see fig. \ref{MediumD}), and long transactions (see fig. \ref{LongD}). We began with a policy update frequency of 1,150ms and doubled the frequency for each subsequent set of runs up to 36,800ms. For each simulation we averaged the duration of each successfully committed transaction to provide a value of cost for view consistency, global consistency, and view consistency with second chance global consistency.
 % Cost
 \begin{figure}[h]
 \begin{center}
@@ -57,7 +60,7 @@ We represent transaction cost as the time in milliseconds that a transaction req
 \end{center}
 \end{figure}
 
-For short length transactions we observed a 2PC baseline cost of 2,610 ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate (2PCLA) baseline, we observed a cost of 3,698 ms, rounded to the nearest integer. Figure \ref{ShortD} shows the results of the 2PV protocols against the baseline values. We observe view consistency perform no successful commits at 1,150 ms but performing successful commits at 2,300 ms and above. View consistency begins with a cost of 2,920 ms, approximately 12\% higher than the 2PC baseline and approximately 21\% lower than the 2PCLA baseline. By the 9,200 ms frequency, view consistency nearly equals the 2PCLA baseline (3,705 ms versus 3,698 ms) and only rises slightly for the remaining frequency points. Global consistency and view consistency second chance show parallel performance throughout the graph, beginning at slightly more than 5,000 ms (about 35\% higher than the 2PCLA baseline) and closely approaching the 2PCLA baseline by the 36,800 ms update frequency. At that frequency point, all three implementations are less then 5\% above the 2PCLA baseline.
+For short length transactions we observed a 2PC baseline cost of 2,610ms, rounded to the nearest integer. Using 2PC with a 99.5\% local authorization success rate (2PCLA) baseline, we observed a cost of 3,698 ms, rounded to the nearest integer. Figure \ref{ShortD} shows the results of the 2PV protocols against the baseline values. We observe view consistency perform no successful commits at 1,150ms but performing successful commits at 2,300ms and above. View consistency begins with a cost of 2,920ms, approximately 12\% higher than the 2PC baseline and approximately 21\% lower than the 2PCLA baseline. By the 9,200ms frequency, view consistency nearly equals the 2PCLA baseline (3,705 ms versus 3,698 ms) and only rises slightly for the remaining frequency points. Global consistency and view consistency with second chance show parallel performance throughout the graph, beginning at slightly more than 5,000ms (about 35\% higher than the 2PCLA baseline) and closely approaching the 2PCLA baseline by the 36,800ms update frequency. At that frequency point, all three implementations are less then 5\% above the 2PCLA baseline.
 % Cost
 \begin{figure}[h]
 \begin{center}
@@ -67,7 +70,7 @@ For short length transactions we observed a 2PC baseline cost of 2,610 ms, round
 \end{center}
 \end{figure}
 
-For medium length transactions we observed a 2PC baseline cost of 5,015 ms, rounded to the nearest integer. For the 2PCLA baseline, we observed a cost of 7,279 ms, rounded to the nearest integer. Figure \ref{MediumD} shows the results of the 2PV protocols against the baseline values. View consistency first began performing successful commits at the 4,600 ms update frequency, beginning with a cost of 5,297 ms, 6\% higher than the 2PC baseline and 27\% lower than the 2PCLA baseline. By the 18,400 ms and 36,800 ms marks, view consistency is within $\pm$40 ms of the 2PCLA baseline. Global consistency and view consistency second chance again exhibit similar performance, with both beginning at the 1,150 ms update frequency roughly 37\% higher than the 2PCLA baseline, rising slightly at the 4,600 ms update frequency, and then trending back towards the 2PCLA baseline, reaching a cost of about 7\% of the 2PCLA baseline at the 36,800 ms update frequency.
+For medium length transactions we observed a 2PC baseline cost of 5,015 ms, rounded to the nearest integer. For the 2PCLA baseline, we observed a cost of 7,279 ms, rounded to the nearest integer. Figure \ref{MediumD} shows the results of the 2PV protocols against the baseline values. View consistency first began performing successful commits at the 4,600ms update frequency, beginning with a cost of 5,297 ms, 6\% higher than the 2PC baseline and 27\% lower than the 2PCLA baseline. By the 18,400ms and 36,800ms marks, view consistency is within $\pm$40ms of the 2PCLA baseline. Global consistency and view consistency with second chance again exhibit similar performance, with both beginning at the 1,150ms update frequency roughly 37\% higher than the 2PCLA baseline, rising slightly at the 4,600ms update frequency, and then trending back towards the 2PCLA baseline, reaching a cost of about 7\% of the 2PCLA baseline at the 36,800ms update frequency.
 % Cost
 \begin{figure}[h]
 \begin{center}
@@ -77,9 +80,9 @@ For medium length transactions we observed a 2PC baseline cost of 5,015 ms, roun
 \end{center}
 \end{figure}
 
-For long length transactions we observed a 2PC baseline cost of 8,688 ms, rounded to the nearest integer. For the 2PCLA baseline, we observed a cost of 12,742 ms, rounded to the nearest integer. Figure \ref{LongD} shows the results of the 2PV protocols against the baseline values. View consistency increasingly shows negligible performance in the shorter update frequencies, only beginning to register successful commits at the 18,400 ms mark. However, the performance does maintain comparable performance to the 2PCLA baseline, costing about 4\% less at the 18,400 ms mark and about 1\% less at the 36,800 ms mark. Global consistency and view consistency second chance are again roughly equivalent in performance, with similarly steady results from the 1,150 ms mark to the 9,200 ms mark ranging between 36\% and 38\% higher than 2PCLA. The performance begins to trend towards the 2PLCA baseline at the 18,400 ms and 36,800 marks, reducing in cost to nearly 13\% above the 2PCLA baseline.
+For long length transactions we observed a 2PC baseline cost of 8,688 ms, rounded to the nearest integer. For the 2PCLA baseline, we observed a cost of 12,742 ms, rounded to the nearest integer. Figure \ref{LongD} shows the results of the 2PV protocols against the baseline values. View consistency increasingly shows negligible performance in the shorter update frequencies, only beginning to register successful commits at the 18,400ms mark. However, the performance does maintain comparable performance to the 2PCLA baseline, costing about 4\% less at the 18,400ms mark and about 1\% less at the 36,800ms mark. Global consistency and view consistency with second chance are again roughly equivalent in performance, with similarly steady results from the 1,150ms mark to the 9,200ms mark ranging between 36\% and 38\% higher than 2PCLA. The performance begins to trend towards the 2PLCA baseline at the 18,400ms and 36,800ms marks, reducing in cost to nearly 13\% above the 2PCLA baseline.
 \subsubsection{Successful Commit Ratio}
-We represent the commit success ratio as the number of commits divided by the total number of transactions attempted. We performed simulations of all protocols for short transactions (see fig. \ref{ShortC}), medium transactions (see fig. \ref{MediumC}), and long transactions operations each (see fig. \ref{LongC}). We began with a policy update frequency of 1,150 ms and doubled the amount for each subsequent set of runs up to 36,800 ms.
+We represent the commit success ratio as the number of commits divided by the total number of transactions attempted. We performed simulations of all protocols for short transactions (see fig. \ref{ShortC}), medium transactions (see fig. \ref{MediumC}), and long transactions operations each (see fig. \ref{LongC}). We began with a policy update frequency of 1,150ms and doubled the amount for each subsequent set of runs up to 36,800ms.
 % Success
 \begin{figure}[h]
 \begin{center}
@@ -88,6 +91,8 @@ We represent the commit success ratio as the number of commits divided by the to
 \label{ShortC}
 \end{center}
 \end{figure}
+
+For short length transactions we observed a 2PC baseline success ratio of 1.0, or 100\%. The perfect commit success was expected from our simulation setting for integrity constraint success of 1.0, which for 2PC solely determines the commit success rate. For the 2PCLA baseline, we observed a baseline success ratio of 0.981, or 98.1\%. As 2PCLA is subject to transaction aborts due to the 99.5\% local authorization success rate, we expected a small drop in successful commits from 100\%. Figure \ref{ShortC} shows the results of the 2PV protocols against the baseline values. View consistency had no commits at the 1,150ms frequency update mark, and had only six commits out of three runs of 1,000 transactions for the 2,300ms mark, resulting in a success ratio of 0.43\%. The view consistency success ratio improves as policy update frequency is lengthened, resulting in an 88.77\% commit success ratio by the 36,800ms mark, roughly 10\% below that of 2PCLA. Global consistency and view consistency with second chance have nearly equal performance characteristics similar to what was observed in the transaction cost trials. Both protocols perform strongly in terms of commit success ratios, beginning at the 1,150ms mark with 93\% $\pm$0.2\% success rates and improving to 97.9\% $\pm$0.1\% success by the 36,800ms mark, nearly equal to the 2PCLA baseline of 98.1\%.
 % Success
 \begin{figure}[h]
 \begin{center}
@@ -96,6 +101,8 @@ We represent the commit success ratio as the number of commits divided by the to
 \label{MediumC}
 \end{center}
 \end{figure}
+
+For medium length transactions, the 2PC baseline remains 1.0, or 100\%. For the 2PCLA baseline, we observed a baseline success ratio of 0.9597, or 95.97\%. Figure \ref{MediumC} shows the results of the 2PV protocols against the baseline values. View consistency had no commits at either the 1,150ms or 2,300ms frequency update marks, and had just one commit out of three runs of 1,000 transactions for the 4,600ms mark, resulting in a success ratio of 0.03\%. The view consistency success ratio again improves as policy update frequency is lengthened, resulting in an 78.1\% commit success ratio by the 36,800ms mark, nearly 18\% below that of 2PCLA. Global consistency and view consistency with second chance again show nearly identical performance characteristics. Both protocols perform well in terms of commit success ratios, beginning at the 1,150ms mark with 85.35\% $\pm$0.12\% success rates and improving to 94.25\% $\pm$0.05\% success by the 36,800ms mark, almost 4\% below the 2PCLA baseline of 98.1\%.
 % Success
 \begin{figure}[h]
 \begin{center}
@@ -104,8 +111,10 @@ We represent the commit success ratio as the number of commits divided by the to
 \label{LongC}
 \end{center}
 \end{figure}
+
+For long length transactions, the 2PC baseline remains 1.0, or 100\%. For the 2PCLA baseline, we observed a baseline success ratio of 0.9247, or 92.47\%. Figure \ref{LongC} shows the results of the 2PV protocols against the baseline values. View consistency began producing successful commits at the 18,400ms mark at a rate of 30\%. At the 36,800ms mark, its success rate is slightly more then doubled to 61.67\%, over a third less than the 2PCLA baseline. Global consistency and view consistency with second chance yet again show nearly identical performance characteristics. Both protocols again outperform view consistency in terms of commit success ratios, beginning at the 1,150ms mark with 78.13\% and 75.07\% success rates, respectively, and improving to 86.53\% and 86.37\% success by the 36,800ms mark, slightly more then 6\% below the 2PCLA baseline of 92.47\%.
 \subsubsection{Transaction Throughput}
-We represent transaction throughput as the number of commits in a simulation run divided by the time in milliseconds of the duration of that simulation run. We performed simulations of all protocols for short transactions (see fig. \ref{ShortT}), medium transactions (see fig. \ref{MediumT}), and long transactions (see fig. \ref{LongT}). We began with a policy update frequency of 1,150 ms and doubled the amount for each subsequent set of runs up to 36,800 ms.
+We represent transaction throughput as the number of commits in a simulation run divided by the time in milliseconds of the duration of that simulation run. We performed simulations of all protocols for short transactions (see fig. \ref{ShortT}), medium transactions (see fig. \ref{MediumT}), and long transactions (see fig. \ref{LongT}). We began with a policy update frequency of 1,150ms and doubled the amount for each subsequent set of runs up to 36,800ms.
 %Throughput
 \begin{figure}[h]
 \begin{center}
@@ -133,6 +142,8 @@ We represent transaction throughput as the number of commits in a simulation run
 \subsection{B. Sensitivity analysis}
 %%% summarize all the above here?
 give analysis
+
+Commit success: VC fares poorly for all lengths, success decreases with length but increases with update interval, suggesting that for longer frequencies may approach something good (cite paper on xn length?); GC and VC2nd do reasonably well as freq updates are longer and ten lengths are shorter
 \section{4. Conclusions \& Observations}
 %%% Do this part for reals this time
 In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
