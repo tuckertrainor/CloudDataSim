@@ -123,6 +123,8 @@ We represent transaction throughput as the number of commits in a simulation run
 \label{ShortT}
 \end{center}
 \end{figure}
+
+For short length transactions we observed a 2PC baseline transaction throughput of 0.003809 commits/ms. For the 2PCLA baseline, we observed a baseline transaction throughput of 0.002665 commits/ms. Figure \ref{ShortT} shows the results of the 2PV protocols against the baseline values. View consistency follows a similar trend to its performance in successful commit ratios (see fig \ref{ShortC}, which is logical since the quantity of commits for throughput for each protocol is the number of successful commits for each protocol. View consistency produces a throughput of virtually zero at the 2,300ms update frequency mark due to there being only six successful commits at that update frequency. Its performance improves to 0.002400 commits/ms by the 36,800ms mark, about 11\% less than the 2PCLA baseline. Global consistency and view consistency second chance fare better, beginning at the 1,150ms update frequency with 0.001903 commits/ms and 0.001900 commits/ms, respectively, showing performance about 29\% below the 2PCLA baseline. By the 36,800ms mark, they improve to 0.002602 commits/ms and 0.002596 commits/ms, respectively, falling between 2.4\% and 2.6\% below the 2PLCA baseline.
 %Throughput
 \begin{figure}[h]
 \begin{center}
@@ -131,6 +133,8 @@ We represent transaction throughput as the number of commits in a simulation run
 \label{MediumT}
 \end{center}
 \end{figure}
+
+For medium length transactions we observed a 2PC baseline transaction throughput of 0.001984 commits/ms. For the 2PCLA baseline, we observed a baseline transaction throughput of 0.001338 commits/ms. Figure \ref{MediumT} shows the results of the 2PV protocols against the baseline values. View consistency still performs poorly at the outset, with a negligible throughput at the 4,600ms update frequency, but improving to 0.001095 commits/ms by the 36,800ms mark, about 18\% less than the 2PCLA baseline. Global consistency and view consistency second chance perform reasonably well at the outset, beginning at the 1,150ms update frequency with 0.000908 commits/ms and 0.000889 commits/ms, respectively, showing performance about 32\% to 34\% below the 2PCLA baseline. By the 36,800ms mark, they improve to 0.001246 commits/ms and 0.001245 commits/ms, respectively, nearly identical performance at 6.9\% below the 2PCLA baseline.
 %Throughput
 \begin{figure}[h]
 \begin{center}
@@ -139,11 +143,21 @@ We represent transaction throughput as the number of commits in a simulation run
 \label{LongT}
 \end{center}
 \end{figure}
+
+For long length transactions we observed a 2PC baseline transaction throughput of 0.001145 commits/ms. For the 2PCLA baseline, we observed a baseline transaction throughput of 0.000752 commits/ms. Figure \ref{LongT} shows the results of the 2PV protocols against the baseline values. View consistency echoes its commit success rate performance, producing throughput only at the 18,400ms and 36,800ms update frequency marks. Its throughput at the former was 0.000247 commits/ms and 0.000506 commits/ms at the latter. These values are, respectively, 67\% less and 33\% less tan the 2PCLA baseline. Global consistency and view consistency second chance perform reasonably well at the outset, beginning at the 1,150ms update frequency with 0.000908 commits/ms and 0.000889 commits/ms, respectively, showing performance about 32\% to 34\% below the 2PCLA baseline. By the 36,800ms mark, they improve to 0.001246 commits/ms and 0.001245 commits/ms, respectively, nearly identical performance at 6.9\% below the 2PCLA baseline.
 \subsection{B. Sensitivity analysis}
 %%% summarize all the above here?
 give analysis
 
+2PC vs. 2PCLA? 65-70\% less for throughput
+
+all fall beneath 2PCLA, as could be expected
+
+GC and VC2nd nearly identical, cost of an extra GC is offset by VC quickness if successful
+
 Commit success: VC fares poorly for all lengths, success decreases with length but increases with update interval, suggesting that for longer frequencies may approach something good (cite paper on xn length?); GC and VC2nd do reasonably well as freq updates are longer and ten lengths are shorter
+
+throughput is subject to successful commits
 \section{4. Conclusions \& Observations}
 %%% Do this part for reals this time
 In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
