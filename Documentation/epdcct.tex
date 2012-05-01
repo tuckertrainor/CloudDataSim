@@ -187,26 +187,21 @@ For medium length transactions we observed a 2PC baseline transaction throughput
 
 For long length transactions we observed a 2PC baseline transaction throughput of 0.001145 commits/ms. For the 2PCLA baseline, we observed a baseline transaction throughput of 0.000752 commits/ms. Figure \ref{LongT} shows the results of the 2PV protocols against the baseline values. View consistency echoes its commit success rate performance, producing throughput only at the 18,400ms and 36,800ms update frequency marks. Its throughput at the former was 0.000247 commits/ms and 0.000506 commits/ms at the latter. These values are, respectively, 67\% less and 33\% less tan the 2PCLA baseline. The throughput of global consistency and view consistency second chance is less impressive than in short and medium transactions but still outperforms view consistency for long transactions. Throughput for global consistency and view consistency second chance begin at 0.000481 commits/ms and 0.000468 commits/ms, respectively, for the 1,150ms update frequency, a performance of about 36\% to 38\% below the 2PCLA baseline. By the 36,800ms mark, they improve to 0.000627 commits/ms and 0.000625 commits/ms, respectively, again nearly identical performance but at 16.6\% and 16.9\% below the 2PCLA baseline.
 \subsection{C. Sensitivity analysis}
-%%% summarize all the above here?
-give analysis
+%%% summarize all of the above
+The results exhibit a clear trend: if the policy update frequency is decreased (i.e., the time between policy updates is lengthened), the 2PV protocols begin to approach the performance of the 2PCLA protocol. View consistency is rendered useless during medium and long transactions when the policy update frequency is high, allowing few if any transactions to commit. Global consistency and view consistency with second chance global consistency were able to allow committed transactions for all update frequencies, often exhibiting nearly identical performance characteristics. View consistency was quicker to match 2PCLA performance in terms of transaction cost; global consistency and view consistency second chance were quicker to match 2PCLA performance in terms of successful commits and transaction throughput.
 
-2PC vs. 2PCLA? 65-70\% less for throughput
+The relationship between policy update frequency, transaction length, and successful commits does not come as a surprise. While formulating the 2PV protocols, its authors noted that deferred proofs of authorization, which we simulated here, are preferable when transaction length is less than the update interval \cite{Iskander}. Indeed, view consistency was able to perform well when transactions were able to be entirely process within an update window. If any transaction using view consistency was in process during a policy update was destined to fail and be aborted.
 
-all fall beneath 2PCLA, as could be expected
-
-GC and VC2nd nearly identical, cost of an extra GC is offset by VC quickness if successful
-
-Commit success: VC fares poorly for all lengths, success decreases with length but increases with update interval, suggesting that for longer frequencies may approach something good (cite paper on xn length?); GC and VC2nd do reasonably well as freq updates are longer and ten lengths are shorter
-
-throughput is subject to successful commits
-
-concurrency affects VC performance, as all that overlap a policy update will abort
-
+Transaction length also directly affects all three performance benchmarks. Obviously, an increase in operations is directly proportional to an increase in time cost, as each operation incurs a time penalty. As the number of operations increases, so does the likelihood of a local authorization check failing and thus aborting a transaction. As the number of aborted transactions increases, the successful committed transaction ration falls along with the throughput rate, whose performance depends hinges on committed transactions.
 \section{4. Conclusions \& Observations}
 %%% Do this part for reals this time
 In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
 \subsection{notes}
 Mention reduction of group size, object was to implement all proofs, instead doing half, leaving remainder for future research
+
+VC vs GC vs VC2nd
+
+GC and VC2nd nearly identical, cost of an extra GC is offset by VC quickness if successful
 % References
 \begin{thebibliography}{9}
 \bibitem{Iskander} Iskander \emph{et al.}, "Enforcing Policy and Data Consistency of Cloud Transactions," Department of Computer Science, University of Pittsburgh.
