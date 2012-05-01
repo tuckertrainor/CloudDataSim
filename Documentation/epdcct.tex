@@ -40,8 +40,6 @@ In order to benchmark these protocols we can simulate two-phase commit (2PC) and
 
 To benchmark these protocols, we will record the interaction between experimental clients and servers as they process sample transactions. A robot-controlled client will send transactions to one of several cloud data servers. This primary server will serve as a transaction manager for the entire transaction, routing operations requiring other cloud data servers to those servers as necessary. The transaction manager is also responsible for collection and validation phases of any 2PC and 2PV protocol invocations. There will also be a policy server which periodically updates the master policy version and pushes it to all available cloud servers. The policy server also will field requests from cloud servers for the most recent policy version.
 \section{2. Experimental Testbed}
-%%% Redo this paragraph or toss it
-%In this section we describe the implementation of the model and algorithms that apply to it. The test environment is detailed, with details such as hardware and software (i.e., Java) touched upon. The different client/server modules and their child threads are described and their variables are listed. The effects of the variables on their respective modules are summarized in terms of relevance to the simulation.
 \subsection{Design and Implementation}
 In designing the simulation, we had two major requirements: communication over a network and the ability to spawn threads. Since we recently were given access to Java source code of a simple client/server application that utilized threading, we went with Java over other equally suitable languages such as C or C++. Coding in Java, we implemented a simulation with three major classes (\texttt{Robot}, \texttt{CloudServer}, \texttt{PolicyServer}), each with a number of supporting classes.
 
@@ -71,13 +69,26 @@ The parameters used in the simulation are stored in a text file named \texttt{pa
 \subsection{Sample Transaction Flow}
 A typical transaction begins in the \texttt{Robot}, where a series of random operations are assembled and and passed to a spawned \texttt{RobotThread}. The \texttt{RobotThread} connects with the TM, which passes it to a \texttt{WorkerThread}. The \texttt{RobotThread} then begins sending the \texttt{WorkerThread} operations one at a time, in order. The \texttt{WorkerThread} will then determine if the operation is to be processed on its own server or on another server; if it is the latter, the \texttt{WorkerThread} passes the operation to the appropriate server and waits for the results of the operation. The \texttt{WorkerThread} handles READ and WRITE operations by performing a check of local authorization, which is simulated using the \texttt{localAuthorizationSuccessRate} for probability of granting authorization; a denial of authorization forces the transaction to ABORT. When the \texttt{WorkerThread} reaches a COMMIT operation, it simulates an integrity check against the \texttt{integrityCheckSuccessRate}, which if successful proceeds to the 2PV protocol as specified in the parameters.
 
-If the transaction is to use view consistency, the 
+If the transaction is to use validate using view consistency, after the integrity check the \texttt{WorkerThread} collects the policy version that each server involved in the transaction used for the lifetime of the transaction, and compares all that are collected to the current policy version on the \texttt{CloudServer} that hosts the TM. If any of the collected versions differ from the current version from the TM's server, the transaction is aborted. Otherwise, the transaction is allowed to commit and is complete.
+
+If the transaction is to validate using global consistency, after the integrity check the \texttt{WorkerThread} has its TM request the current policy version from the \texttt{PolicyServer}. It then iterates through its \texttt{OperationRecord}s and if the operation was authorized with a policy version other than the current version, it runs a local authorization again for that operation with the current version. If all of the operations validate under the current policy version, the transaction is allowed to commit and is complete. Otherwise, the transaction is aborted at the first local authorization failure.
+
+Finally, if the transaction is to validate using view consistency with second chance global consistency, it simple performs a view consistency check. If the view consistency check passes, then the transaction is allowed to commit and is complete. If the view consistency check fails, the \texttt{WorkerThread} then runs a global consistency check, with the same outcomes as the previous paragraph.
 \section{3. Experiments}
-%%% Redo the opening paragraph
-%In this section we produce representations of the resulting data from the simulation. The parameters used for each set of simulations is listed and followed by the results. Each set of results is prefaced by the real-world environment that we attempted to simulate, along with explanations of specific decisions in parameter setting.
-explain update freq.
+With our testbed implemented, we carried out a series of experiments to benchmark the costs of the 2PV protocols. For our initial experiments we chose to determine transaction cost in terms of time, successful commit ratio, and throughput of committed transactions as a function of policy update frequency.
+
+To establish a series of policy update frequencies, we began with an initial amount of time representing an average case of eight operations. Given a range of 75ms to 125ms for a READ operation and a range of 150ms to 225ms for a WRITE operation, we calculated the average duration of four READs and four WRITEs to be 1,150ms. We then ran experiments using 1,150ms as the policy update frequency. From there we continuously doubled the value, running experiments using the value as the policy update frequency, up through 36,800ms.
+
+For each policy update frequency, we varied transaction length and validation protocol and ran experiments for every combination between the two. The variables were set as follows:
+\begin{itemize}
+\item{}Transaction lengths were divided into three ranges: short (8-15 operations per transaction), medium (16-30 operations per transaction), and long (31-50 operations per transaction).
+\item{}Five validation protocols were used: 2PC, 2PC with local authorization checks, view consistency, global consistency, and view consistency with second chance global consistency.
+\end{itemize}
+
+State the fixed parameters, the varied parameters
 
 explain all parameter settings
+
 \subsection{A. Performance evaluation}
 \subsubsection{Transaction Cost}
 We represent transaction cost as the time in milliseconds that a transaction requires for completion. We performed simulations of all protocols for short transactions (see fig. \ref{ShortD}), medium transactions (see fig. \ref{MediumD}), and long transactions (see fig. \ref{LongD}). We began with a policy update frequency of 1,150ms and doubled the frequency for each subsequent set of runs up to 36,800ms. For each simulation we averaged the duration of each successfully committed transaction to provide a value of cost for view consistency, global consistency, and view consistency with second chance global consistency.
@@ -188,6 +199,9 @@ GC and VC2nd nearly identical, cost of an extra GC is offset by VC quickness if 
 Commit success: VC fares poorly for all lengths, success decreases with length but increases with update interval, suggesting that for longer frequencies may approach something good (cite paper on xn length?); GC and VC2nd do reasonably well as freq updates are longer and ten lengths are shorter
 
 throughput is subject to successful commits
+
+concurrency affects VC performance, as all that overlap a policy update will abort
+
 \section{4. Conclusions \& Observations}
 %%% Do this part for reals this time
 In this section we summarize the findings from the simulation and explore the potential of the algorithms simulated. We will note any findings that suggest further simulation or experimentation. We will also recount any notable observations that occurred during implementation or simulation.
