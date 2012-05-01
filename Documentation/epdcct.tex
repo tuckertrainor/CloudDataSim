@@ -75,6 +75,7 @@ If the transaction is to validate using global consistency, after the integrity 
 
 Finally, if the transaction is to validate using view consistency with second chance global consistency, it simple performs a view consistency check. If the view consistency check passes, then the transaction is allowed to commit and is complete. If the view consistency check fails, the \texttt{WorkerThread} then runs a global consistency check, with the same outcomes as the previous paragraph.
 \section{3. Experiments}
+\subsection{A. Variables and Fixed Parameters}
 With our testbed implemented, we carried out a series of experiments to benchmark the costs of the 2PV protocols. For our initial experiments we chose to determine transaction cost in terms of time, successful commit ratio, and throughput of committed transactions as a function of policy update frequency.
 
 To establish a series of policy update frequencies, we began with an initial amount of time representing an average case of eight operations. Given a range of 75ms to 125ms for a READ operation and a range of 150ms to 225ms for a WRITE operation, we calculated the average duration of four READs and four WRITEs to be 1,150ms. We then ran experiments using 1,150ms as the policy update frequency. From there we continuously doubled the value, running experiments using the value as the policy update frequency, up through 36,800ms.
@@ -85,11 +86,10 @@ For each policy update frequency, we varied transaction length and validation pr
 \item{}Five validation protocols were used: 2PC, 2PC with local authorization checks, view consistency, global consistency, and view consistency with second chance global consistency.
 \end{itemize}
 
-State the fixed parameters, the varied parameters
-
-explain all parameter settings
-
-\subsection{A. Performance evaluation}
+With a combination matrix of these variables, we simulated three runs of 1,000 transactions for each combination and averaged their results. For the purposes of our experiments, several parameters (see table 1) were constant throughout all experiments but can be varied in future experiments to further explore the performance of the 2PV protocols.
+\begin{table}[htdp]\begin{center}\begin{tabular}{|l|c|}\hline \emph{Variable name} & \emph{Value} \\\hline \texttt{maxServers} & 3 \\\hline \texttt{maxDegree} & 10 \\\hline \texttt{latencyMin} & 5ms \\\hline \texttt{latencyMax} & 25ms \\\hline \texttt{integrityCheckSuccessRate} & 1.000 \\\hline \texttt{localAuthorizationSuccessRate} & 0.995 \\\hline \end{tabular} \caption{Fixed Parameters}\end{center}\label{Fixed}\end{table}
+The experiments utilized three \texttt{CloudServer}s processing a maximum total of ten transactions concurrently. The network latency parameters were set to simulate a local area network (LAN) environment. Integrity check success rate was set at 1.000, or 100\%, as we only wanted to see successes and failures based upon policy validation. Thus, the local authorization success rate was set at 0.995, or 99.5\%. Though this rate may initially appear artificially high, it is worth noting that it comes out to, on average, 1 out of every 200 operations failing local authorization. If four long transactions of 50 operations each are run, it is probable that one of them will fail local authorization and be aborted.
+\subsection{B. Performance evaluation}
 \subsubsection{Transaction Cost}
 We represent transaction cost as the time in milliseconds that a transaction requires for completion. We performed simulations of all protocols for short transactions (see fig. \ref{ShortD}), medium transactions (see fig. \ref{MediumD}), and long transactions (see fig. \ref{LongD}). We began with a policy update frequency of 1,150ms and doubled the frequency for each subsequent set of runs up to 36,800ms. For each simulation we averaged the duration of each successfully committed transaction to provide a value of cost for view consistency, global consistency, and view consistency with second chance global consistency.
 % Cost
@@ -186,7 +186,7 @@ For medium length transactions we observed a 2PC baseline transaction throughput
 \end{figure}
 
 For long length transactions we observed a 2PC baseline transaction throughput of 0.001145 commits/ms. For the 2PCLA baseline, we observed a baseline transaction throughput of 0.000752 commits/ms. Figure \ref{LongT} shows the results of the 2PV protocols against the baseline values. View consistency echoes its commit success rate performance, producing throughput only at the 18,400ms and 36,800ms update frequency marks. Its throughput at the former was 0.000247 commits/ms and 0.000506 commits/ms at the latter. These values are, respectively, 67\% less and 33\% less tan the 2PCLA baseline. The throughput of global consistency and view consistency second chance is less impressive than in short and medium transactions but still outperforms view consistency for long transactions. Throughput for global consistency and view consistency second chance begin at 0.000481 commits/ms and 0.000468 commits/ms, respectively, for the 1,150ms update frequency, a performance of about 36\% to 38\% below the 2PCLA baseline. By the 36,800ms mark, they improve to 0.000627 commits/ms and 0.000625 commits/ms, respectively, again nearly identical performance but at 16.6\% and 16.9\% below the 2PCLA baseline.
-\subsection{B. Sensitivity analysis}
+\subsection{C. Sensitivity analysis}
 %%% summarize all the above here?
 give analysis
 
