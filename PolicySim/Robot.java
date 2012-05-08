@@ -29,8 +29,8 @@ import java.util.Date;
 
 public class Robot {
 	static int maxTransactions;
-	static int maxQueries;
-	static int minQueries;
+	static int maxOperations;
+	static int minOperations;
 	static int maxServers;
 	static int maxDegree;
 	static int latencyMin;
@@ -90,14 +90,14 @@ public class Robot {
 			case 4:
 				primaryServer = getTM(serverList, args[0]);
 				setSeed(args[1]);
-				setQmin(args[2]);
-				setQmax(minQueries, args[3]);
+				setOpMin(args[2]);
+				setOpMax(minOperations, args[3]);
 				break;
 			case 5:
 				primaryServer = getTM(serverList, args[0]);
 				setSeed(args[1]);
-				setQmin(args[2]);
-				setQmax(minQueries, args[3]);
+				setOpMin(args[2]);
+				setOpMax(minOperations, args[3]);
 				setVT(args[4]);
 				break;
 			default: // We should never reach here, but just in case
@@ -127,7 +127,7 @@ public class Robot {
 			prevQuery = 'B';
 			queryServer = 0;
 			// Get random number of queries for this transaction
-			operations = minQueries + generator.nextInt(maxQueries - minQueries);
+			operations = minOperations + generator.nextInt(maxOperations - minOperations);
 			for (int j = 0; j < operations; j++) {
 				String newQuery = new String();
 				// make READ or WRITE
@@ -241,11 +241,11 @@ public class Robot {
 						maxTransactions = Integer.parseInt(tuple[1]);
 						ThreadCounter.maxThreads = maxTransactions;
 					}
-					else if (tuple[0].equals("QMIN")) {
-						minQueries = Integer.parseInt(tuple[1]);
+					else if (tuple[0].equals("OPMIN")) {
+						minOperations = Integer.parseInt(tuple[1]);
 					}
-					else if (tuple[0].equals("QMAX")) {
-						maxQueries = Integer.parseInt(tuple[1]);
+					else if (tuple[0].equals("OPMAX")) {
+						maxOperations = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("MS")) {
 						maxServers = Integer.parseInt(tuple[1]);
@@ -319,8 +319,8 @@ public class Robot {
 	public static void argsError() {
 		System.err.println("Usage: java Robot <TM Number> or");
 		System.err.println("Usage: java Robot <TM Number> <Seed> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> <QMIN> <QMAX> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> <QMIN> <QMAX> <VT>\n");
+		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> or");
+		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> <VT>\n");
 	}
 	
 	public static int getTM(ArrayList<ServerID> _serverList, String str) {
@@ -352,37 +352,37 @@ public class Robot {
 		}
 	}
 	
-	public static void setQmin(String str) {
+	public static void setOpMin(String str) {
 		int min = 0;
 		// Check arg for proper value, range
 		try {
 			min = Integer.parseInt(str);
 			if (min < 1) {
-				System.err.println("Error in QMIN. Please set a minimum of at least 1.");
+				System.err.println("Error in OPMIN. Please set a minimum of at least 1.");
 				System.exit(-1);
 			}
-			minQueries = min;
+			minOperations = min;
 		}
 		catch (Exception e) {
-			System.err.println("Error parsing argument for QMIN. Please use a valid integer.");
+			System.err.println("Error parsing argument for OPMIN. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
 	}
 	
-	public static void setQmax(int min, String str) {
+	public static void setOpMax(int min, String str) {
 		int max = 0;
 		// Check arg for proper value, range
 		try {
 			max = Integer.parseInt(str);
 			if (max < min) {
-				System.err.println("Error in QMAX. Please set a value equal to or greater than QMIN.");
+				System.err.println("Error in OPMAX. Please set a value equal to or greater than OPMIN.");
 				System.exit(-1);
 			}
-			maxQueries = max;
+			maxOperations = max;
 		}
 		catch (Exception e) {
-			System.err.println("Error parsing argument for QMAX. Please use a valid integer.");
+			System.err.println("Error parsing argument for OPMAX. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
@@ -552,9 +552,9 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("MT=" + maxTransactions);
 			outputBuf.newLine();
-			outputBuf.write("QMIN=" + minQueries);
+			outputBuf.write("OPMIN=" + minOperations);
 			outputBuf.newLine();
-			outputBuf.write("QMAX=" + maxQueries);
+			outputBuf.write("OPMAX=" + maxOperations);
 			outputBuf.newLine();
 			outputBuf.write("MS=" + maxServers);
 			outputBuf.newLine();

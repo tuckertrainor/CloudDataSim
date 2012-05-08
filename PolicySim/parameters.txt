@@ -1,9 +1,9 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
 MT 1000
-# QMIN minQueries - minimum number of queries (READ/WRITE) per transaction
-QMIN 8
-# QMAX maxQueries - maximum number of queries (READ/WRITE) per transaction
+# OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
+OPMAX 8
+# OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
 QMAX 15
 # MS maxServers - number of servers available
 MS 3
