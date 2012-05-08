@@ -1,10 +1,10 @@
 # *** This file is required by the Robot and the Policy Server
 # MT maxTransactions - number of transactions to perform
-MT 100
+MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
-OPMIN 8
+OPMIN 1000
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
-OPMAX 15
+OPMAX 1001
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
@@ -23,9 +23,9 @@ ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
 LASR 0.995
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
-PMIN 2300
+PMIN 10000
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
-PMAX 2300
+PMAX 10000
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345

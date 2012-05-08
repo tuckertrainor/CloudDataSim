@@ -150,6 +150,8 @@ public class WorkerThread extends Thread {
 								System.out.println("READ for transaction " + query[1] +
 												   " sequence " + query[3]);
 								databaseRead();
+								// Add policy version for passed query logging
+								msgText += " " + transactionPolicyVersion;
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -165,26 +167,11 @@ public class WorkerThread extends Thread {
 							System.out.println("Pass READ of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
-							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
-								System.out.println("READ of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   " successful");
-								// Add to totalSleepTime if necessary
-								if (!my_tm.threadSleep) {
-									// Add databaseRead() time
-									totalSleepTime += 75 + generator.nextInt(50);
-									// Add return latency
-									totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-								}
-								
-								// Tell RobotThread to add this server to its commitStack
-								// server is query[2], transaction is query[1], sequence is query[3]
-								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
-							}
-							else { // error in passQuery()
-								System.out.println("ERROR in passQuery()");
-							}
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to READ of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
 						}
 					}
 					else if (query[0].equals("W")) { // WRITE
@@ -213,6 +200,8 @@ public class WorkerThread extends Thread {
 								System.out.println("WRITE for transaction " + query[1] +
 												   " sequence " + query[3]);
 								databaseWrite();
+								// Add policy version for passed query logging
+								msgText += " " + transactionPolicyVersion;
 								// Add to query log
 								if (addToQueryLog(query, transactionPolicyVersion)) {
 									System.out.println("Transaction " + query[1] +
@@ -224,35 +213,22 @@ public class WorkerThread extends Thread {
 								}
 								// Tell RobotThread to add this server to its commitStack
 								// server is query[2], transaction is query[1], sequence is query[3]
-								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
+								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3] + " " + transactionPolicyVersion;
 							}
 						}
 						else { // Pass to server
 							System.out.println("Pass WRITE of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
-							if (passQuery(Integer.parseInt(query[2]), queryGroup[i])) {
-								System.out.println("WRITE of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   " successful");
-								// Add to totalSleepTime if necessary
-								if (!my_tm.threadSleep) {
-									// Add databaseWrite() time
-									totalSleepTime += 150 + generator.nextInt(75);
-									// Add return latency
-									totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-								}
-
-								// Tell RobotThread to add this server to its commitStack, send policy version as well
-								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3] + " " + transactionPolicyVersion;
-							}
-							else { // error in passQuery()
-								System.out.println("ERROR in passQuery()");
-							}
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
 						}
 					}
 					else if (query[0].equals("POLICY")) { // POLICY
+						latencySleep();
 						// Return Policy version of this transaction to caller
 						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
 					}
@@ -326,8 +302,8 @@ public class WorkerThread extends Thread {
 						}
 					}
 				}
-				latencySleep(); // Simulate latency
-				// ACK completion of this query group
+				latencySleep(); // Simulate latency to RobotThread
+				// ACK completion of this query group to RobotThread
 				output.writeObject(new Message(msgText));
 			}
 			// Close any SocketGroup connection
@@ -382,7 +358,7 @@ public class WorkerThread extends Thread {
 			// send query
 			Message msg = null;
 			msg = new Message(query);
-			latencySleep(); // Simulate latency
+			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
@@ -391,18 +367,13 @@ public class WorkerThread extends Thread {
 			// Get policy version and log the query
 			String msgSplit[] = msg.theMessage.split(" ");
 			if (msgSplit[0].equals("ACK")) { // acknowledged, get policy #
-				addToQueryLog(query, Integer.parseInt(msgSplit[1]));
+				addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]));
 			}
 			else if (msgSplit[0].equals("ACS")) { // Add to commit stack, get policy #
-				addToQueryLog(query, Integer.parseInt(msgSplit[4]));
+				addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[4]));
 			}
-			// else it is an ABORT
-
-			// Add to totalSleepTime if necessary
-			if (!my_tm.threadSleep) {
-				// Add return latency
-				totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-			}
+			// else it is an ABORT, no need to log, will be handled by RobotThread
+			return msg.theMessage;
 		}
 		catch (ConnectException ce) {
 			System.err.println(ce.getMessage() +
@@ -413,7 +384,7 @@ public class WorkerThread extends Thread {
 			System.err.println("Error during passQuery(): " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		return msg.theMessage;
+		return "FAIL";
 	}
 	
 	public boolean addToQueryLog(String query[], int policyVersion) {
