@@ -227,7 +227,7 @@ public class WorkerThread extends Thread {
 								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
 							}
 						}
-						else { // Tass to server
+						else { // Pass to server
 							System.out.println("Pass WRITE of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
