@@ -244,8 +244,8 @@ public class WorkerThread extends Thread {
 									totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
 								}
 
-								// Tell RobotThread to add this server to its commitStack
-								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3];
+								// Tell RobotThread to add this server to its commitStack, send policy version as well
+								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3] + " " + transactionPolicyVersion;
 							}
 							else { // error in passQuery()
 								System.out.println("ERROR in passQuery()");
@@ -361,9 +361,9 @@ public class WorkerThread extends Thread {
 	 * @param otherServer - The number of the server to pass to
 	 * @param query - The query that must be performed on another server
 	 *
-	 * @return boolean - true if query was successful, else false
+	 * @return String - the ACK/ABORT from the other server
 	 */
-	public boolean passQuery(int otherServer, String query) {
+	public String passQuery(int otherServer, String query) {
 		String server = my_tm.serverList.get(otherServer).getAddress();
 		int port = my_tm.serverList.get(otherServer).getPort();
 		
@@ -389,18 +389,19 @@ public class WorkerThread extends Thread {
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);
 			// Get policy version and log the query
-			msg = new Message("POLICY");
-			latencySleep(); // Simulate latency
-			sockList.get(otherServer).output.writeObject(msg);
-			msg = (Message)sockList.get(otherServer).input.readObject();
+			String msgSplit[] = msg.theMessage.split(" ");
+			if (msgSplit[0].equals("ACK")) { // acknowledged, get policy #
+				addToQueryLog(query, Integer.parseInt(msgSplit[1]));
+			}
+			else if (msgSplit[0].equals("ACS")) { // Add to commit stack, get policy #
+				addToQueryLog(query, Integer.parseInt(msgSplit[4]));
+			}
+			// else it is an ABORT
+
 			// Add to totalSleepTime if necessary
 			if (!my_tm.threadSleep) {
 				// Add return latency
 				totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-			}
-			String msgSplit[] = msg.theMessage.split(" ");
-			if (addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]))) {
-				return true;
 			}
 		}
 		catch (ConnectException ce) {
@@ -409,10 +410,10 @@ public class WorkerThread extends Thread {
 			ce.printStackTrace(System.err);
 		}
 		catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
+			System.err.println("Error during passQuery(): " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		return false;
+		return msg.theMessage;
 	}
 	
 	public boolean addToQueryLog(String query[], int policyVersion) {
