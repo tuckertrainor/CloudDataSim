@@ -25,6 +25,7 @@ public class WorkerThread extends Thread {
 	private int transactionPolicyVersion = 0;
 	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
+	private boolean isTM = false;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -79,7 +80,7 @@ public class WorkerThread extends Thread {
 				if (msg.theMessage.equals("DONE")) {
 					break;
 				}
-				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update
+				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update from Policy Server
 					String msgSplit[] = msg.theMessage.split(" ");
 					int update = Integer.parseInt(msgSplit[1]);
 					// Check that we aren't going backwards in a race condition
@@ -87,8 +88,19 @@ public class WorkerThread extends Thread {
 						my_tm.setPolicy(update);
 						System.out.println("Server Policy Version updated to v." + update);
 					}
+					// If in Incremental Punctual or Continuous, update transaction
+					// policy version and distribute to other servers
+
 					latencySleep(); // Simulate latency
-					output.writeObject(new Message(msgText));
+					output.writeObject(new Message(msgText)); // send ACK
+					break;
+				}
+				else if (msg.theMessage.indexOf("TMPOLICYUPDATE") != -1) { // Policy update from TM
+					String msgSplit[] = msg.theMessage.split(" ");
+					transactionPolicyVersion = Integer.parseInt(msgSplit[1]);
+					System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
+					latencySleep(); // Simulate latency
+					output.writeObject(new Message(msgText)); // send ACK
 					break;
 				}
 				else if (msg.theMessage.indexOf("PARAMETERS") != -1) { // Configuration change
@@ -113,6 +125,7 @@ public class WorkerThread extends Thread {
 					// Handle instructions
 					String query[] = queryGroup[i].split(" ");
 					if (query[0].equals("B")) { // BEGIN
+						isTM = true; // set this server as the TM
 						System.out.println("BEGIN transaction " + query[1]);
 						// Set the transaction's Policy version
 						transactionPolicyVersion = my_tm.getPolicy();
