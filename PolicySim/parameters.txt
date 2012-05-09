@@ -15,9 +15,9 @@ LMIN 5
 LMAX 25
 # SLEEP threadSleep - boolean for whether or not to thread sleep or use sum
 SLEEP true
-# VT verificationType - 0 for 2PC, 1 for 2PC w/local authorization,
+# VM validationMode - 0 for 2PC, 1 for 2PC w/local authorization,
 # 2 for view consistency, 3 for global consistency, 4 for both 2 and 3
-VT 1
+VM 1
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)

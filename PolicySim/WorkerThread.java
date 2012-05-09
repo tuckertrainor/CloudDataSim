@@ -67,7 +67,7 @@ public class WorkerThread extends Thread {
 
 			Message msg = null;
 			Message resp = null;
-			int verificationType = 0;
+			int validationMode = 0;
 			
 			while (true) {
 				// Loop to read messages
@@ -104,12 +104,12 @@ public class WorkerThread extends Thread {
 					break;
 				}
 				else if (msg.theMessage.indexOf("PARAMETERS") != -1) { // Configuration change
-					// PARAMETERS <LMIN> <LMAX> <SLEEP> <VT> <ICSR> <LASR>
+					// PARAMETERS <LMIN> <LMAX> <SLEEP> <VM> <ICSR> <LASR>
 					String msgSplit[] = msg.theMessage.split(" ");
 					my_tm.latencyMin = Integer.parseInt(msgSplit[1]);
 					my_tm.latencyMax = Integer.parseInt(msgSplit[2]);
 					my_tm.threadSleep = Boolean.parseBoolean(msgSplit[3]);
-					my_tm.verificationType = Integer.parseInt(msgSplit[4]);
+					my_tm.validationMode = Integer.parseInt(msgSplit[4]);
 					my_tm.integrityCheckSuccessRate = Float.parseFloat(msgSplit[5]);
 					my_tm.localAuthSuccessRate = Float.parseFloat(msgSplit[6]);
 					System.out.println("Server parameters updated:");
@@ -262,7 +262,7 @@ public class WorkerThread extends Thread {
 							msgText = "ABORT INTEGRITY_FAIL";
 						}
 						else {
-							switch (my_tm.verificationType) {
+							switch (my_tm.validationMode) {
 								case 0:
 								case 1:
 									System.out.println("No View or Global Consistency required for transaction " + query[1]);
@@ -489,7 +489,7 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkLocalAuth() {
-		if (my_tm.verificationType > 0) { // requires local authorization
+		if (my_tm.validationMode > 0) { // requires local authorization
 			if (my_tm.threadSleep) {
 				try {
 					// sleep for a random period of time between 50ms and 150ms

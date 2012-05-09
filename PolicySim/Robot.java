@@ -36,7 +36,7 @@ public class Robot {
 	static int latencyMin;
 	static int latencyMax;
 	static boolean threadSleep;
-	static int verificationType;
+	static int validationMode;
 	static float integrityCheckSuccessRate;
 	static float localAuthSuccessRate;
 	static float globalAuthSuccessRate;
@@ -98,7 +98,7 @@ public class Robot {
 				setSeed(args[1]);
 				setOpMin(args[2]);
 				setOpMax(minOperations, args[3]);
-				setVT(args[4]);
+				setVM(args[4]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
@@ -262,8 +262,8 @@ public class Robot {
 					else if (tuple[0].equals("SLEEP")) {
 						threadSleep = Boolean.parseBoolean(tuple[1]);
 					}
-					else if (tuple[0].equals("VT")) {
-						verificationType = Integer.parseInt(tuple[1]);
+					else if (tuple[0].equals("VM")) {
+						validationMode = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
@@ -320,7 +320,7 @@ public class Robot {
 		System.err.println("Usage: java Robot <TM Number> or");
 		System.err.println("Usage: java Robot <TM Number> <Seed> or");
 		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> <VT>\n");
+		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> <VM>\n");
 	}
 	
 	public static int getTM(ArrayList<ServerID> _serverList, String str) {
@@ -388,19 +388,19 @@ public class Robot {
 		}
 	}
 	
-	public static void setVT(String str) {
+	public static void setVM(String str) {
 		int number = -1;
 		// Check arg for proper value, range
 		try {
 			number = Integer.parseInt(str);
 			if (number < 0 || number > 4) {
-				System.err.println("Error in VT. Please set a value in the range of 0 - 4.");
+				System.err.println("Error in VM. Please set a value in the range of 0 - 4.");
 				System.exit(-1);
 			}
-			verificationType = number;
+			validationMode = number;
 		}
 		catch (Exception e) {
-			System.err.println("Error parsing argument for VT. Please use a valid integer.");
+			System.err.println("Error parsing argument for VM. Please use a valid integer.");
 			argsError();
 			System.exit(-1);
 		}
@@ -421,7 +421,7 @@ public class Robot {
 										  latencyMin + " " +
 										  latencyMax + " " +
 										  threadSleep + " " +
-										  verificationType + " " +
+										  validationMode + " " +
 										  integrityCheckSuccessRate	+ " " +
 										  localAuthSuccessRate);
 				output.writeObject(msg);
@@ -566,7 +566,7 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("SLEEP=" + threadSleep);
 			outputBuf.newLine();
-			outputBuf.write("VT=" + verificationType);
+			outputBuf.write("VM=" + validationMode);
 			outputBuf.newLine();
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
 			outputBuf.newLine();

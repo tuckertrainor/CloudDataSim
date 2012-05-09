@@ -21,7 +21,7 @@ public class CloudServer {
 	public static int latencyMin;
 	public static int latencyMax;
 	public static boolean threadSleep;
-	public static int verificationType;
+	public static int validationMode;
 	public static float integrityCheckSuccessRate;
 	public static float localAuthSuccessRate;
 	public static float globalAuthSuccessRate;
@@ -270,8 +270,8 @@ public class CloudServer {
 					else if (tuple[0].equals("SLEEP")) {
 						threadSleep = Boolean.parseBoolean(tuple[1]);
 					}
-					else if (tuple[0].equals("VT")) {
-						verificationType = Integer.parseInt(tuple[1]);
+					else if (tuple[0].equals("VM")) {
+						validationMode = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
