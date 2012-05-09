@@ -11,10 +11,7 @@
 import java.lang.Thread;            // We will extend Java's base Thread class
 import java.net.Socket;
 import java.net.ConnectException;
-import java.io.ObjectInputStream;   // For reading Java objects off of the wire
-import java.io.ObjectOutputStream;  // For writing Java objects to the wire
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 
 public class WorkerThread extends Thread {

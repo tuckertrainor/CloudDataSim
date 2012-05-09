@@ -8,10 +8,7 @@
 
 import java.net.Socket;
 import java.net.ServerSocket;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class PolicyServer {

@@ -9,20 +9,9 @@
  * Message objects around.
  */
 
-import java.net.Socket;             // Used to connect to the server
-import java.io.ObjectInputStream;   // Used to read objects sent from the server
-import java.io.ObjectOutputStream;  // Used to write objects to the server
-import java.io.BufferedReader;      // Needed to read from the console
-import java.io.InputStreamReader;   // Needed to read from the console
+import java.net.Socket;
 import java.net.ConnectException;
-
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Date;
