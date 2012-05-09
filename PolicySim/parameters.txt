@@ -15,9 +15,16 @@ LMIN 5
 LMAX 25
 # SLEEP threadSleep - boolean for whether or not to thread sleep or use sum
 SLEEP true
-# VM validationMode - 0 for 2PC, 1 for 2PC w/local authorization,
-# 2 for view consistency, 3 for global consistency, 4 for both 2 and 3
-VM 1
+# VM validationMode - 8-bit number for setting modes: 0 for OFF, 1 for ON
+# bit 0: Local authorization
+# bit 1: view consistency
+# bit 2: global consistency
+# bit 3: 2PC (w/o LA = 8, w/LA = 9)
+# bit 4: Deferred Proofs of authorization (w/VC = 19, w/GC = 21)
+# bit 5: Punctual Proofs of authorization (w/VC = 35, w/GC = 37)
+# bit 6: Incremental Punctual Proofs of authorization (w/VC = 67, w/GC = 69)
+# bit 7: Continuous Proofs of authorization (w/VC = 131, w/GC = 133)
+VM 19
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
