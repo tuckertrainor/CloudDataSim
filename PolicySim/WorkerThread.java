@@ -369,7 +369,7 @@ public class WorkerThread extends Thread {
 																	new ObjectInputStream(sock.getInputStream())));
 			}
 
-			// send query
+			// Send query
 			Message msg = null;
 			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
