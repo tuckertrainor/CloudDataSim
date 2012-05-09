@@ -87,7 +87,11 @@ public class WorkerThread extends Thread {
 					}
 					// If in Incremental Punctual or Continuous, update transaction
 					// policy version and distribute to other servers
-
+					if ((my_tm.validationMode & 192) != 0) {
+						transactionPolicyVersion = update;
+						// my_tm.serverList, my_tm.serverNumber
+						
+					}
 					latencySleep(); // Simulate latency
 					output.writeObject(new Message(msgText)); // send ACK
 					break;
@@ -486,7 +490,7 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkLocalAuth() {
-		if (my_tm.validationMode > 0) { // requires local authorization
+		if ((my_tm.validationMode & 1) == 1) { // requires local authorization
 			if (my_tm.threadSleep) {
 				try {
 					// sleep for a random period of time between 50ms and 150ms
