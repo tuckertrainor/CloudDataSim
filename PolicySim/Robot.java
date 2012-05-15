@@ -102,12 +102,11 @@ public class Robot {
 		tData.setStartTime();
 		tData.setEndTime(0L);
 		TransactionLog.entry.add(tData);
-		String newTrans;
+		String newTrans = new String();
 		char prevQuery;
 		int queryServer;
 		int operations;
 		for (int i = 1; i <= maxTransactions; i++) {
-			newTrans = "B " + i;
 			prevQuery = 'B';
 			queryServer = 0;
 			// Get random number of queries for this transaction
@@ -119,8 +118,11 @@ public class Robot {
 					if (prevQuery == 'R') {
 						newQuery += ";R " + i; // ,
 					}
-					else {
+					else if (prevQuery == 'W') {
 						newQuery += ";R " + i;
+					}
+					else { // first operation
+						newQuery += "R " + i;
 					}
 					prevQuery = 'R';
 				}
@@ -128,8 +130,11 @@ public class Robot {
 					if (prevQuery == 'W') {
 						newQuery += ";W " + i; // ,
 					}
-					else {
+					else if (prevQuery == 'R') {
 						newQuery += ";W " + i;
+					}
+					else { // first operation
+						newQuery += "W " + i;
 					}
 					prevQuery = 'W';
 				}
