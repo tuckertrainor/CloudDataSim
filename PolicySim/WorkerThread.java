@@ -14,6 +14,8 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
+/* TODO: implement PTC in run(), add a final COMMIT after validaton */
+
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
 	private CloudServer my_tm; // The Transaction Manager that called the thread
@@ -424,11 +426,37 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks the integrity of the data for the commit
+	 * Checks the integrity of the data for the commit (2PC)
 	 *
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean integrityCheck() {
+		// Go through socket list, contact servers involved in transaction
+		if (sockList.size() > 0) {
+			Message msg = null;
+			int serverNum;
+			try {
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					msg = new Message("PTC"); // Prepare-to-Commit
+					serverNum = socketList.nextElement();
+					latencySleep(); // Simulate latency
+					sockList.get(serverNum).output.writeObject(msg);
+					// Receive YES/NO
+					msg = (Message)sockList.get(serverNum).input.readObject();
+					System.out.println("Server " + serverNum + " responds " +
+									   msg.theMessage + " for Prepare-to-Commit.");
+					if (!msg.theMessage.equals("YES")) { // ABORT
+						return false;
+					}
+				}
+			}
+			catch (Exception e) {
+				System.err.println("verifyIntegrity() Prepare-to-Commit error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+		
+		// Perform final check on own server
 		if (my_tm.threadSleep) {
 			try {
 				// sleep for a random period of time between 150ms and 225ms
