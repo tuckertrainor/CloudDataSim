@@ -125,16 +125,7 @@ public class WorkerThread extends Thread {
 				for (int i = 0; i < queryGroup.length; i++) {
 					// Handle instructions
 					String query[] = queryGroup[i].split(" ");
-					if (query[0].equals("B")) { // BEGIN
-						isTM = true; // set this server as the TM
-						System.out.println("BEGIN transaction " + query[1]);
-						// Set the transaction's Policy version
-						transactionPolicyVersion = my_tm.getPolicy();
-						System.out.println("Transaction " + query[1] +
-										   " Policy version set: " +
-										   transactionPolicyVersion);
-					}
-					else if (query[0].equals("R")) { // READ
+					if (query[0].equals("R")) { // READ
 						// Check server number, perform query or pass on
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed
@@ -144,6 +135,8 @@ public class WorkerThread extends Thread {
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
+								// Note: If policy has not been set, this server
+								// is the coordinator.
 							}
 							
 							// Check transaction policy against server policy
