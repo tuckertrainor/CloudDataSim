@@ -96,7 +96,7 @@ public class WorkerThread extends Thread {
 					output.writeObject(new Message(msgText)); // send ACK
 					break;
 				}
-				else if (msg.theMessage.indexOf("TMPOLICYUPDATE") != -1) { // Policy update from TM
+				else if (msg.theMessage.indexOf("COORDPOLICY") != -1) { // Policy update from coordinator
 					String msgSplit[] = msg.theMessage.split(" ");
 					transactionPolicyVersion = Integer.parseInt(msgSplit[1]);
 					System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
@@ -349,7 +349,7 @@ public class WorkerThread extends Thread {
 	public String passQuery(int otherServer, String query) {
 		String server = my_tm.serverList.get(otherServer).getAddress();
 		int port = my_tm.serverList.get(otherServer).getPort();
-		
+		Message msg = null;
 		try {
 			// Check SocketList for an existing socket, else create and add new
 			if (!sockList.hasSocket(otherServer)) {
@@ -360,10 +360,21 @@ public class WorkerThread extends Thread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
+				// Send new server the transaction's beginning policy version
+				msg = new Message("COORDPOLICY " + transactionPolicyVersion);
+				latencySleep(); // Simulate latency to other server
+				sockList.get(otherServer).output.writeObject(msg);
+				msg = (Message)sockList.get(otherServer).input.readObject();
+				System.out.println("Server " + otherServer +
+								   " says: " + msg.theMessage +
+								   " for updating policy version.");
+				if (!msg.theMessage.equals("ACK")) {
+					System.err.println("Unsuccessful transfer of policy version to server " + otherServer);
+					return "FAIL";
+				}
 			}
 
 			// Send query
-			Message msg = null;
 			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
