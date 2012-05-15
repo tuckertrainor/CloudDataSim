@@ -67,23 +67,23 @@ public class Robot {
 			System.out.println("Server configuration file read successfully.");
 		}
 		
-		int primaryServer = 0;
+		int coordinator = 0;
 		switch (args.length) {
 			case 1:
-				primaryServer = getTM(serverList, args[0]);
+				coordinator = getTM(serverList, args[0]);
 				break;
 			case 2:
-				primaryServer = getTM(serverList, args[0]);
+				coordinator = getTM(serverList, args[0]);
 				setSeed(args[1]);
 				break;
 			case 4:
-				primaryServer = getTM(serverList, args[0]);
+				coordinator = getTM(serverList, args[0]);
 				setSeed(args[1]);
 				setOpMin(args[2]);
 				setOpMax(minOperations, args[3]);
 				break;
 			case 5:
-				primaryServer = getTM(serverList, args[0]);
+				coordinator = getTM(serverList, args[0]);
 				setSeed(args[1]);
 				setOpMin(args[2]);
 				setOpMax(minOperations, args[3]);
@@ -160,10 +160,10 @@ public class Robot {
 				if (ThreadCounter.activeThreads < maxDegree) {
 					TransactionLog.entry.get(i).setStartTime();
 					thread = new RobotThread(i,
-											 primaryServer,
+											 coordinator,
 											 TransactionLog.entry.get(i).getQuerySet(),
-											 serverList.get(primaryServer).getAddress(),
-											 serverList.get(primaryServer).getPort(),
+											 serverList.get(coordinator).getAddress(),
+											 serverList.get(coordinator).getPort(),
 											 latencyMin,
 											 latencyMax,
 											 threadSleep);

@@ -2,9 +2,9 @@
 # MT maxTransactions - number of transactions to perform
 MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
-OPMIN 1000
+OPMIN 100
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
-OPMAX 1001
+OPMAX 101
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
