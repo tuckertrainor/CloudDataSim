@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class RobotThread extends Thread {
-	private final int transNumber;
-	private final int primaryServer;
+	private final int txnNumber;
+	private final int coordinator;
     private final String transactions;
 	private final String server;
 	private final int port;
@@ -32,15 +32,15 @@ public class RobotThread extends Thread {
 	/**
 	 * Constructor that sets up transaction communication
 	 *
-	 * @param _transNumber - the number of this transaction set
+	 * @param _txnNumber - the number of this transaction set
 	 * @param _transactions - A string representing the queries to be run
 	 * @param _server - The server name where the primary Transaction Manager
 	 * is located
 	 * @param _port - The port number of the server
 	 */
-	public RobotThread(int _transNumber, int _primaryServer, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep) {
-		primaryServer = _primaryServer;
-		transNumber = _transNumber;
+	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep) {
+		coordinator = _coordinator;
+		txnNumber = _txnNumber;
 		transactions = _transactions;
 		server = _server;
 		port = _port;
@@ -62,7 +62,7 @@ public class RobotThread extends Thread {
 
 			// Connect to the specified server
 			final Socket sock = new Socket(server, port);
-			System.out.println("RobotThread: Transaction " + transNumber +
+			System.out.println("RobotThread: Transaction " + txnNumber +
 							   " connected to " + server + " on port " + port);
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
@@ -95,23 +95,23 @@ public class RobotThread extends Thread {
 				}
 				else if (respSplit[0].equals("ABORT")) {
 					// Something did not validate
-					TransactionLog.entry.get(transNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
-					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+					TransactionLog.entry.get(txnNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
+					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
-					System.out.println("RobotThread: Transaction " + transNumber + " " +
-									   TransactionLog.entry.get(transNumber).getStatus());
+					System.out.println("RobotThread: Transaction " + txnNumber + " " +
+									   TransactionLog.entry.get(txnNumber).getStatus());
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
 					// Set the end time of the transaction
-					TransactionLog.entry.get(transNumber).setEndTime(new Date().getTime());
+					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
 					// If there was not thread sleeping, get the time used by the TM
 					if (!threadSleep) {
-						TransactionLog.entry.get(transNumber).addSleepTime(Integer.parseInt(respSplit[1]));
+						TransactionLog.entry.get(txnNumber).addSleepTime(Integer.parseInt(respSplit[1]));
 					}
 					ThreadCounter.threadComplete(); // remove thread from active count
-					System.out.println("RobotThread: Transaction " + transNumber + " " +
-									   TransactionLog.entry.get(transNumber).getStatus());
+					System.out.println("RobotThread: Transaction " + txnNumber + " " +
+									   TransactionLog.entry.get(txnNumber).getStatus());
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: Query handling error");
@@ -152,7 +152,7 @@ public class RobotThread extends Thread {
 			}
 		}
 		else { // add int amount to log entry
-			TransactionLog.entry.get(transNumber).addSleepTime(latency);
+			TransactionLog.entry.get(txnNumber).addSleepTime(latency);
 		}
 	}
 
