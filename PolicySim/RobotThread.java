@@ -114,7 +114,7 @@ public class RobotThread extends Thread {
 									   TransactionLog.entry.get(txnNumber).getStatus());
 				}
 				else { // Something went wrong
-					System.out.println("RobotThread: Query handling error");
+					System.out.println("RobotThread: Query handling error - received \"" + respSplit[0] + "\" from server.");
 					// break; // ?
 				}
 				groupIndex++;

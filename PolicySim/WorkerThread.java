@@ -22,7 +22,6 @@ public class WorkerThread extends Thread {
 	private int transactionPolicyVersion = 0;
 	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
-	private boolean isTM = false;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -92,14 +91,6 @@ public class WorkerThread extends Thread {
 						// my_tm.serverList, my_tm.serverNumber
 						
 					}
-					latencySleep(); // Simulate latency
-					output.writeObject(new Message(msgText)); // send ACK
-					break;
-				}
-				else if (msg.theMessage.indexOf("COORDPOLICY") != -1) { // Policy update from coordinator
-					String msgSplit[] = msg.theMessage.split(" ");
-					transactionPolicyVersion = Integer.parseInt(msgSplit[1]);
-					System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
 					latencySleep(); // Simulate latency
 					output.writeObject(new Message(msgText)); // send ACK
 					break;
@@ -187,6 +178,11 @@ public class WorkerThread extends Thread {
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
 								transactionPolicyVersion = my_tm.getPolicy();
+								System.out.println("Transaction " + query[1] +
+												   " Policy version set: " +
+												   transactionPolicyVersion);
+								// Note: If policy has not been set, this server
+								// is the coordinator.
 							}
 
 							// Check transaction policy against server policy
@@ -233,6 +229,11 @@ public class WorkerThread extends Thread {
 											   " to server " + query[2] +
 											   ": " + msgText);
 						}
+					}
+					else if (query[0].equals("COORDPOLICY")) { // Policy update from coordinator
+						transactionPolicyVersion = Integer.parseInt(query[1]);
+						System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
+						latencySleep(); // Simulate latency and return ACK
 					}
 					else if (query[0].equals("POLICY")) { // POLICY
 						latencySleep();
@@ -375,10 +376,14 @@ public class WorkerThread extends Thread {
 			}
 
 			// Send query
+			System.out.println("Here 1");
 			msg = new Message(query);
+			System.out.println("Here 2 " + sockList.hasSocket(otherServer));
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
+			System.out.println("Here 3");
 			msg = (Message)sockList.get(otherServer).input.readObject();
+			System.out.println("Here 4");
 			System.out.println("Server " + otherServer +
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);

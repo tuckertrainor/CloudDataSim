@@ -2,9 +2,9 @@
 # MT maxTransactions - number of transactions to perform
 MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
-OPMIN 100
+OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
-OPMAX 101
+OPMAX 15
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
@@ -30,9 +30,9 @@ ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
 LASR 1.00
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
-PMIN 10000
+PMIN 60000
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
-PMAX 10000
+PMAX 60000
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345
