@@ -10,7 +10,7 @@ import java.util.Date;
 
 public class TransactionData {
 	private int transactionNumber;
-	private String querySet;
+	private String transaction;
 	private long startTime;
 	private	long endTime;
 	private int sleepTime;
@@ -22,9 +22,9 @@ public class TransactionData {
 	 * @param _transNumber
 	 * @param _querySet
 	 */
-	public TransactionData(int _transNumber, String _querySet) {
+	public TransactionData(int _transNumber, String _transaction) {
 		transactionNumber = _transNumber;
-		querySet = _querySet;
+		transaction = _transaction;
 		sleepTime = 0;
 		status = "COMMIT";
 	}
@@ -49,12 +49,12 @@ public class TransactionData {
 		status = _status;
 	}
 	
-	public int getTransNumber() {
+	public int getTxnNumber() {
 		return transactionNumber;
 	}
 	
-	public String getQuerySet() {
-		return querySet;
+	public String getTxn() {
+		return transaction;
 	}
 	
 	public long getStartTime() {

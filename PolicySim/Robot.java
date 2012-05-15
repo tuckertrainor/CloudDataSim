@@ -41,8 +41,8 @@ public class Robot {
 	 * argument specifies the port number
 	 */
     public static void main(String[] args) {
-		// Error checking for arguments
-		if (args.length < 1 || args.length > 5 || args.length == 3) {
+		// Error checking for arguments (0, 1, 3, or 4 args)
+		if (args.length == 2 || args.length > 4) {
 			System.err.println("Improper argument count.");
 			argsError();
 			System.exit(-1);
@@ -67,27 +67,22 @@ public class Robot {
 			System.out.println("Server configuration file read successfully.");
 		}
 		
-		int coordinator = 0;
 		switch (args.length) {
-			case 1:
-				coordinator = getTM(serverList, args[0]);
+			case 0:
 				break;
-			case 2:
-				coordinator = getTM(serverList, args[0]);
-				setSeed(args[1]);
+			case 1:
+				setSeed(args[0]);
+				break;
+			case 3:
+				setSeed(args[0]);
+				setOpMin(args[1]);
+				setOpMax(minOperations, args[2]);
 				break;
 			case 4:
-				coordinator = getTM(serverList, args[0]);
-				setSeed(args[1]);
-				setOpMin(args[2]);
-				setOpMax(minOperations, args[3]);
-				break;
-			case 5:
-				coordinator = getTM(serverList, args[0]);
-				setSeed(args[1]);
-				setOpMin(args[2]);
-				setOpMax(minOperations, args[3]);
-				setVM(args[4]);
+				setSeed(args[0]);
+				setOpMin(args[1]);
+				setOpMax(minOperations, args[2]);
+				setVM(args[3]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
@@ -155,13 +150,19 @@ public class Robot {
 		try {
 			RobotThread thread = null;
 			int i = 1;
+			int coordinator = 0;
+			String txn;
+			String txnSplit[];
 			
 			while (ThreadCounter.threadCount < maxTransactions) {
 				if (ThreadCounter.activeThreads < maxDegree) {
+					txn = TransactionLog.entry.get(i).getTxn();
+					txnSplit = txn.split(" ");
+					coordinator = Integer.parseInt(txnSplit[2]);
 					TransactionLog.entry.get(i).setStartTime();
 					thread = new RobotThread(i,
 											 coordinator,
-											 TransactionLog.entry.get(i).getQuerySet(),
+											 txn,
 											 serverList.get(coordinator).getAddress(),
 											 serverList.get(coordinator).getPort(),
 											 latencyMin,
@@ -306,10 +307,10 @@ public class Robot {
 	}
 	
 	public static void argsError() {
-		System.err.println("Usage: java Robot <TM Number> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> or");
-		System.err.println("Usage: java Robot <TM Number> <Seed> <OPMIN> <OPMAX> <VM>\n");
+		System.err.println("Usage: java Robot or");
+		System.err.println("Usage: java Robot <Seed> or");
+		System.err.println("Usage: java Robot <Seed> <OPMIN> <OPMAX> or");
+		System.err.println("Usage: java Robot <Seed> <OPMIN> <OPMAX> <VM>\n");
 	}
 	
 	public static int getTM(ArrayList<ServerID> _serverList, String str) {
@@ -569,8 +570,8 @@ public class Robot {
 			outputBuf.newLine();
 			if (threadSleep) {
 				for (int i = 1; i <= maxTransactions; i++) {
-					outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
-									TransactionLog.entry.get(i).getQuerySet() + "\t" +
+					outputBuf.write(TransactionLog.entry.get(i).getTxnNumber() + "\t" +
+									TransactionLog.entry.get(i).getTxn() + "\t" +
 									TransactionLog.entry.get(i).getStartTime() + "\t" +
 									TransactionLog.entry.get(i).getEndTime() + "\t" +
 									TransactionLog.entry.get(i).getDuration() + "\t" +
@@ -580,8 +581,8 @@ public class Robot {
 			}
 			else { // output sleep time in data
 				for (int i = 1; i <= maxTransactions; i++) {
-					outputBuf.write(TransactionLog.entry.get(i).getTransNumber() + "\t" +
-									TransactionLog.entry.get(i).getQuerySet() + "\t" +
+					outputBuf.write(TransactionLog.entry.get(i).getTxnNumber() + "\t" +
+									TransactionLog.entry.get(i).getTxn() + "\t" +
 									TransactionLog.entry.get(i).getStartTime() + "\t" +
 									TransactionLog.entry.get(i).getEndTime() + "\t" +
 									TransactionLog.entry.get(i).getDuration() + "\t" +
