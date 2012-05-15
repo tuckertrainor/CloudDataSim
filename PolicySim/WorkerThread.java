@@ -376,14 +376,10 @@ public class WorkerThread extends Thread {
 			}
 
 			// Send query
-			System.out.println("Here 1");
 			msg = new Message(query);
-			System.out.println("Here 2 " + sockList.hasSocket(otherServer));
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
-			System.out.println("Here 3");
 			msg = (Message)sockList.get(otherServer).input.readObject();
-			System.out.println("Here 4");
 			System.out.println("Server " + otherServer +
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);
