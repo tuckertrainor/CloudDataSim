@@ -252,6 +252,26 @@ public class WorkerThread extends Thread {
 							msgText = "GLOBALFAIL";
 						}
 					}
+					else if (query[0].equals("PTC")) { // Prepare-to-Commit
+						// Receive PTC message, handle options
+						// 1. Rec'v PTC, request for policy version
+						//    Return integrity status (YES/NO), Policy version
+						// 2. Rec'v PTC, request for policy version
+						//    Return integrity status (YES/NO), Policy version
+						// 3. Rec'v PTC, global master policy version
+						//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
+						//    If Pmaster != Ptrans, return FALSE
+						// 4. Rec'v PTC, global master policy version
+						//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
+						//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
+						//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
+						
+						// create a prepareToCommit() function?
+						// if (? == my_tm.serverNumber) { } // Perform PTC on this server
+						// else { } // send "PTC" to all other participants, parse responses
+						// participants will need to know consistency mode
+						// add policy push to specific servers?
+					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT - transaction " + query[1]);
 						
