@@ -24,7 +24,7 @@ public class PolicyThread extends Thread {
 	 * @param _version
 	 * @param _address
 	 * @param _port
-	 * @param _pushSleep
+	 * @param _latency
 	 */
 	public PolicyThread(int _version, String _address, int _port, int _latency) {
 		version = _version;
@@ -49,13 +49,15 @@ public class PolicyThread extends Thread {
 			Message msg = null;
 			Message response = null;
 			
-			// Sleep to simulate latency
-			try {
-				Thread.sleep(latency);
-			}
-			catch(Exception e) {
-				System.err.println("latencySleep() Error: " + e.getMessage());
-				e.printStackTrace(System.err);
+			if (latency > 0) {
+				// Sleep to simulate latency
+				try {
+					Thread.sleep(latency);
+				}
+				catch(Exception e) {
+					System.err.println("latencySleep() Error: " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
 			}
 			msg = new Message("POLICYUPDATE " + version);
 			output.writeObject(msg);
