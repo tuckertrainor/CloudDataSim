@@ -44,14 +44,17 @@ public class PolicyServer {
 		
 		PolicyServer server = new PolicyServer();
 		
-		// Launch the Policy Updater
-		try {
-			PolicyUpdater puthread = new PolicyUpdater(server);
-			puthread.start();
-		}
-		catch(Exception e) {
-			System.err.println("Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+		// Allow disabling of policy updater by setting update frequencies to 0
+		if ((policyUpdateMin + policyUpdateMax) > 0) {
+			// Launch the Policy Updater
+			try {
+				PolicyUpdater puthread = new PolicyUpdater(server);
+				puthread.start();
+			}
+			catch(Exception e) {
+				System.err.println("Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
 		}
 
 		server.start();
