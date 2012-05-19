@@ -76,7 +76,9 @@ public class PolicyRequestThread extends Thread {
 												  0);
 						thread.start();
 					}
-				}				
+				}
+				// ACK sender of request
+				output.writeObject(new Message("ACK"));
 			}
 			else {
 				output.writeObject(new Message("FAIL"));
