@@ -357,14 +357,6 @@ public class WorkerThread extends Thread {
 			System.out.println("Server " + otherServer +
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);
-			// Get policy version and log the query
-			String msgSplit[] = msg.theMessage.split(" ");
-			if (msgSplit[0].equals("ACK")) { // acknowledged, get policy #
-				addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[1]));
-			}
-			else if (msgSplit[0].equals("ACS")) { // Add to commit stack, get policy #
-				addToQueryLog(query.split(" "), Integer.parseInt(msgSplit[4]));
-			}
 			// else it is an ABORT, no need to log, will be handled by RobotThread
 			return msg.theMessage;
 		}
