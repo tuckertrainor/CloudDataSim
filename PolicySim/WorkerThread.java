@@ -405,6 +405,18 @@ public class WorkerThread extends Thread {
 		// participants will need to know consistency mode
 		// add policy push to specific servers?
 		
+		else if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+			// view consistency checks
+			commitStatus = viewConsistencyCheck();
+		}
+		else if (my_tm.validationMode == 3 || my_tm.validationMode == 4) {
+			// global consistency checks
+			commitStatus = globalConsistencyCheck();
+		}
+		else { // default to 2PC
+			
+		}
+		
 		// Call each participating server with a PTC message, handle response
 		if (sockList.size() > 0) {
 			Message msg = null;
