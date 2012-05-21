@@ -274,9 +274,7 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
-						
 						msgText = coordinatorCommit();
-						
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
 						Thread.sleep(Integer.parseInt(query[1]));
