@@ -480,6 +480,188 @@ public class WorkerThread extends Thread {
 		}
 	}
 
+	/**
+	 * (Description)
+	 *
+	 * @return String
+	 */
+	public String viewConsistencyCheck() {
+		String status = "COMMIT";
+		Message msg = null;
+		
+		// Call all participants, send PTC and gather policy versions
+		if (sockList.size() > 0) {
+			int serverNum;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC");
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Check response, add policy version to ArrayList
+						if (msg.theMessage.indexOf("YES") != -1) {
+							String msgSplit[] = msg.theMessage.split(" ");
+							versions.add(Integer.parseInt(msgSplit[1]));
+						}
+						else { // ABORT
+							return "ABORT PTC_RESPONSE_NO";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("Policy Check Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		
+		// Turn ArrayList into an array of ints, sort and compare versions
+		Integer versionArray[] = new Integer[versions.size()];
+		versionArray = versions.toArray(versionArray);
+		// Sort array, compare first value with last
+		Arrays.sort(versionArray);
+		if (versionArray[0] == versionArray[versionArray.length - 1]) {
+			// Policy versions match across servers - run authorizations
+			
+			status = runAuths((int)versionArray[0]);
+		}
+		else { // Handle inequality
+			if (my_tm.validationMode == 1) { // ABORT
+				status = "ABORT VIEW_CONSISTENCY_FAIL";
+			}
+			else { // Find common policy and run authorizations with it
+				// For simplicity, use minimum of versions as common policy
+				status = runAuths((int)versionArray[0]);
+			}
+		}
+		
+		return status;
+	}
+
+	/**
+	 * (Description)
+	 *
+	 * @return String
+	 */
+	public String globalConsistencyCheck() {
+		String status = "COMMIT";
+		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
+		
+		for (int i = 0; i < queryLog.size(); i++) {
+			if (queryLog.get(i).getPolicy() != masterPolicyVersion) {
+				// Re-check authorization with new policy version				
+				if (queryLog.get(i).getServer() == my_tm.serverNumber) { // local check
+					if (checkLocalAuth() == false) {
+						System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
+										   " version: " + queryLog.get(i).getPolicy() +
+										   "\tGlobal version: " + masterPolicyVersion);
+						return "ABORT";
+					}
+				}
+				else { // other server? passQuery(<server number>, "A <masterPolicyVersion>")
+					int otherServer = queryLog.get(i).getServer();
+					String server = my_tm.serverList.get(otherServer).getAddress();
+					int port = my_tm.serverList.get(otherServer).getPort();
+					
+					try {
+						// Check SocketList for an existing socket, else create and add new
+						if (!sockList.hasSocket(otherServer)) {
+							// Create new socket, add it to SocketGroup
+							System.out.println("Connecting to " + server +
+											   " on port " + port);
+							Socket sock = new Socket(server, port);
+							sockList.addSocketObj(otherServer, new SocketObject(sock,
+																				new ObjectOutputStream(sock.getOutputStream()),	
+																				new ObjectInputStream(sock.getInputStream())));
+						}
+						
+						// Send query for global auth
+						Message msg = null;
+						msg = new Message("A " + masterPolicyVersion);
+						latencySleep(); // Simulate latency
+						sockList.get(otherServer).output.writeObject(msg);
+						msg = (Message)sockList.get(otherServer).input.readObject();
+						// Add to totalSleepTime if necessary
+						if (!my_tm.threadSleep) {
+							// Add checkLocalAuth() time
+							totalSleepTime += 50 + generator.nextInt(100);
+							// Add return latency
+							totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+						}
+						
+						System.out.println("Server " + otherServer +
+										   " says: " + msg.theMessage +
+										   " for passed query A " + masterPolicyVersion);
+						if (msg.theMessage.equals("GLOBALFAIL")) {
+							System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
+											   " version: " + queryLog.get(i).getPolicy() +
+											   "\tGlobal version: " + masterPolicyVersion);
+							return "ABORT";
+						}
+					}
+					catch (ConnectException ce) {
+						System.err.println(ce.getMessage() +
+										   ": Check server address and port number.");
+						ce.printStackTrace(System.err);
+					}
+					catch (Exception e) {
+						System.err.println("Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		return status;
+	}
+	
+	/**
+	 * (Description)
+	 *
+	 * @return String
+	 */
+	public String runAuths(int version) {
+		// Check local auths on coordinator
+		for (int j = 0; j < queryLog.size(); j++) {
+			if (!checkLocalAuth()) {
+				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			}
+		}
+		
+		// Contact all other participants, have them run authorizations and return results
+		if (sockList.size() > 0) {
+			Message msg = null;
+			int serverNum;
+			
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("RUNAUTHS" + version);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Check response, add policy version to ArrayList
+						if (msg.theMessage.equals("FALSE")) {
+							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("runAuths() error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		
+		return "COMMIT";
+	}
+	
 	public void databaseRead() {
 		if (my_tm.threadSleep) {
 			try {
@@ -580,178 +762,6 @@ public class WorkerThread extends Thread {
 		}
 	}
 	
-	/**
-	 * (Description)
-	 *
-	 * @return String
-	 */
-	public String viewConsistencyCheck() {
-		String status = "COMMIT";
-		Message msg = null;
-		
-		// Call all participants, send PTC and gather policy versions
-		if (sockList.size() > 0) {
-			int serverNum;
-			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
-					try {
-						msg = new Message("PTC");
-						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						// Check response, add policy version to ArrayList
-						if (msg.theMessage.indexOf("YES") != -1) {
-							String msgSplit[] = msg.theMessage.split(" ");
-							versions.add(Integer.parseInt(msgSplit[1]));
-						}
-						else { // ABORT
-							return "ABORT PTC_RESPONSE_NO";
-						}
-					}
-					catch (Exception e) {
-						System.err.println("Policy Check Error: " + e.getMessage());
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-		
-		// Turn ArrayList into an array of ints, sort and compare versions
-		Integer versionArray[] = new Integer[versions.size()];
-		versionArray = versions.toArray(versionArray);
-		// Sort array, compare first value with last
-		Arrays.sort(versionArray);
-		if (versionArray[0] == versionArray[versionArray.length - 1]) {
-			// Policy versions match across servers - run authorizations
-			
-			status = runAuths((int)versionArray[0]);
-		}
-		else { // Handle inequality
-			if (my_tm.validationMode == 1) { // ABORT
-				status = "ABORT VIEW_CONSISTENCY_FAIL";
-			}
-			else { // Find common policy and run authorizations with it
-				// For simplicity, use minimum of versions as common policy
-				status = runAuths((int)versionArray[0]);
-			}
-		}
-		
-		return status;
-	}
-	
-	public String runAuths(int version) {
-		// Check local auths on coordinator
-		for (int j = 0; j < queryLog.size(); j++) {
-			if (!checkLocalAuth()) {
-				return "ABORT LOCAL_AUTHORIZATION_FAIL";
-			}
-		}
-
-		// Contact all other participants, have them run authorizations and return results
-		if (sockList.size() > 0) {
-			Message msg = null;
-			int serverNum;
-			
-			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
-					try {
-						msg = new Message("RUNAUTHS" + version);
-						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						// Check response, add policy version to ArrayList
-						if (msg.theMessage.equals("FALSE")) {
-							return "ABORT LOCAL_AUTHORIZATION_FAIL";
-						}
-					}
-					catch (Exception e) {
-						System.err.println("runAuths() error: " + e.getMessage());
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-
-		return "COMMIT";
-	}
-
-	public String globalConsistencyCheck() {
-		String status = "COMMIT";
-		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
-		
-		for (int i = 0; i < queryLog.size(); i++) {
-			if (queryLog.get(i).getPolicy() != masterPolicyVersion) {
-				// Re-check authorization with new policy version				
-				if (queryLog.get(i).getServer() == my_tm.serverNumber) { // local check
-					if (checkLocalAuth() == false) {
-						System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
-										   " version: " + queryLog.get(i).getPolicy() +
-										   "\tGlobal version: " + masterPolicyVersion);
-						return "ABORT";
-					}
-				}
-				else { // other server? passQuery(<server number>, "A <masterPolicyVersion>")
-					int otherServer = queryLog.get(i).getServer();
-					String server = my_tm.serverList.get(otherServer).getAddress();
-					int port = my_tm.serverList.get(otherServer).getPort();
-					
-					try {
-						// Check SocketList for an existing socket, else create and add new
-						if (!sockList.hasSocket(otherServer)) {
-							// Create new socket, add it to SocketGroup
-							System.out.println("Connecting to " + server +
-											   " on port " + port);
-							Socket sock = new Socket(server, port);
-							sockList.addSocketObj(otherServer, new SocketObject(sock,
-																				new ObjectOutputStream(sock.getOutputStream()),	
-																				new ObjectInputStream(sock.getInputStream())));
-						}
-						
-						// Send query for global auth
-						Message msg = null;
-						msg = new Message("A " + masterPolicyVersion);
-						latencySleep(); // Simulate latency
-						sockList.get(otherServer).output.writeObject(msg);
-						msg = (Message)sockList.get(otherServer).input.readObject();
-						// Add to totalSleepTime if necessary
-						if (!my_tm.threadSleep) {
-							// Add checkLocalAuth() time
-							totalSleepTime += 50 + generator.nextInt(100);
-							// Add return latency
-							totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-						}
-
-						System.out.println("Server " + otherServer +
-										   " says: " + msg.theMessage +
-										   " for passed query A " + masterPolicyVersion);
-						if (msg.theMessage.equals("GLOBALFAIL")) {
-							System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
-											   " version: " + queryLog.get(i).getPolicy() +
-											   "\tGlobal version: " + masterPolicyVersion);
-							return "ABORT";
-						}
-					}
-					catch (ConnectException ce) {
-						System.err.println(ce.getMessage() +
-										   ": Check server address and port number.");
-						ce.printStackTrace(System.err);
-					}
-					catch (Exception e) {
-						System.err.println("Error: " + e.getMessage());
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-		return status;
-	}
-
 	public boolean coinToss(float successRate) {
 		if (generator.nextFloat() > successRate) {
 			return false;
