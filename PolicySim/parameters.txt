@@ -1,4 +1,13 @@
 # *** This file is required by the Robot and the Policy Server
+# PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL PUNCTUAL, CONTINUOUS
+DEFERRED
+# VM validationMode - integer for setting mode of proof
+# Deferred 0: 2PC only
+# Deferred 1: view consistency single chance
+# Deferred 2: view consistency second chance
+# Deferred 3: global consistency coordinator calls policy server
+# Deferred 4: global consistency any participant can call policy server
+VM 0
 # MT maxTransactions - number of transactions to perform
 MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
@@ -15,16 +24,6 @@ LMIN 5
 LMAX 25
 # SLEEP threadSleep - boolean for whether or not to thread sleep or use sum
 SLEEP true
-# VM validationMode - 8-bit number for setting modes: 0 for OFF, 1 for ON
-# bit 0: Local authorization
-# bit 1: view consistency
-# bit 2: global consistency
-# bit 3: 2PC (w/o LA = 8, w/LA = 9)
-# bit 4: Deferred Proofs of authorization (w/VC = 19, w/GC = 21)
-# bit 5: Punctual Proofs of authorization (w/VC = 35, w/GC = 37)
-# bit 6: Incremental Punctual Proofs of authorization (w/VC = 67, w/GC = 69)
-# bit 7: Continuous Proofs of authorization (w/VC = 131, w/GC = 133)
-VM 19
 # ICSR - integrity check success rate (0.00 to 1.00)
 ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)

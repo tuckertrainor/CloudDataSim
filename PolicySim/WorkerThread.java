@@ -412,9 +412,8 @@ public class WorkerThread extends Thread {
 			// Global consistency checks
 			commitStatus = globalConsistencyCheck();
 		}
-		else { // 2PC
-			// Check integrity across participating servers
-			
+		else {
+			commitStatus = "ABORT UNKNOWN_MODE";
 		}
 		
 		return commitStatus;
