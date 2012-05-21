@@ -7,7 +7,7 @@ DEFERRED
 # Deferred 2: view consistency second chance
 # Deferred 3: global consistency coordinator calls policy server
 # Deferred 4: global consistency any participant can call policy server
-VM 0
+VM 1
 # MT maxTransactions - number of transactions to perform
 MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction

@@ -643,7 +643,7 @@ public class WorkerThread extends Thread {
 				serverNum = socketList.nextElement();
 				if (serverNum != 0) { // Don't call the Policy server
 					try {
-						msg = new Message("RUNAUTHS" + version);
+						msg = new Message("RUNAUTHS " + version);
 						latencySleep(); // Simulate latency
 						// Send
 						sockList.get(serverNum).output.writeObject(msg);
