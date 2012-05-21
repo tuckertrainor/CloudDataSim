@@ -265,12 +265,7 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						if (prepareToCommit()) {
-							// if validation passes, do this
-						}
-						else {
-							// validation fails, do this
-						}
+						msgText = prepareToCommit(Integer.parseInt(query[1]));
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
@@ -407,77 +402,19 @@ public class WorkerThread extends Thread {
 	 */
 	public String coordinatorCommit() {
 		String commitStatus = "COMMIT";
-		// Call each participating server with a PTC message
-
 		
-		// if (? == my_tm.serverNumber) { } // Perform PTC on this server
-		// else { } // send "PTC" to all other participants, parse responses
-		// participants will need to know consistency mode
-		// add policy push to specific servers?
-		
+		// Call each participating server with a PTC message		
 		if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
-			// view consistency checks
+			// View consistency checks
 			commitStatus = viewConsistencyCheck();
 		}
 		else if (my_tm.validationMode == 3 || my_tm.validationMode == 4) {
-			// global consistency checks
+			// Global consistency checks
 			commitStatus = globalConsistencyCheck();
 		}
-		else { // default to 2PC
+		else { // 2PC
+			// Check integrity across participating servers
 			
-		}
-		
-		// Call each participating server with a PTC message, handle response
-		if (sockList.size() > 0) {
-			Message msg = null;
-			int serverNum;
-			try {
-				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-					msg = new Message("PTC"); // Prepare-to-Commit
-					serverNum = socketList.nextElement();
-					latencySleep(); // Simulate latency
-					sockList.get(serverNum).output.writeObject(msg);
-					// Receive YES/NO
-					msg = (Message)sockList.get(serverNum).input.readObject();
-					System.out.println("Server " + serverNum + " responds " +
-									   msg.theMessage + " for Prepare-to-Commit.");
-					// Modes 0 or 1 or 2: rec'v YES and policy version
-					if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-						String msgSplit[] = msg.theMessage.split(" ");
-						if (msgSplit[0].equals("YES")) {
-							// If mode == 0, 2PC only, policy version irrelevant
-							if (msgSplit[1].equals("0")) {
-								// Send Commit
-								msg.theMessage = "COMMIT";
-								sockList.get(serverNum).output.writeObject(msg);
-								// Receive TRUE/FALSE
-								msg = (Message)sockList.get(serverNum).input.readObject();
-								if (msg.theMessage.equals("FALSE")) {
-									commitStatus = "ABORT INTEGRITY_FAIL";
-									break;
-								}
-							}
-							if (msgSplit[1].equals("1")) {
-								// Compare policy versions
-								
-								// Send Commit
-								msg.theMessage = "COMMIT";
-								sockList.get(serverNum).output.writeObject(msg);
-								// Receive TRUE/FALSE
-								msg = (Message)sockList.get(serverNum).input.readObject();
-								if (msg.theMessage.equals("FALSE")) {
-									commitStatus = "ABORT INTEGRITY_FAIL";
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception e) {
-				System.err.println("coordinatorCommit() Prepare-to-Commit error: " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
 		}
 		
 		return commitStatus;
@@ -534,33 +471,12 @@ public class WorkerThread extends Thread {
 				return "ABORT GLOBAL_POLICY_INEQUALITY";
 			}
 		}
-		else (my_tm.validationMode == 4) {
+		else { // my_tm.validationMode == 4)
 			// 4. Rec'v PTC, global master policy version
 			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
 			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
 			//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
-		}
-		
-		// Perform final check on own server
-		if (my_tm.threadSleep) {
-			try {
-				// sleep for a random period of time between 150ms and 225ms
-				Thread.sleep(150 + generator.nextInt(75));
-			}
-			catch(Exception e) {
-				System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
-		}
-		else {
-			totalSleepTime += 150 + generator.nextInt(75);
-		}
-		// perform random success operation
-		if (my_tm.integrityCheckSuccessRate < 1.0) {
-			return coinToss(my_tm.integrityCheckSuccessRate);
-		}
-		else {
-			return true;
+			return "STUB";
 		}
 	}
 
