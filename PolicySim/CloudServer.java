@@ -54,8 +54,8 @@ public class CloudServer {
 				}
 			}
 			catch (Exception e) {
-				System.err.println("Error parsing argument. Please use valid integers.");
-				System.err.println("Usage: java CloudServer <Server Number>\n");
+				System.err.println("Error parsing argument. Please use valid arguments.");
+				System.err.println("Usage: java CloudServer <Server Number> <V|v>\n");
 				System.exit(-1);
 			}
 	    }

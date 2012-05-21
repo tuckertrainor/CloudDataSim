@@ -29,9 +29,9 @@ ICSR 1.00
 # LASR - local authorization success rate per query (0.00 to 1.00)
 LASR 1.00
 #PMIN - policyUpdateMin - minimum time between Policy version updates in ms
-PMIN 60000
+PMIN 0
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
-PMAX 60000
+PMAX 0
 # RS randomSeed - long integer for seeding PRNG
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS 12345
