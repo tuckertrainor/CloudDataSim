@@ -253,6 +253,14 @@ public class WorkerThread extends Thread {
 							msgText = "GLOBALFAIL";
 						}
 					}
+					else if (query[0].equals("RUNAUTHS")) { // Authorize all queries
+						msgText = "TRUE";
+						for (int j = 0; j < queryLog.size(); j++) {
+							if (!checkLocalAuth()) {
+								msgText = "FALSE";
+							}
+						}
+					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
 						if (prepareToCommit()) {
 							// if validation passes, do this
@@ -633,15 +641,9 @@ public class WorkerThread extends Thread {
 	 */
 	public String viewConsistencyCheck() {
 		String status = "COMMIT";
-		
-		// Call all participants, send PTC and request policy version
-		
-		// Arrays.sort, compare first with last?
-		
-		int masterPolicyVersion = my_tm.getPolicy(); // store current policy on server
-		int stale = 0;
 		Message msg = null;
 		
+		// Call all participants, send PTC and gather policy versions
 		if (sockList.size() > 0) {
 			int serverNum;
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
@@ -660,7 +662,7 @@ public class WorkerThread extends Thread {
 							versions.add(Integer.parseInt(msgSplit[1]));
 						}
 						else { // ABORT
-							return "ABORT";
+							return "ABORT PTC_RESPONSE_NO";
 						}
 					}
 					catch (Exception e) {
@@ -671,7 +673,35 @@ public class WorkerThread extends Thread {
 			}
 		}
 		
+		// Turn ArrayList into an array of ints, sort and compare versions
+		Integer versionArray[] = new Integer[versions.size()];
+		versionArray = versions.toArray(versionArray);
+		// Sort array, compare first value with last
+		Arrays.sort(versionArray);
+		if (versionArray[0] == versionArray[versionArray.length - 1]) {
+			// Policy versions match across servers - run authorizations
+			
+			status = runAuths((int)versionArray[0]);
+		}
+		else { // Handle inequality
+			if (my_tm.validationMode == 1) { // ABORT
+				status = "ABORT VIEW_CONSISTENCY_FAIL";
+			}
+			else { // Find common policy and run authorizations with it
+				// For simplicity, use minimum of versions as common policy
+				status = runAuths((int)versionArray[0]);
+			}
+		}
+		
 		return status;
+	}
+	
+	public String runAuths(int version) {
+		String result = "TRUE";
+		
+		// Contact all participants, have them run authorizations and return results
+		version *= 10;
+		return result;
 	}
 
 	public String globalConsistencyCheck() {
