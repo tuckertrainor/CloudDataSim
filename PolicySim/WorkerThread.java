@@ -263,51 +263,8 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
 						
-						if (!integrityCheck()) { // Check data integrity for commit
-							msgText = "ABORT INTEGRITY_FAIL";
-						}
-						else {
-							switch (my_tm.validationMode) {
-								case 0:
-								case 1:
-									System.out.println("No View or Global Consistency required for transaction " + query[1]);
-									break;
-								case 2:
-									if (viewConsistencyCheck() != 0) { // a server was not fresh
-										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-										msgText = "ABORT VIEW_POLICY_FAIL";
-									}
-									else {
-										System.out.println("View Consistency Policy OK - transaction " + query[1]);
-									}
-									break;
-								case 3:
-									if (!globalConsistencyCheck()) {
-										System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
-										msgText = "ABORT GLOBAL_POLICY_FAIL";
-									}
-									else {
-										System.out.println("Global Consistency Policy OK - transaction " + query[1]);
-									}
-									break;
-								case 4:
-									if (viewConsistencyCheck() != 0) { // a server was not fresh
-										System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-										System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
-										if (!globalConsistencyCheck()) {
-											System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
-											msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
-										}
-										else {
-											System.out.println("Global Consistency Policy OK - transaction " + query[1]);
-										}
-									}
-									else {
-										System.out.println("View Consistency Policy OK - transaction " + query[1]);
-									}
-									break;
-							}
-						}
+						msgText = coordinatorCommit();
+						
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
 						Thread.sleep(Integer.parseInt(query[1]));
@@ -436,10 +393,113 @@ public class WorkerThread extends Thread {
 	/**
 	 * (Description)
 	 *
-	 * @return boolean
+	 * @return String
 	 */
-	public boolean coordinatorCommit() {
+	public String coordinatorCommit() {
+		String commitStatus = "COMMIT";
+		// Call each participating server with a PTC message
+
 		
+		// if (? == my_tm.serverNumber) { } // Perform PTC on this server
+		// else { } // send "PTC" to all other participants, parse responses
+		// participants will need to know consistency mode
+		// add policy push to specific servers?
+		
+		// Call each participating server with a PTC message, handle response
+		if (sockList.size() > 0) {
+			Message msg = null;
+			int serverNum;
+			try {
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					msg = new Message("PTC"); // Prepare-to-Commit
+					serverNum = socketList.nextElement();
+					latencySleep(); // Simulate latency
+					sockList.get(serverNum).output.writeObject(msg);
+					// Receive YES/NO
+					msg = (Message)sockList.get(serverNum).input.readObject();
+					System.out.println("Server " + serverNum + " responds " +
+									   msg.theMessage + " for Prepare-to-Commit.");
+					// Modes 0 or 1 or 2: rec'v YES and policy version
+					if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+						String msgSplit = msg.theMessage.split(" ");
+						if (msgSplit[0].equals("YES")) {
+							// If mode == 0, 2PC only, policy version irrelevant
+							if (msgSplit[1].equals("0")) {
+								// Send Commit
+								msg.theMessage = "COMMIT";
+								sockList.get(serverNum).output.writeObject(msg);
+								// Receive TRUE/FALSE
+								msg = (Message)sockList.get(serverNum).input.readObject();
+								if (msg.theMessage.equals("FALSE")) {
+									returnString = "ABORT INTEGRITY_FAIL";
+									break;
+								}
+							}
+							if (msgSplit[1].equals("1")) {
+								// Compare policy versions
+								
+								// Send Commit
+								msg.theMessage = "COMMIT";
+								sockList.get(serverNum).output.writeObject(msg);
+								// Receive TRUE/FALSE
+								msg = (Message)sockList.get(serverNum).input.readObject();
+								if (msg.theMessage.equals("FALSE")) {
+									returnString = "ABORT INTEGRITY_FAIL";
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception e) {
+				System.err.println("coordinatorCommit() Prepare-to-Commit error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+		
+		return commitStatus;
+
+		switch (my_tm.validationMode) {
+			case 0:
+			case 1:
+				System.out.println("No View or Global Consistency required for transaction " + query[1]);
+				break;
+			case 2:
+				if (viewConsistencyCheck() != 0) { // a server was not fresh
+					System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+					msgText = "ABORT VIEW_POLICY_FAIL";
+				}
+				else {
+					System.out.println("View Consistency Policy OK - transaction " + query[1]);
+				}
+				break;
+			case 3:
+				if (!globalConsistencyCheck()) {
+					System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
+					msgText = "ABORT GLOBAL_POLICY_FAIL";
+				}
+				else {
+					System.out.println("Global Consistency Policy OK - transaction " + query[1]);
+				}
+				break;
+			case 4:
+				if (viewConsistencyCheck() != 0) { // a server was not fresh
+					System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
+					System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
+					if (!globalConsistencyCheck()) {
+						System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
+						msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
+					}
+					else {
+						System.out.println("Global Consistency Policy OK - transaction " + query[1]);
+					}
+				}
+				else {
+					System.out.println("View Consistency Policy OK - transaction " + query[1]);
+				}
+				break;
+		}
 	}
 	
 	/**
@@ -469,35 +529,6 @@ public class WorkerThread extends Thread {
 			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
 			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
 			//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
-		}
-		
-		// if (? == my_tm.serverNumber) { } // Perform PTC on this server
-		// else { } // send "PTC" to all other participants, parse responses
-		// participants will need to know consistency mode
-		// add policy push to specific servers?
-		// Go through socket list, contact servers involved in transaction
-		if (sockList.size() > 0) {
-			Message msg = null;
-			int serverNum;
-			try {
-				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-					msg = new Message("PTC"); // Prepare-to-Commit
-					serverNum = socketList.nextElement();
-					latencySleep(); // Simulate latency
-					sockList.get(serverNum).output.writeObject(msg);
-					// Receive YES/NO
-					msg = (Message)sockList.get(serverNum).input.readObject();
-					System.out.println("Server " + serverNum + " responds " +
-									   msg.theMessage + " for Prepare-to-Commit.");
-					if (!msg.theMessage.equals("YES")) { // ABORT
-						return false;
-					}
-				}
-			}
-			catch (Exception e) {
-				System.err.println("verifyIntegrity() Prepare-to-Commit error: " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
 		}
 		
 		// Perform final check on own server
