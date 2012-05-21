@@ -253,7 +253,7 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						if (prepareToCommit(my_tm.validationMode)) {
+						if (prepareToCommit()) {
 							// if validation passes, do this
 						}
 						else {
@@ -447,18 +447,18 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean
 	 */
-	public boolean prepareToCommit(int mode) {
+	public boolean prepareToCommit() {
 		// Receive PTC message, handle options
-		if (mode == 1) {
+		if (my_tm.validationMode == 1) {
 			// 1. Rec'v PTC, request for policy version
 			//    Return integrity status (YES/NO), Policy version
 		}
-		else if (mode == 2) {
+		else if (my_tm.validationMode == 2) {
 			// 2. Rec'v PTC, request for policy version
 			//    Return integrity status (YES/NO), Policy version
 			
 		}
-		else if (mode == 3) {
+		else if (my_tm.validationMode == 3) {
 			// 3. Rec'v PTC, global master policy version
 			//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
 			//    If Pmaster != Ptrans, return FALSE
@@ -515,7 +515,12 @@ public class WorkerThread extends Thread {
 			totalSleepTime += 150 + generator.nextInt(75);
 		}
 		// perform random success operation
-		return coinToss(my_tm.integrityCheckSuccessRate);
+		if (my_tm.integrityCheckSuccessRate < 1.0) {
+			return coinToss(my_tm.integrityCheckSuccessRate);
+		}
+		else {
+			return true;
+		}
 	}
 
 	public void databaseRead() {
@@ -582,7 +587,12 @@ public class WorkerThread extends Thread {
 				totalSleepTime += 50 + generator.nextInt(100);
 			}
 			// Perform random success operation
-			return coinToss(my_tm.localAuthSuccessRate);
+			if (my_tm.localAuthSuccessRate < 1.0) {
+				return coinToss(my_tm.localAuthSuccessRate);
+			}
+			else {
+				return true;
+			}
 		}
 		else { // just 2PC, no check needed
 			return true;
