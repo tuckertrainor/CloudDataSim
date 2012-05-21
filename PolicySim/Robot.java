@@ -17,6 +17,8 @@ import java.util.Random;
 import java.util.Date;
 
 public class Robot {
+	static String proof;
+	static int validationMode;
 	static int maxTransactions;
 	static int maxOperations;
 	static int minOperations;
@@ -25,7 +27,6 @@ public class Robot {
 	static int latencyMin;
 	static int latencyMax;
 	static boolean threadSleep;
-	static int validationMode;
 	static float integrityCheckSuccessRate;
 	static float localAuthSuccessRate;
 	static float globalAuthSuccessRate;
@@ -96,6 +97,35 @@ public class Robot {
 			System.exit(-1);
 		}
 		
+		// Check Policy Server settings, push initial policy if necessary
+		if ((policyUpdateMin + policyUpdateMax) == 0) {
+			// No periodic updates, trigger the first with POLICYPUSH
+			try {
+				Message msg = new Message("POLICYPUSH");
+				// Connect to the policy server
+				final Socket sock = new Socket(serverList.get(0).getAddress(),
+											   serverList.get(0).getPort());
+				// Set up I/O streams with the policy server
+				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				System.out.println("Robot: Connected to Policy Server at " +
+								   serverList.get(0).getAddress() + ":" +
+								   serverList.get(0).getPort());
+				// Send
+				output.writeObject(msg);
+				// Rec'v ACK
+				msg = (Message)input.readObject();
+				if (!msg.theMessage.equals("ACK")) {
+					System.err.println("Error with Policy Server during POLICYPUSH.");
+					System.exit(-1);
+				}
+			}
+			catch (Exception e) {
+				System.err.println("Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+	
 		// Build a series of transactions using parameters
 		generator = new Random(randomSeed);
 		TransactionData tData = new TransactionData(0, "ZERO");
@@ -232,7 +262,13 @@ public class Robot {
 			if (line.charAt(0) != '#') { // not a comment line
 				try {
 					String tuple[] = line.split(" ");
-					if (tuple[0].equals("MT")) {
+					if (tuple[0].equals("PROOF")) {
+						proof = tuple[1];
+					}
+					else if (tuple[0].equals("VM")) {
+						validationMode = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("MT")) {
 						maxTransactions = Integer.parseInt(tuple[1]);
 						ThreadCounter.maxThreads = maxTransactions;
 					}
@@ -256,9 +292,6 @@ public class Robot {
 					}
 					else if (tuple[0].equals("SLEEP")) {
 						threadSleep = Boolean.parseBoolean(tuple[1]);
-					}
-					else if (tuple[0].equals("VM")) {
-						validationMode = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
@@ -545,6 +578,10 @@ public class Robot {
 		try {
 			outputBuf.write("PARAMETERS:");
 			outputBuf.newLine();
+			outputBuf.write("PROOF=" + proof);
+			outputBuf.newLine();
+			outputBuf.write("VM=" + validationMode);
+			outputBuf.newLine();
 			outputBuf.write("MT=" + maxTransactions);
 			outputBuf.newLine();
 			outputBuf.write("OPMIN=" + minOperations);
@@ -560,8 +597,6 @@ public class Robot {
 			outputBuf.write("LMAX=" + latencyMax);
 			outputBuf.newLine();
 			outputBuf.write("SLEEP=" + threadSleep);
-			outputBuf.newLine();
-			outputBuf.write("VM=" + validationMode);
 			outputBuf.newLine();
 			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
 			outputBuf.newLine();
