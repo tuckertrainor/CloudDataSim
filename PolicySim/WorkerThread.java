@@ -572,29 +572,24 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if authorization check comes back OK, else false
 	 */
 	public boolean checkLocalAuth() {
-		if ((my_tm.validationMode & 1) == 1) { // requires local authorization
-			if (my_tm.threadSleep) {
-				try {
-					// sleep for a random period of time between 50ms and 150ms
-					Thread.sleep(50 + generator.nextInt(100));
-				}
-				catch(Exception e) {
-					System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
-					e.printStackTrace(System.err);
-				}
+		if (my_tm.threadSleep) {
+			try {
+				// sleep for a random period of time between 50ms and 150ms
+				Thread.sleep(50 + generator.nextInt(100));
 			}
-			else {
-				totalSleepTime += 50 + generator.nextInt(100);
-			}
-			// Perform random success operation
-			if (my_tm.localAuthSuccessRate < 1.0) {
-				return coinToss(my_tm.localAuthSuccessRate);
-			}
-			else {
-				return true;
+			catch(Exception e) {
+				System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
 			}
 		}
-		else { // just 2PC, no check needed
+		else {
+			totalSleepTime += 50 + generator.nextInt(100);
+		}
+		// Perform random success operation
+		if (my_tm.localAuthSuccessRate < 1.0) {
+			return coinToss(my_tm.localAuthSuccessRate);
+		}
+		else {
 			return true;
 		}
 	}
