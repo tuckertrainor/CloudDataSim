@@ -249,9 +249,15 @@ public class WorkerThread extends Thread {
 										   Integer.parseInt(query[1]));
 						msgText = "TRUE";
 						for (int j = 0; j < queryLog.size(); j++) {
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence());
 							if (!checkLocalAuth()) {
+								System.out.println(": FAIL");
 								msgText = "FALSE";
 								break;
+							}
+							else {
+								System.out.println(": PASS");
 							}
 						}
 					}
@@ -628,9 +634,17 @@ public class WorkerThread extends Thread {
 	 */
 	public String runAuths(int version) {
 		// Check local auths on coordinator
+		System.out.println("Running authorizations on queries using policy version " +
+						   version);
 		for (int j = 0; j < queryLog.size(); j++) {
+			System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+							 " for sequence " + queryLog.get(j).getSequence());
 			if (!checkLocalAuth()) {
+				System.out.println(": FAIL");
 				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			}
+			else {
+				System.out.println(": PASS");
 			}
 		}
 		
