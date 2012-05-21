@@ -626,6 +626,35 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
+	 * Checks the integrity of the data for the commit (2PC)
+	 *
+	 * @return boolean - true if integrity check comes back OK, else false
+	 */
+	public boolean integrityCheck() {
+		
+		// Sleep for duration of check, between 150ms and 225ms
+		if (my_tm.threadSleep) {
+			try {
+				Thread.sleep(150 + generator.nextInt(75));
+			}
+			catch(Exception e) {
+				System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+		else {
+			totalSleepTime += 150 + generator.nextInt(75);
+		}
+		// Perform random success operation if necessary
+		if (my_tm.integrityCheckSuccessRate < 1.0) {
+			return coinToss(my_tm.integrityCheckSuccessRate);
+		}
+		else {
+			return true;
+		}
+	}
+	
+	/**
 	 * Checks all involved servers for Policy version freshness
 	 *
 	 * @return int - 0 if all servers are fresh, 1+ if not
