@@ -253,27 +253,15 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						// Receive PTC message, handle options
-						// 1. Rec'v PTC, request for policy version
-						//    Return integrity status (YES/NO), Policy version
-						// 2. Rec'v PTC, request for policy version
-						//    Return integrity status (YES/NO), Policy version
-						// 3. Rec'v PTC, global master policy version
-						//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
-						//    If Pmaster != Ptrans, return FALSE
-						// 4. Rec'v PTC, global master policy version
-						//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
-						//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
-						//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
-						
-						// create a prepareToCommit() function?
-						// if (? == my_tm.serverNumber) { } // Perform PTC on this server
-						// else { } // send "PTC" to all other participants, parse responses
-						// participants will need to know consistency mode
-						// add policy push to specific servers?
+						if (prepareToCommit(my_tm.validationMode)) {
+							// if validation passes, do this
+						}
+						else {
+							// validation fails, do this
+						}
 					}
 					else if (query[0].equals("C")) { // COMMIT
-						System.out.println("COMMIT - transaction " + query[1]);
+						System.out.println("COMMIT phase - transaction " + query[1]);
 						
 						if (!integrityCheck()) { // Check data integrity for commit
 							msgText = "ABORT INTEGRITY_FAIL";
@@ -446,11 +434,47 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks the integrity of the data for the commit (2PC)
+	 * (Description)
 	 *
-	 * @return boolean - true if integrity check comes back OK, else false
+	 * @return boolean
 	 */
-	public boolean integrityCheck() {
+	public boolean coordinatorCommit() {
+		
+	}
+	
+	/**
+	 * (Description)
+	 *
+	 * @return boolean
+	 */
+	public boolean prepareToCommit(int mode) {
+		// Receive PTC message, handle options
+		if (mode == 1) {
+			// 1. Rec'v PTC, request for policy version
+			//    Return integrity status (YES/NO), Policy version
+		}
+		else if (mode == 2) {
+			// 2. Rec'v PTC, request for policy version
+			//    Return integrity status (YES/NO), Policy version
+			
+		}
+		else if (mode == 3) {
+			// 3. Rec'v PTC, global master policy version
+			//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
+			//    If Pmaster != Ptrans, return FALSE
+			
+		}
+		else { // Default to mode == 4
+			// 4. Rec'v PTC, global master policy version
+			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
+			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
+			//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
+		}
+		
+		// if (? == my_tm.serverNumber) { } // Perform PTC on this server
+		// else { } // send "PTC" to all other participants, parse responses
+		// participants will need to know consistency mode
+		// add policy push to specific servers?
 		// Go through socket list, contact servers involved in transaction
 		if (sockList.size() > 0) {
 			Message msg = null;
