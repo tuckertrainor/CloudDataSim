@@ -87,13 +87,6 @@ public class WorkerThread extends Thread {
 						my_tm.setPolicy(update);
 						System.out.println("Server Policy Version updated to v." + update);
 					}
-					// If in Incremental Punctual or Continuous, update transaction
-					// policy version and distribute to other servers
-					if ((my_tm.validationMode & 192) != 0) {
-						transactionPolicyVersion = update;
-						// my_tm.serverList, my_tm.serverNumber
-						
-					}
 					latencySleep(); // Simulate latency
 					output.writeObject(new Message(msgText)); // send ACK
 					break;
