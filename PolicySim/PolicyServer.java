@@ -57,10 +57,10 @@ public class PolicyServer {
 			}
 		}
 
-		server.start();
+		server.start(server);
     }
 	
-	public void start() {
+	public void start(PolicyServer server) {
 		try {
 			// Create and seed random number generator
 			Random generator = new Random(new Date().getTime());
@@ -76,7 +76,7 @@ public class PolicyServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				prthread = new PolicyRequestThread(sock, (latencyMin + generator.nextInt(latencyMax - latencyMin)));
+				prthread = new PolicyRequestThread(server, sock, (latencyMin + generator.nextInt(latencyMax - latencyMin)));
 				prthread.start();
 			}
 		}

@@ -24,6 +24,7 @@ public class WorkerThread extends Thread {
 	private int transactionPolicyVersion = 0;
 	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
+	private ArrayList<Integer> versions = new ArrayList<Integer>();
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -405,7 +406,7 @@ public class WorkerThread extends Thread {
 		// participants will need to know consistency mode
 		// add policy push to specific servers?
 		
-		else if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+		if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
 			// view consistency checks
 			commitStatus = viewConsistencyCheck();
 		}
@@ -433,7 +434,7 @@ public class WorkerThread extends Thread {
 									   msg.theMessage + " for Prepare-to-Commit.");
 					// Modes 0 or 1 or 2: rec'v YES and policy version
 					if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-						String msgSplit = msg.theMessage.split(" ");
+						String msgSplit[] = msg.theMessage.split(" ");
 						if (msgSplit[0].equals("YES")) {
 							// If mode == 0, 2PC only, policy version irrelevant
 							if (msgSplit[1].equals("0")) {
@@ -443,7 +444,7 @@ public class WorkerThread extends Thread {
 								// Receive TRUE/FALSE
 								msg = (Message)sockList.get(serverNum).input.readObject();
 								if (msg.theMessage.equals("FALSE")) {
-									returnString = "ABORT INTEGRITY_FAIL";
+									commitStatus = "ABORT INTEGRITY_FAIL";
 									break;
 								}
 							}
@@ -456,7 +457,7 @@ public class WorkerThread extends Thread {
 								// Receive TRUE/FALSE
 								msg = (Message)sockList.get(serverNum).input.readObject();
 								if (msg.theMessage.equals("FALSE")) {
-									returnString = "ABORT INTEGRITY_FAIL";
+									commitStatus = "ABORT INTEGRITY_FAIL";
 									break;
 								}
 							}
@@ -471,47 +472,6 @@ public class WorkerThread extends Thread {
 		}
 		
 		return commitStatus;
-
-		switch (my_tm.validationMode) {
-			case 0:
-			case 1:
-				System.out.println("No View or Global Consistency required for transaction " + query[1]);
-				break;
-			case 2:
-				if (viewConsistencyCheck() != 0) { // a server was not fresh
-					System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-					msgText = "ABORT VIEW_POLICY_FAIL";
-				}
-				else {
-					System.out.println("View Consistency Policy OK - transaction " + query[1]);
-				}
-				break;
-			case 3:
-				if (!globalConsistencyCheck()) {
-					System.out.println("*** Global Consistency Policy FAIL - transaction " + query[1] + " ***");
-					msgText = "ABORT GLOBAL_POLICY_FAIL";
-				}
-				else {
-					System.out.println("Global Consistency Policy OK - transaction " + query[1]);
-				}
-				break;
-			case 4:
-				if (viewConsistencyCheck() != 0) { // a server was not fresh
-					System.out.println("*** View Consistency Policy FAIL - transaction " + query[1] + " ***");
-					System.out.println("*** Attempting Global Consistency Check - transaction " + query[1] + " ***");
-					if (!globalConsistencyCheck()) {
-						System.out.println("*** Second Chance FAIL - transaction " + query[1] + " ***");
-						msgText = "ABORT VIEW_AND_GLOBAL_POLICY_FAIL";
-					}
-					else {
-						System.out.println("Global Consistency Policy OK - transaction " + query[1]);
-					}
-				}
-				else {
-					System.out.println("View Consistency Policy OK - transaction " + query[1]);
-				}
-				break;
-		}
 	}
 	
 	/**
@@ -673,7 +633,6 @@ public class WorkerThread extends Thread {
 	 */
 	public String viewConsistencyCheck() {
 		String status = "COMMIT";
-		ArrayList versions = new ArrayList<Integer)();
 		
 		// Call all participants, send PTC and request policy version
 		
@@ -697,7 +656,7 @@ public class WorkerThread extends Thread {
 						msg = (Message)sockList.get(serverNum).input.readObject();
 						// Check response, add policy version to ArrayList
 						if (msg.theMessage.indexOf("YES") != -1) {
-							String msgSplit[] = resp.theMessage.split(" ");
+							String msgSplit[] = msg.theMessage.split(" ");
 							versions.add(Integer.parseInt(msgSplit[1]));
 						}
 						else { // ABORT
@@ -715,7 +674,8 @@ public class WorkerThread extends Thread {
 		return status;
 	}
 
-	public boolean globalConsistencyCheck() {
+	public String globalConsistencyCheck() {
+		String status = "COMMIT";
 		int masterPolicyVersion = my_tm.callPolicyServer(); // store freshest policy off policy server
 		
 		for (int i = 0; i < queryLog.size(); i++) {
@@ -726,7 +686,7 @@ public class WorkerThread extends Thread {
 						System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
 										   " version: " + queryLog.get(i).getPolicy() +
 										   "\tGlobal version: " + masterPolicyVersion);
-						return false;
+						return "ABORT";
 					}
 				}
 				else { // other server? passQuery(<server number>, "A <masterPolicyVersion>")
@@ -767,7 +727,7 @@ public class WorkerThread extends Thread {
 							System.out.println("Global Consistency Check FAIL: " + queryLog.get(i).toString() +
 											   " version: " + queryLog.get(i).getPolicy() +
 											   "\tGlobal version: " + masterPolicyVersion);
-							return false;
+							return "ABORT";
 						}
 					}
 					catch (ConnectException ce) {
@@ -782,7 +742,7 @@ public class WorkerThread extends Thread {
 				}
 			}
 		}
-		return true;
+		return status;
 	}
 
 	public boolean coinToss(float successRate) {
