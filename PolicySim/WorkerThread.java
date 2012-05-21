@@ -14,7 +14,7 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
-/* TODO: implement PTC in run(), add a final COMMIT after validaton */
+/* TODO: Follow flow of transaction, remove unnecessary code */
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
