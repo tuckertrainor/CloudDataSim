@@ -8,7 +8,7 @@
  * over the socket until the socket is closed.
  */
 
-import java.lang.Thread;            // We will extend Java's base Thread class
+import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
 import java.io.*;
