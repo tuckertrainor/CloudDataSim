@@ -500,8 +500,10 @@ public class WorkerThread extends Thread {
 						msg = (Message)sockList.get(serverNum).input.readObject();
 						// Check response, add policy version to ArrayList
 						if (msg.theMessage.indexOf("YES") != -1) {
-							String msgSplit[] = msg.theMessage.split(" ");
-							versions.add(Integer.parseInt(msgSplit[1]));
+							if (my_tm.validationMode != 0) { // Not 2PC only
+								String msgSplit[] = msg.theMessage.split(" ");
+								versions.add(Integer.parseInt(msgSplit[1]));
+							}
 						}
 						else { // ABORT - someone responded with a NO
 							return "ABORT PTC_RESPONSE_NO";
