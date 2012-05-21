@@ -667,15 +667,21 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * Checks all involved servers for Policy version freshness
+	 * (Description)
 	 *
-	 * @return int - 0 if all servers are fresh, 1+ if not
+	 * @return String
 	 */
-	public int viewConsistencyCheck() {
+	public String viewConsistencyCheck() {
+		String status = "COMMIT";
+		ArrayList versions = new ArrayList<Integer)();
+		
+		// Call all participants, send PTC and request policy version
+		
+		// Arrays.sort, compare first with last?
+		
 		int masterPolicyVersion = my_tm.getPolicy(); // store current policy on server
 		int stale = 0;
 		Message msg = null;
-		Message resp = null;
 		
 		if (sockList.size() > 0) {
 			int serverNum;
@@ -683,21 +689,19 @@ public class WorkerThread extends Thread {
 				serverNum = socketList.nextElement();
 				if (serverNum != 0) { // Don't call the Policy server
 					try {
-						msg = new Message("POLICY");
+						msg = new Message("PTC");
 						latencySleep(); // Simulate latency
+						// Send
 						sockList.get(serverNum).output.writeObject(msg);
-						resp = (Message)sockList.get(serverNum).input.readObject();
-						// Add to totalSleepTime if necessary
-						if (!my_tm.threadSleep) {
-							// Add checkLocalAuth() time
-							totalSleepTime += 50 + generator.nextInt(100);
-							// Add return latency
-							totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Check response, add policy version to ArrayList
+						if (msg.theMessage.indexOf("YES") != -1) {
+							String msgSplit[] = resp.theMessage.split(" ");
+							versions.add(Integer.parseInt(msgSplit[1]));
 						}
-						// Compare Policy versions
-						String msgSplit[] = resp.theMessage.split(" ");
-						if (msgSplit[0].equals("VERSION") && Integer.parseInt(msgSplit[1]) < masterPolicyVersion) {
-							stale++;
+						else { // ABORT
+							return "ABORT";
 						}
 					}
 					catch (Exception e) {
@@ -707,7 +711,8 @@ public class WorkerThread extends Thread {
 				}
 			}
 		}
-		return stale;
+		
+		return status;
 	}
 
 	public boolean globalConsistencyCheck() {
