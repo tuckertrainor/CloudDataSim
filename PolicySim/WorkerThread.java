@@ -404,7 +404,7 @@ public class WorkerThread extends Thread {
 		String commitStatus = "COMMIT";
 		
 		// Call each participating server with a PTC message		
-		if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+		if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
 			// View consistency checks
 			commitStatus = viewConsistencyCheck();
 		}
@@ -507,7 +507,7 @@ public class WorkerThread extends Thread {
 							String msgSplit[] = msg.theMessage.split(" ");
 							versions.add(Integer.parseInt(msgSplit[1]));
 						}
-						else { // ABORT
+						else { // ABORT - someone responded with a NO
 							return "ABORT PTC_RESPONSE_NO";
 						}
 					}
@@ -517,6 +517,11 @@ public class WorkerThread extends Thread {
 					}
 				}
 			}
+		}
+		
+		// If 2PC only, no need to check policies or run auths
+		if (my_tm.validationMode == 0) {
+			return status;
 		}
 		
 		// Turn ArrayList into an array of ints, sort and compare versions
