@@ -488,24 +488,53 @@ public class WorkerThread extends Thread {
 	 *
 	 * @return boolean
 	 */
-	public boolean prepareToCommit() {
+	public String prepareToCommit(int globalVersion) {
 		// Receive PTC message, handle options
-		if (my_tm.validationMode == 1) {
+		if (my_tm.validationMode == 0) { // 2PC only
+			// Return integrity status
+			if (integrityCheck()) {
+				return "YES";
+			}
+			else {
+				return "NO";
+			}
+		}
+		else if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
 			// 1. Rec'v PTC, request for policy version
 			//    Return integrity status (YES/NO), Policy version
-		}
-		else if (my_tm.validationMode == 2) {
-			// 2. Rec'v PTC, request for policy version
-			//    Return integrity status (YES/NO), Policy version
-			
+			if (integrityCheck()) {
+				return "YES " + transactionPolicyVersion;
+			}
+			else {
+				return "NO";
+			}
 		}
 		else if (my_tm.validationMode == 3) {
 			// 3. Rec'v PTC, global master policy version
 			//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
 			//    If Pmaster != Ptrans, return FALSE
 			
+			if (globalVersion == transactionPolicyVersion) {
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					for (int j = 0; j < queryLog.size(); j++) {
+						if (!checkLocalAuth()) {
+							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+						}
+					}
+					
+					return "YES TRUE";
+				}
+				else {
+					return "NO";
+				}
+			}
+			else {
+				return "ABORT GLOBAL_POLICY_INEQUALITY";
+			}
 		}
-		else { // Default to mode == 4
+		else (my_tm.validationMode == 4) {
 			// 4. Rec'v PTC, global master policy version
 			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
 			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
