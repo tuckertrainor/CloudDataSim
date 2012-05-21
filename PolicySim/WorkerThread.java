@@ -253,7 +253,9 @@ public class WorkerThread extends Thread {
 							msgText = "GLOBALFAIL";
 						}
 					}
-					else if (query[0].equals("RUNAUTHS")) { // Authorize all queries
+					else if (query[0].equals("RUNAUTHS")) { // Run authorizations on all queries
+						System.out.println("Running authorizations on queries using policy version " +
+										   Integer.parseInt(query[1]));
 						msgText = "TRUE";
 						for (int j = 0; j < queryLog.size(); j++) {
 							if (!checkLocalAuth()) {
@@ -714,7 +716,7 @@ public class WorkerThread extends Thread {
 				serverNum = socketList.nextElement();
 				if (serverNum != 0) { // Don't call the Policy server
 					try {
-						msg = new Message("RUNAUTHS");
+						msg = new Message("RUNAUTHS" + version);
 						latencySleep(); // Simulate latency
 						// Send
 						sockList.get(serverNum).output.writeObject(msg);
