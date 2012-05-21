@@ -14,7 +14,7 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
-/* TODO: Follow flow of transaction, remove unnecessary code */
+/* TODO: Follow flow of transaction, remove unnecessary code, do code for global check */
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
@@ -256,7 +256,12 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						msgText = prepareToCommit(Integer.parseInt(query[1]));
+						if (my_tm.validationMode >= 0 || my_tm.validationMode <= 2) {
+							msgText = prepareToCommit(0); // No global version
+						}
+						else { // Uses a global version, pass to method
+							msgText = prepareToCommit(Integer.parseInt(query[1]));
+						}
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
@@ -413,6 +418,7 @@ public class WorkerThread extends Thread {
 	/**
 	 * (Description)
 	 *
+	 * @param globalVersion
 	 * @return boolean
 	 */
 	public String prepareToCommit(int globalVersion) {
