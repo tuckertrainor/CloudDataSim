@@ -87,14 +87,17 @@ public class RobotThread extends Thread {
 				if (respSplit[0].equals("ACK")) {
 					Thread.yield();
 				}
-				else if (respSplit[0].equals("ACS")) { // add to commitStack
+				else if (respSplit[0].equals("ACS")) { // Add to commitStack
 					// parse data from message
 					commitStack.add(new CommitItem(Integer.parseInt(respSplit[1]),
 												   Integer.parseInt(respSplit[2]),
 												   Integer.parseInt(respSplit[3])));
 				}
-				else if (respSplit[0].equals("ABORT")) {
-					// Something did not validate
+				else if (respSplit[0].equals("COMMIT")) { // Successful commit
+					// Set the end time of the transaction
+					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
+				}
+				else if (respSplit[0].equals("ABORT")) { // Unsuccessful transaction
 					TransactionLog.entry.get(txnNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
 					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
@@ -103,8 +106,6 @@ public class RobotThread extends Thread {
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
-					// Set the end time of the transaction
-					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
 					// If there was not thread sleeping, get the time used by the TM
 					if (!threadSleep) {
 						TransactionLog.entry.get(txnNumber).addSleepTime(Integer.parseInt(respSplit[1]));
