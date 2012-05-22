@@ -508,14 +508,14 @@ public class WorkerThread extends Thread {
 					System.out.println("Running authorizations on queries using policy version " +
 									   transactionPolicyVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
-						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
-										 " for sequence " + queryLog.get(j).getSequence());
 						if (!checkLocalAuth()) {
-							System.out.println(": FAIL");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println(": PASS");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": PASS");
 						}
 					}
 					return "YES TRUE"; // (integrity and authorizations pass)
@@ -666,14 +666,14 @@ public class WorkerThread extends Thread {
 		System.out.println("Running authorizations on queries using policy version " +
 						   version);
 		for (int j = 0; j < queryLog.size(); j++) {
-			System.out.print("Authorization " + queryLog.get(j).getQueryType() +
-							 " for sequence " + queryLog.get(j).getSequence());
 			if (!checkLocalAuth()) {
-				System.out.println(": FAIL");
+				System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+								 " for sequence " + queryLog.get(j).getSequence() + ": FAIL");
 				return "ABORT LOCAL_AUTHORIZATION_FAIL";
 			}
 			else {
-				System.out.println(": PASS");
+				System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+								 " for sequence " + queryLog.get(j).getSequence() + ": PASS");
 			}
 		}
 		
