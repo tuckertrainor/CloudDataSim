@@ -92,6 +92,7 @@ public class RobotThread extends Thread {
 					commitStack.add(new CommitItem(Integer.parseInt(respSplit[1]),
 												   Integer.parseInt(respSplit[2]),
 												   Integer.parseInt(respSplit[3])));
+					Thread.yield();
 				}
 				else if (respSplit[0].equals("COMMIT")) { // Successful commit
 					// Set the end time of the transaction
