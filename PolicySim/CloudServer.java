@@ -18,10 +18,11 @@ public class CloudServer {
 	public int serverNumber;
 	private int serverPolicyVersion;
 	public static boolean verbose = false;
+	public static String proof;
+	public static int validationMode;
 	public static int latencyMin;
 	public static int latencyMax;
 	public static boolean threadSleep;
-	public static int validationMode;
 	public static float integrityCheckSuccessRate;
 	public static float localAuthSuccessRate;
 	public static float globalAuthSuccessRate;
@@ -261,7 +262,13 @@ public class CloudServer {
 			if (line.charAt(0) != '#') { // not a comment line
 				try {
 					String tuple[] = line.split(" ");
-					if (tuple[0].equals("LMIN")) {
+					if (tuple[0].equals("PROOF")) {
+						proof = tuple[1];
+					}
+					else if (tuple[0].equals("VM")) {
+						validationMode = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("LMIN")) {
 						latencyMin = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("LMAX")) {
@@ -269,9 +276,6 @@ public class CloudServer {
 					}
 					else if (tuple[0].equals("SLEEP")) {
 						threadSleep = Boolean.parseBoolean(tuple[1]);
-					}
-					else if (tuple[0].equals("VM")) {
-						validationMode = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("ICSR")) {
 						integrityCheckSuccessRate = Float.parseFloat(tuple[1]);
