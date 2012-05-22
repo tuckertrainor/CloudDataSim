@@ -467,7 +467,6 @@ public class WorkerThread extends Thread {
 				}
 			}
 			else {
-				System.out.println("******* GLOBAL: " + globalVersion + "\t\tLocal: " + transactionPolicyVersion);
 				return "YES FALSE"; // (policy inequality)
 			}
 		}
