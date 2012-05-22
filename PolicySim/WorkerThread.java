@@ -461,7 +461,7 @@ public class WorkerThread extends Thread {
 					return "YES TRUE"; // (integrity and authorizations pass)
 				}
 				else {
-					return "NO"; // (integrity fail)
+					return "NO FALSE"; // (integrity fail)
 				}
 			}
 			else {
@@ -473,7 +473,62 @@ public class WorkerThread extends Thread {
 			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
 			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
 			//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
-			return "STUB";
+			
+			// Check global master policy version against transaction version
+			if (globalVersion != transactionPolicyVersion) {
+				// Have server get global version from the policy server
+				int calledGlobal = my_tm.callPolicyServer();
+				// Check version for possible race condition
+				if (calledGlobal > globalVersion) {
+					calledGlobal = globalVersion;
+				}
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					System.out.println("Running authorizations on queries using policy version " +
+									   calledGlobal);
+					for (int j = 0; j < queryLog.size(); j++) {
+						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+										 " for sequence " + queryLog.get(j).getSequence());
+						if (!checkLocalAuth()) {
+							System.out.println(": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println(": PASS");
+						}
+					}
+					return "YES TRUE"; // (integrity and authorizations pass)
+				}
+				else {
+					return "NO FALSE"; // (integrity fail)
+				}
+
+			}
+			
+			else { // (globalVersion == transactionPolicyVersion) 
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					System.out.println("Running authorizations on queries using policy version " +
+									   transactionPolicyVersion);
+					for (int j = 0; j < queryLog.size(); j++) {
+						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+										 " for sequence " + queryLog.get(j).getSequence());
+						if (!checkLocalAuth()) {
+							System.out.println(": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println(": PASS");
+						}
+					}
+					return "YES TRUE"; // (integrity and authorizations pass)
+				}
+				else {
+					return "NO FALSE"; // (integrity fail)
+				}
+			}
 		}
 	}
 
