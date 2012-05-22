@@ -137,6 +137,7 @@ public class Robot {
 		int queryServer;
 		int operations;
 		for (int i = 1; i <= maxTransactions; i++) {
+			newTrans = "";
 			prevQuery = 'B';
 			queryServer = 0;
 			// Get random number of queries for this transaction

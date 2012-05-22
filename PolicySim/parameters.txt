@@ -1,5 +1,5 @@
 # *** This file is required by the Robot and the Policy Server
-# PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL PUNCTUAL, CONTINUOUS
+# PROOF proof - DEFERRED, PUNCTUAL, INCREMENTALPUNCTUAL, CONTINUOUS
 PROOF DEFERRED
 # VM validationMode - integer for setting mode of proof
 # Deferred 0: 2PC only
@@ -9,7 +9,7 @@ PROOF DEFERRED
 # Deferred 4: global consistency any participant can call policy server
 VM 0
 # MT maxTransactions - number of transactions to perform
-MT 3
+MT 20
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
