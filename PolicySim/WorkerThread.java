@@ -582,17 +582,13 @@ public class WorkerThread extends Thread {
 						// server and get global, run auths, return Y/N, T/F
 						// if auths fail, ABORT
 						
-						// Check response, add policy version to ArrayList
-						if (msg.theMessage.indexOf("YES") != -1) {
-							if (my_tm.validationMode != 0) { // Not 2PC only
-								String msgSplit[] = msg.theMessage.split(" ");
-								versions.add(Integer.parseInt(msgSplit[1]));
-							}
-						}
-						else { // ABORT - someone responded with a NO
+						// Check response
+						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
 							return "ABORT PTC_RESPONSE_NO";
 						}
-						
+						else if (msg.theMessage.indexOf("FALSE") != -1) { // Someone responded FALSE
+							return "ABORT PTC_RESPONSE_FALSE";
+						}
 					}
 					catch (Exception e) {
 						System.err.println("Global Consistency Check Error: " + e.getMessage());
