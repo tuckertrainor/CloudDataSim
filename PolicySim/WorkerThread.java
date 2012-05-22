@@ -440,28 +440,32 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else if (my_tm.validationMode == 3) {
-			// 3. Rec'v PTC, global master policy version
-			//    If Pmaster == Ptrans, run integrity check (if NO, return ABORT INTEGRITY_FAIL), run auths and return (YES/NO, TRUE/FALSE)
-			//    If Pmaster != Ptrans, return FALSE
-			
+			// Check global master policy version against transaction version
 			if (globalVersion == transactionPolicyVersion) {
 				// Perform integrity check
 				if (integrityCheck()) {
 					// Run local authorizations
+					System.out.println("Running authorizations on queries using policy version " +
+									   transactionPolicyVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
+						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+										 " for sequence " + queryLog.get(j).getSequence());
 						if (!checkLocalAuth()) {
-							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+							System.out.println(": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println(": PASS");
 						}
 					}
-					
-					return "YES TRUE";
+					return "YES TRUE"; // (integrity and authorizations pass)
 				}
 				else {
-					return "NO";
+					return "NO"; // (integrity fail)
 				}
 			}
 			else {
-				return "ABORT GLOBAL_POLICY_INEQUALITY";
+				return "YES FALSE"; // (policy inequality)
 			}
 		}
 		else { // my_tm.validationMode == 4)
