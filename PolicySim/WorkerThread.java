@@ -258,7 +258,7 @@ public class WorkerThread extends Thread {
 						}
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						if (my_tm.validationMode >= 0 || my_tm.validationMode <= 2) {
+						if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
 							msgText = prepareToCommit(0); // No global version
 						}
 						else { // Uses a global version, pass to method
@@ -450,14 +450,14 @@ public class WorkerThread extends Thread {
 					System.out.println("Running authorizations on queries using policy version " +
 									   transactionPolicyVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
-						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
-										 " for sequence " + queryLog.get(j).getSequence());
 						if (!checkLocalAuth()) {
-							System.out.println(": FAIL");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println(": PASS");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": PASS");
 						}
 					}
 					return "YES TRUE"; // (integrity and authorizations pass)
@@ -467,6 +467,7 @@ public class WorkerThread extends Thread {
 				}
 			}
 			else {
+				System.out.println("******* GLOBAL: " + globalVersion + "\t\tLocal: " + transactionPolicyVersion);
 				return "YES FALSE"; // (policy inequality)
 			}
 		}
@@ -485,14 +486,14 @@ public class WorkerThread extends Thread {
 					System.out.println("Running authorizations on queries using policy version " +
 									   calledGlobal);
 					for (int j = 0; j < queryLog.size(); j++) {
-						System.out.print("Authorization " + queryLog.get(j).getQueryType() +
-										 " for sequence " + queryLog.get(j).getSequence());
 						if (!checkLocalAuth()) {
-							System.out.println(": FAIL");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println(": PASS");
+							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
+											 " for sequence " + queryLog.get(j).getSequence() + ": PASS");
 						}
 					}
 					return "YES TRUE"; // (integrity and authorizations pass)
