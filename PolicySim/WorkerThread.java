@@ -243,15 +243,17 @@ public class WorkerThread extends Thread {
 										   Integer.parseInt(query[1]));
 						msgText = "TRUE";
 						for (int j = 0; j < queryLog.size(); j++) {
-							System.out.print("Authorization " + queryLog.get(j).getQueryType() +
-											 " for sequence " + queryLog.get(j).getSequence());
 							if (!checkLocalAuth()) {
-								System.out.println(": FAIL");
+								System.out.println("Authorization " + queryLog.get(j).getQueryType() +
+												   " for sequence " + queryLog.get(j).getSequence() +
+												   ": FAIL");
 								msgText = "FALSE";
 								break;
 							}
 							else {
-								System.out.println(": PASS");
+								System.out.println("Authorization " + queryLog.get(j).getQueryType() +
+												   " for sequence " + queryLog.get(j).getSequence() +
+												   ": PASS");
 							}
 						}
 					}
