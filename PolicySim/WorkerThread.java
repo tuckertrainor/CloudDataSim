@@ -66,7 +66,6 @@ public class WorkerThread extends Thread {
 
 			Message msg = null;
 			Message resp = null;
-			int validationMode = 0;
 			
 			while (true) {
 				// Loop to read messages
@@ -272,6 +271,8 @@ public class WorkerThread extends Thread {
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
 						msgText = coordinatorCommit();
+						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
+										   ": " + msgText);
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
 						Thread.sleep(Integer.parseInt(query[1]));
@@ -390,9 +391,11 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * (Description)
+	 * When the coordinator receives a request to COMMIT, it directs the flow
+	 * of the transaction to either a view consistency check or a global
+	 * consistency check.
 	 *
-	 * @return String
+	 * @return String - the result of the 2PV check, either COMMIT or ABORT
 	 */
 	public String coordinatorCommit() {
 		String commitStatus = "COMMIT";
@@ -414,9 +417,10 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * (Description)
+	 * The prepare-to-commit method that is invoked when participating servers
+	 * received the PTC call from the coordinator
 	 *
-	 * @param globalVersion
+	 * @param globalVersion - used for global consistency check
 	 * @return boolean
 	 */
 	public String prepareToCommit(int globalVersion) {
@@ -475,9 +479,11 @@ public class WorkerThread extends Thread {
 	}
 
 	/**
-	 * (Description)
+	 * Handles the 2PV view consistency check. Calls each participant with the
+	 * PTC command, receives back their policy versions, and determines whether
+	 * or not to run proofs of authorization.
 	 *
-	 * @return String
+	 * @return String - COMMIT or ABORT under view consistency
 	 */
 	public String viewConsistencyCheck() {
 		String status = "COMMIT";
@@ -544,9 +550,13 @@ public class WorkerThread extends Thread {
 	}
 
 	/**
-	 * (Description)
+	 * Handles the 2PV global consistency check. Sends each participant the PTC
+	 * command and the global master policy version. If all participants are
+	 * using the global version, then authorizations can be performed. Otherwise
+	 * a decision is made whether to allow calls to the policy server to refresh
+	 * or to ABORT.
 	 *
-	 * @return String
+	 * @return String - COMMIT or ABORT
 	 */
 	public String globalConsistencyCheck() {
 		String status = "COMMIT";
@@ -620,9 +630,10 @@ public class WorkerThread extends Thread {
 	}
 	
 	/**
-	 * (Description)
+	 * Method to run authorizations on each query performed on all participating
+	 * servers, including the coordinator.
 	 *
-	 * @return String
+	 * @return String - COMMIT or ABORT
 	 */
 	public String runAuths(int version) {
 		// Check local auths on coordinator
