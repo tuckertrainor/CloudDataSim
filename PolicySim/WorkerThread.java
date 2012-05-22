@@ -228,11 +228,6 @@ public class WorkerThread extends Thread {
 						System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
 						latencySleep(); // Simulate latency and return ACK
 					}
-					else if (query[0].equals("POLICY")) { // POLICY
-						latencySleep();
-						// Return Policy version of this transaction to caller
-						msgText = "VERSION " + Integer.toString(transactionPolicyVersion);
-					}
 					else if (query[0].equals("A")) { // Re-authorize a query
 						// Query example: "A <global policy version>"
 						// Retrieve policy version: Integer.parseInt(query[1])
