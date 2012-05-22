@@ -468,12 +468,7 @@ public class WorkerThread extends Thread {
 				return "YES FALSE"; // (policy inequality)
 			}
 		}
-		else { // my_tm.validationMode == 4)
-			// 4. Rec'v PTC, global master policy version
-			//    If Pmaster == Ptrans, run integrity check (if NO, return NO),
-			//    If Pmaster != Ptrans, run integrity check (if NO, return NO),
-			//    retrieve global master policy version from Policy server, run auths and return (YES/NO, TRUE/FALSE)
-			
+		else { // (my_tm.validationMode == 4)
 			// Check global master policy version against transaction version
 			if (globalVersion != transactionPolicyVersion) {
 				// Have server get global version from the policy server
@@ -503,9 +498,7 @@ public class WorkerThread extends Thread {
 				else {
 					return "NO FALSE"; // (integrity fail)
 				}
-
-			}
-			
+			}			
 			else { // (globalVersion == transactionPolicyVersion) 
 				// Perform integrity check
 				if (integrityCheck()) {
