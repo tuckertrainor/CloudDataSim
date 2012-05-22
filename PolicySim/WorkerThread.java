@@ -805,6 +805,10 @@ public class WorkerThread extends Thread {
 		}
 	}
 	
+	/**
+	 * A class to store sockets between servers in order to reduce the number
+	 * of connections necessary during a transaction.
+	 */
 	public class SocketList {
 		private Hashtable<Integer, SocketObject> list = new Hashtable<Integer, SocketObject>();
 		
