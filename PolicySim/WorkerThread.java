@@ -720,11 +720,23 @@ public class WorkerThread extends Thread {
 	 * @param mode - the integer value of policyPush from parameters.txt file
 	 */
 	public void forcePolicyUpdate(int mode) {
-		if (mode == 1) { // Push an update to a single server
+		if (sockList.size() > 0) { // Can only perform if more than one server
+			String msg = "POLICYPUSH";
 			
-		}
-		else if (mode == 2) { // Push an update to all servers
-			
+			if (mode == 1) { // Push an update to a single server
+				// Find the first server in the list, push an update to it
+				for (int i = 1; i <= my_tm.serverList.size(); i++) {
+					if (sockList.hasSocket(i)) {
+						// Call policy server to update policy version on it
+						msg += i;
+						break;
+					}
+				}
+			}
+			else if (mode == 2) { // Push an update to all servers
+				// msg is already set correctly
+			}
+			// Send policy server msg, wait for ACK
 		}
 	}
 	
