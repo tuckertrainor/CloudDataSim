@@ -737,6 +737,35 @@ public class WorkerThread extends Thread {
 				// msg is already set correctly
 			}
 			// Send policy server msg, wait for ACK
+		// Check Policy Server settings, push initial policy if necessary
+		if ((policyUpdateMin + policyUpdateMax) == 0) {
+			// No periodic updates, trigger the first with POLICYPUSH
+			try {
+				Message msg = new Message("POLICYPUSH");
+				// Connect to the policy server
+				final Socket sock = new Socket(serverList.get(0).getAddress(),
+											   serverList.get(0).getPort());
+				// Set up I/O streams with the policy server
+				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				System.out.println("Robot: Connected to Policy Server at " +
+								   serverList.get(0).getAddress() + ":" +
+								   serverList.get(0).getPort());
+				// Send
+				output.writeObject(msg);
+				// Rec'v ACK
+				msg = (Message)input.readObject();
+				if (!msg.theMessage.equals("ACK")) {
+					System.err.println("Error with Policy Server during POLICYPUSH.");
+					System.exit(-1);
+				}
+			}
+			catch (Exception e) {
+				System.err.println("Error: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+			
 		}
 	}
 	
