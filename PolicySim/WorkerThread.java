@@ -728,6 +728,8 @@ public class WorkerThread extends Thread {
 				for (int i = 1; i <= my_tm.serverList.size(); i++) {
 					if (sockList.hasSocket(i)) {
 						// Call policy server to update policy version on it
+						System.out.println("Preparing to request policy update for server " +
+										   i + ".");
 						msgText += i;
 						break;
 					}
@@ -735,6 +737,7 @@ public class WorkerThread extends Thread {
 			}
 			else if (mode == 2) { // Push an update to all servers
 				// msgText is already set correctly
+				System.out.println("Preparing to request policy update to all servers.");
 			}
 			// Send policy server msg, wait for ACK
 			try {
