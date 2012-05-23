@@ -81,6 +81,10 @@ public class WorkerThread extends Thread {
 				if (msg.theMessage.equals("DONE")) {
 					break;
 				}
+				else if (msg.theMessage.equals("KILL")) {
+					my_tm.shutdownServer();
+					break;
+				}
 				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update from Policy Server
 					String msgSplit[] = msg.theMessage.split(" ");
 					int update = Integer.parseInt(msgSplit[1]);
