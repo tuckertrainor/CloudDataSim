@@ -463,12 +463,9 @@ public class Robot {
 				input = new ObjectInputStream(socket.getInputStream());
 				
 				Message msg = new Message("PARAMETERS " +
-										  latencyMin + " " +
-										  latencyMax + " " +
-										  threadSleep + " " +
+										  proof + " " +
 										  validationMode + " " +
-										  integrityCheckSuccessRate	+ " " +
-										  localAuthSuccessRate);
+										  policyPush);
 				output.writeObject(msg);
 				msg = (Message)input.readObject();
 				if (!msg.theMessage.equals("ACK")) {
