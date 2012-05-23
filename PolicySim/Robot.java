@@ -197,7 +197,7 @@ public class Robot {
 		}
 		
 		// Shut down Cloud Servers
-		for (int i = 1; i < serverList.size(); i++) {
+		for (int i = 1; i <= maxServers; i++) {
 			try {
 				// Connect to the specified server
 				Socket sock = new Socket(serverList.get(i).getAddress(),
@@ -209,6 +209,11 @@ public class Robot {
 				output.writeObject(new Message("KILL"));
 				// Disconnect from server
 				sock.close();
+			}
+			catch (ConnectException ce) {
+				System.err.println(ce.getMessage() +
+								   ": Check server address and port number.");
+				ce.printStackTrace(System.err);
 			}
 			catch (Exception e) {
 				System.err.println("Error during KILL: " + e.getMessage());
