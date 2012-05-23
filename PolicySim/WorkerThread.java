@@ -174,8 +174,6 @@ public class WorkerThread extends Thread {
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
-								// Note: If policy has not been set, this server
-								// is the coordinator.
 							}
 
 							// Check transaction policy against server policy
