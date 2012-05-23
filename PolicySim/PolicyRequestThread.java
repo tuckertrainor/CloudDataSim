@@ -64,9 +64,10 @@ public class PolicyRequestThread extends Thread {
 				// Increment the policy version and distribute to all servers
 				PolicyThread thread = null;
 				int policyVersion = PolicyVersion.getCurrent();
-				if (policyVersion < Integer.MAX_VALUE) {
+				if (PolicyVersion.getCurrent() < Integer.MAX_VALUE) {
 					// Update policy version
 					PolicyVersion.updatePolicy();
+					policyVersion = PolicyVersion.getCurrent();
 					System.out.println("Policy version updated to v. " + policyVersion);
 					// Spread the word, no latency
 					for (int i = 1; i <= my_ps.maxServers; i++) {
@@ -87,6 +88,7 @@ public class PolicyRequestThread extends Thread {
 				if (policyVersion < Integer.MAX_VALUE) {
 					// Update policy version
 					PolicyVersion.updatePolicy();
+					policyVersion = PolicyVersion.getCurrent();
 					System.out.println("Policy version updated to v. " + policyVersion);
 				}
 				// ACK sender of request
@@ -102,6 +104,7 @@ public class PolicyRequestThread extends Thread {
 				if (policyVersion < Integer.MAX_VALUE) {
 					// Update policy version
 					PolicyVersion.updatePolicy();
+					policyVersion = PolicyVersion.getCurrent();
 					// Send to destination, no latency
 					thread = new PolicyThread(policyVersion,
 											  my_ps.serverList.get(dest).getAddress(),
