@@ -19,6 +19,7 @@ import java.util.Date;
 public class Robot {
 	static String proof;
 	static int validationMode;
+	static int policyPush;
 	static int maxTransactions;
 	static int maxOperations;
 	static int minOperations;
@@ -582,6 +583,8 @@ public class Robot {
 			outputBuf.write("PROOF=" + proof);
 			outputBuf.newLine();
 			outputBuf.write("VM=" + validationMode);
+			outputBuf.newLine();
+			outputBuf.write("PUSH=" + policyPush);
 			outputBuf.newLine();
 			outputBuf.write("MT=" + maxTransactions);
 			outputBuf.newLine();

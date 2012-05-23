@@ -20,6 +20,7 @@ public class CloudServer {
 	public static boolean verbose = false;
 	public static String proof;
 	public static int validationMode;
+	public static int policyPush;
 	public static int latencyMin;
 	public static int latencyMax;
 	public static boolean threadSleep;
@@ -267,6 +268,9 @@ public class CloudServer {
 					}
 					else if (tuple[0].equals("VM")) {
 						validationMode = Integer.parseInt(tuple[1]);
+					}
+					else if (tuple[0].equals("PUSH")) {
+						policyPush = Integer.parseInt(tuple[1]);
 					}
 					else if (tuple[0].equals("LMIN")) {
 						latencyMin = Integer.parseInt(tuple[1]);

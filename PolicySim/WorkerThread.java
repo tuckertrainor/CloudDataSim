@@ -266,6 +266,9 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
+						// Perform any forced policy updating
+						forcePolicyUpdate(my_tm.policyPush);
+						// Begin 2PC/2PV methods
 						msgText = coordinatorCommit();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
 										   ": " + msgText);
@@ -708,6 +711,21 @@ public class WorkerThread extends Thread {
 		}
 		
 		return "COMMIT";
+	}
+	
+	/**
+	 * Method to force a policy update in order to trigger policy mismatch
+	 * handling by 2PV algorithms.
+	 *
+	 * @param mode - the integer value of policyPush from parameters.txt file
+	 */
+	public void forcePolicyUpdate(int mode) {
+		if (mode == 1) { // Push an update to a single server
+			
+		}
+		else if (mode == 2) { // Push an update to all servers
+			
+		}
 	}
 	
 	public void databaseRead() {
