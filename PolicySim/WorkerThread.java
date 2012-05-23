@@ -97,16 +97,12 @@ public class WorkerThread extends Thread {
 					break;
 				}
 				else if (msg.theMessage.indexOf("PARAMETERS") != -1) { // Configuration change
-					// PARAMETERS <LMIN> <LMAX> <SLEEP> <VM> <ICSR> <LASR>
+					// PARAMETERS <PROOF> <VM> <PUSH>
 					String msgSplit[] = msg.theMessage.split(" ");
-					my_tm.latencyMin = Integer.parseInt(msgSplit[1]);
-					my_tm.latencyMax = Integer.parseInt(msgSplit[2]);
-					my_tm.threadSleep = Boolean.parseBoolean(msgSplit[3]);
-					my_tm.validationMode = Integer.parseInt(msgSplit[4]);
-					my_tm.integrityCheckSuccessRate = Float.parseFloat(msgSplit[5]);
-					my_tm.localAuthSuccessRate = Float.parseFloat(msgSplit[6]);
-					System.out.println("Server parameters updated:");
-					System.out.println(msg.theMessage);
+					my_tm.proof = msgSplit[1];
+					my_tm.validationMode = Integer.parseInt(msgSplit[2]);
+					my_tm.policyPush = Integer.parseInt(msgSplit[3]);
+					System.out.println("Server parameters updated: " + msg.theMessage);
 					// No artificial latency needed, send ACK
 					output.writeObject(new Message(msgText));
 					break;

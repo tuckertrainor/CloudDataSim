@@ -68,6 +68,7 @@ public class Robot {
 		else {
 			System.out.println("Server configuration file read successfully.");
 		}
+		//		System.err.println("Usage: java Robot <Seed> <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
 		
 		switch (args.length) {
 			case 0:
@@ -75,16 +76,13 @@ public class Robot {
 			case 1:
 				setSeed(args[0]);
 				break;
-			case 3:
+			case 6:
 				setSeed(args[0]);
-				setOpMin(args[1]);
-				setOpMax(minOperations, args[2]);
-				break;
-			case 4:
-				setSeed(args[0]);
-				setOpMin(args[1]);
-				setOpMax(minOperations, args[2]);
-				setVM(args[3]);
+				proof = args[1];
+				setVM(args[2]);
+				setPush(args[3]);
+				setOpMin(args[4]);
+				setOpMax(minOperations, args[5]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
@@ -266,6 +264,9 @@ public class Robot {
 					else if (tuple[0].equals("VM")) {
 						validationMode = Integer.parseInt(tuple[1]);
 					}
+					else if (tuple[0].equals("PUSH")) {
+						policyPush = Integer.parseInt(tuple[1]);
+					}
 					else if (tuple[0].equals("MT")) {
 						maxTransactions = Integer.parseInt(tuple[1]);
 						ThreadCounter.maxThreads = maxTransactions;
@@ -345,8 +346,7 @@ public class Robot {
 	public static void argsError() {
 		System.err.println("Usage: java Robot or");
 		System.err.println("Usage: java Robot <Seed> or");
-		System.err.println("Usage: java Robot <Seed> <OPMIN> <OPMAX> or");
-		System.err.println("Usage: java Robot <Seed> <OPMIN> <OPMAX> <VM>\n");
+		System.err.println("Usage: java Robot <Seed> <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
 	}
 	
 	public static int getTM(ArrayList<ServerID> _serverList, String str) {
@@ -432,6 +432,25 @@ public class Robot {
 		}
 	}
 
+	public static void setPush(String str) {
+		int number = -1;
+		// Check arg for proper value, range
+		try {
+			number = Integer.parseInt(str);
+			if (number < 0 || number > 3) {
+				System.err.println("Error in PUSH. Please set a value in the range of 0 - 3.");
+				System.exit(-1);
+			}
+			policyPush = number;
+		}
+		catch (Exception e) {
+			System.err.println("Error parsing argument for PUSH. Please use a valid integer.");
+			argsError();
+			System.exit(-1);
+		}
+
+	}
+	
 	public static boolean parameterPush(ArrayList<ServerID> list) {
 		Socket socket;
 		ObjectOutputStream output;
