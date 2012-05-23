@@ -266,8 +266,10 @@ public class WorkerThread extends Thread {
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
-						// Perform any forced policy updating
-						forcePolicyUpdate(my_tm.policyPush);
+						// Perform any forced policy updating for global
+						if (my_tm.validationMode == 3 || my_tm.validationMode == 4) {
+							forcePolicyUpdate(my_tm.policyPush);
+						}
 						// Begin 2PC/2PV methods
 						msgText = coordinatorCommit();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
