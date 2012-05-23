@@ -14,7 +14,7 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
-/* TODO: Follow flow of transaction, remove unnecessary code, do code for global check */
+/* TODO: create to do */
 
 public class WorkerThread extends Thread {
     private final Socket socket; // The socket that we'll be talking over
@@ -24,7 +24,6 @@ public class WorkerThread extends Thread {
 	private int transactionPolicyVersion = 0;
 	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
-	private ArrayList<Integer> versions = new ArrayList<Integer>();
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -537,7 +536,10 @@ public class WorkerThread extends Thread {
 	public String viewConsistencyCheck() {
 		String status = "COMMIT";
 		Message msg = null;
-		
+		ArrayList<Integer> versions = new ArrayList<Integer>();
+
+		// Add coordinator's policy version to ArrayList
+		versions.add(transactionPolicyVersion);
 		// Call all participants, send PTC and gather policy versions
 		if (sockList.size() > 0) {
 			int serverNum;
