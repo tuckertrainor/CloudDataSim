@@ -730,7 +730,7 @@ public class WorkerThread extends Thread {
 						// Call policy server to update policy version on it
 						System.out.println("Preparing to request policy update for server " +
 										   i + ".");
-						msgText += i;
+						msgText += " " + i;
 						break;
 					}
 				}
