@@ -233,4 +233,11 @@ public class PolicyServer {
 		
 		return true; // success
 	}
+	
+	/**
+     * Allows the Robot to shut down the server.
+     */
+	public static void shutdownServer() {
+		System.exit(0);
+	}
 }

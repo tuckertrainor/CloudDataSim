@@ -115,6 +115,10 @@ public class PolicyRequestThread extends Thread {
 				// ACK sender of request
 				output.writeObject(new Message("ACK"));
 			}
+			else if (msg.theMessage.equals("KILL")) {
+				// Shut down the server
+				my_ps.shutdownServer();
+			}
 			else {
 				output.writeObject(new Message("FAIL"));
 			}
