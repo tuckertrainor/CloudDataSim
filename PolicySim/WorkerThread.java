@@ -24,6 +24,7 @@ public class WorkerThread extends Thread {
 	private int transactionPolicyVersion = 0;
 	private int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	private Random generator;
+	private boolean hasUpdated = false;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -335,8 +336,11 @@ public class WorkerThread extends Thread {
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
 				// If pushing updates for view consistency testing, do it now
-				if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+				if (!hasUpdated && (my_tm.validationMode == 1 || my_tm.validationMode == 2)) {
 					forcePolicyUpdate(my_tm.policyPush);
+					hasUpdated = true; // This only needs to be done once
+					// NOTE: this seems to allow a few transactions to pass
+					// before taking effect
 				}
 			}
 
