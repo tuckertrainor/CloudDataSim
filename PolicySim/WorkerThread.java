@@ -739,6 +739,10 @@ public class WorkerThread extends Thread {
 				// msgText is already set correctly
 				System.out.println("Preparing to request policy update to all servers.");
 			}
+			else if (mode == 3) { // Update global version, but do not 
+				msgText += " UPDATEONLY";
+				System.out.println("Preparing to request undistributed policy update.");
+			}
 			// Send policy server msg, wait for ACK
 			try {
 				Message msg = new Message(msgText);

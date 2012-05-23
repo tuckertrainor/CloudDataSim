@@ -80,10 +80,21 @@ public class PolicyRequestThread extends Thread {
 				// ACK sender of request
 				output.writeObject(new Message("ACK"));
 			}
+			else if (msg.theMessage.equals("POLICYPUSH UPDATEONLY")) {
+				// Increment policy version, but do not distribute to servers
+				PolicyThread thread = null;
+				int policyVersion = PolicyVersion.getCurrent();
+				if (policyVersion < Integer.MAX_VALUE) {
+					// Update policy version
+					PolicyVersion.updatePolicy();
+					System.out.println("Policy version updated to v. " + policyVersion);
+				}
+				// ACK sender of request
+				output.writeObject(new Message("ACK"));
+			}
 			else if (msg.theMessage.indexOf("POLICYPUSH") != -1) {
 				// We'll be sending an update to an individual server
 				PolicyThread thread = null;
-				
 				String msgSplit[] = msg.theMessage.split(" ");
 				// Get destination server
 				int dest = Integer.parseInt(msgSplit[1]);
