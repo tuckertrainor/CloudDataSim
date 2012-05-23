@@ -681,14 +681,14 @@ public class WorkerThread extends Thread {
 			if (!checkLocalAuth()) {
 				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for sequence " + queryLog.get(j).getSequence() +
-								   " with policy v. " + transactionPolicyVersion +
+								   " with policy v. " + version +
 								   ": FAIL");
 				return "ABORT LOCAL_AUTHORIZATION_FAIL";
 			}
 			else {
 				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for sequence " + queryLog.get(j).getSequence() +
-								   " with policy v. " + transactionPolicyVersion +
+								   " with policy v. " + version +
 								   ": PASS");
 			}
 		}
