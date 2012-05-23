@@ -80,6 +80,27 @@ public class PolicyRequestThread extends Thread {
 				// ACK sender of request
 				output.writeObject(new Message("ACK"));
 			}
+			else if (msg.theMessage.indexOf("POLICYPUSH") != -1) {
+				// We'll be sending an update to an individual server
+				PolicyThread thread = null;
+				
+				String msgSplit[] = msg.theMessage.split(" ");
+				// Get destination server
+				int dest = Integer.parseInt(msgSplit[1]);
+				int policyVersion = PolicyVersion.getCurrent();
+				if (policyVersion < Integer.MAX_VALUE) {
+					// Update policy version
+					PolicyVersion.updatePolicy();
+					// Send to destination, no latency
+					thread = new PolicyThread(policyVersion,
+											  my_ps.serverList.get(dest).getAddress(),
+											  my_ps.serverList.get(dest).getPort(),
+											  0);
+					thread.start();
+				}
+				// ACK sender of request
+				output.writeObject(new Message("ACK"));
+			}
 			else {
 				output.writeObject(new Message("FAIL"));
 			}
