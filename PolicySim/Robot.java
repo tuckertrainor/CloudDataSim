@@ -196,6 +196,26 @@ public class Robot {
 			Thread.yield();
 		}
 		
+		// Shut down Cloud Servers
+		for (int i = 1; i < serverList.size(); i++) {
+			try {
+				// Connect to the specified server
+				Socket sock = new Socket(serverList.get(i).getAddress(),
+										 serverList.get(i).getPort());
+				// Set up I/O streams with the server
+				ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				// Send KILL
+				output.writeObject(new Message("KILL"));
+				// Disconnect from server
+				sock.close();
+			}
+			catch (Exception e) {
+				System.err.println("Error during KILL: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+		
 		// Record output log
 		if (outputLog()) {
 			System.out.println("Log created.");
