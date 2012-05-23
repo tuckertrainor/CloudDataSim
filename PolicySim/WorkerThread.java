@@ -721,51 +721,45 @@ public class WorkerThread extends Thread {
 	 */
 	public void forcePolicyUpdate(int mode) {
 		if (sockList.size() > 0) { // Can only perform if more than one server
-			String msg = "POLICYPUSH";
+			String msgText = "POLICYPUSH";
 			
 			if (mode == 1) { // Push an update to a single server
 				// Find the first server in the list, push an update to it
 				for (int i = 1; i <= my_tm.serverList.size(); i++) {
 					if (sockList.hasSocket(i)) {
 						// Call policy server to update policy version on it
-						msg += i;
+						msgText += i;
 						break;
 					}
 				}
 			}
 			else if (mode == 2) { // Push an update to all servers
-				// msg is already set correctly
+				// msgText is already set correctly
 			}
 			// Send policy server msg, wait for ACK
-		// Check Policy Server settings, push initial policy if necessary
-		if ((policyUpdateMin + policyUpdateMax) == 0) {
-			// No periodic updates, trigger the first with POLICYPUSH
 			try {
-				Message msg = new Message("POLICYPUSH");
+				Message msg = new Message(msgText);
 				// Connect to the policy server
-				final Socket sock = new Socket(serverList.get(0).getAddress(),
-											   serverList.get(0).getPort());
+				final Socket sock = new Socket(my_tm.serverList.get(0).getAddress(),
+											   my_tm.serverList.get(0).getPort());
 				// Set up I/O streams with the policy server
 				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
-				System.out.println("Robot: Connected to Policy Server at " +
-								   serverList.get(0).getAddress() + ":" +
-								   serverList.get(0).getPort());
+				System.out.println("Connected to Policy Server at " +
+								   my_tm.serverList.get(0).getAddress() + ":" +
+								   my_tm.serverList.get(0).getPort());
 				// Send
 				output.writeObject(msg);
 				// Rec'v ACK
 				msg = (Message)input.readObject();
 				if (!msg.theMessage.equals("ACK")) {
-					System.err.println("Error with Policy Server during POLICYPUSH.");
-					System.exit(-1);
+					System.err.println("*** Error with Policy Server during POLICYPUSH.");
 				}
 			}
 			catch (Exception e) {
 				System.err.println("Error: " + e.getMessage());
 				e.printStackTrace(System.err);
 			}
-		}
-			
 		}
 	}
 	
