@@ -222,11 +222,6 @@ public class WorkerThread extends Thread {
 											   ": " + msgText);
 						}
 					}
-					else if (query[0].equals("COORDPOLICY")) { // Policy update from coordinator
-						transactionPolicyVersion = Integer.parseInt(query[1]);
-						System.out.println("Transaction Policy Version updated to v." + transactionPolicyVersion);
-						latencySleep(); // Simulate latency and return ACK
-					}
 					else if (query[0].equals("A")) { // Re-authorize a query
 						// Query example: "A <global policy version>"
 						// Retrieve policy version: Integer.parseInt(query[1])
@@ -337,18 +332,6 @@ public class WorkerThread extends Thread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
-				// Send new server the transaction's beginning policy version
-				msg = new Message("COORDPOLICY " + transactionPolicyVersion);
-				latencySleep(); // Simulate latency to other server
-				sockList.get(otherServer).output.writeObject(msg);
-				msg = (Message)sockList.get(otherServer).input.readObject();
-				System.out.println("Server " + otherServer +
-								   " says: " + msg.theMessage +
-								   " for updating policy version.");
-				if (!msg.theMessage.equals("ACK")) {
-					System.err.println("Unsuccessful transfer of policy version to server " + otherServer);
-					return "FAIL";
-				}
 			}
 
 			// Send query
