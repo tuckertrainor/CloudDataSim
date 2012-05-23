@@ -332,6 +332,10 @@ public class WorkerThread extends Thread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
+				// If pushing updates for view consistency testing, do it now
+				if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+					forcePolicyUpdate(my_tm.policyPush);
+				}
 			}
 
 			// Send query
