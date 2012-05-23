@@ -196,8 +196,8 @@ public class Robot {
 			Thread.yield();
 		}
 		
-		// Shut down Cloud Servers
-		for (int i = 1; i <= maxServers; i++) {
+		// Shut down Policy Server, Cloud Servers
+		for (int i = 0; i <= maxServers; i++) {
 			try {
 				// Connect to the specified server
 				Socket sock = new Socket(serverList.get(i).getAddress(),
