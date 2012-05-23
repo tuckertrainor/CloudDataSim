@@ -7,11 +7,11 @@ PROOF DEFERRED
 # Deferred 2: view consistency second chance
 # Deferred 3: global consistency coordinator calls policy server
 # Deferred 4: global consistency any participant can call policy server
-VM 2
+VM 1
 # PUSH policyPush - 0: none, 1: single random participant, 2: all participants
 PUSH 2
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 1000
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
