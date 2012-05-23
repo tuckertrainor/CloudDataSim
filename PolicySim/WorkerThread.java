@@ -239,7 +239,7 @@ public class WorkerThread extends Thread {
 							if (!checkLocalAuth()) {
 								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 												   " for sequence " + queryLog.get(j).getSequence() +
-												   " with policy v. " + transactionPolicyVersion +
+												   " with policy v. " + Integer.parseInt(query[1]) +
 												   ": FAIL");
 								msgText = "FALSE";
 								break;
@@ -247,7 +247,7 @@ public class WorkerThread extends Thread {
 							else {
 								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 												   " for sequence " + queryLog.get(j).getSequence() +
-												   " with policy v. " + transactionPolicyVersion +
+												   " with policy v. " + Integer.parseInt(query[1]) +
 												   ": PASS");
 							}
 						}
@@ -487,14 +487,14 @@ public class WorkerThread extends Thread {
 						if (!checkLocalAuth()) {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
-											   " with policy v. " + transactionPolicyVersion +
+											   " with policy v. " + calledGlobal +
 											   ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
-											   " with policy v. " + transactionPolicyVersion +
+											   " with policy v. " + calledGlobal +
 											   ": PASS");
 						}
 					}

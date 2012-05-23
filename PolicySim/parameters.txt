@@ -11,7 +11,7 @@ VM 2
 # PUSH policyPush - 0: none, 1: single random participant, 2: all participants
 PUSH 2
 # MT maxTransactions - number of transactions to perform
-MT 1000
+MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
