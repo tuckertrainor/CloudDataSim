@@ -238,7 +238,7 @@ public class WorkerThread extends Thread {
 						msgText = "TRUE";
 						for (int j = 0; j < queryLog.size(); j++) {
 							if (!checkLocalAuth()) {
-								System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 												   " for sequence " + queryLog.get(j).getSequence() +
 												   " with policy v. " + transactionPolicyVersion +
 												   ": FAIL");
@@ -246,7 +246,7 @@ public class WorkerThread extends Thread {
 								break;
 							}
 							else {
-								System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 												   " for sequence " + queryLog.get(j).getSequence() +
 												   " with policy v. " + transactionPolicyVersion +
 												   ": PASS");
@@ -444,14 +444,14 @@ public class WorkerThread extends Thread {
 									   transactionPolicyVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
 						if (!checkLocalAuth()) {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": PASS");
@@ -483,14 +483,14 @@ public class WorkerThread extends Thread {
 									   calledGlobal);
 					for (int j = 0; j < queryLog.size(); j++) {
 						if (!checkLocalAuth()) {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": PASS");
@@ -510,14 +510,14 @@ public class WorkerThread extends Thread {
 									   transactionPolicyVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
 						if (!checkLocalAuth()) {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
 						else {
-							System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for sequence " + queryLog.get(j).getSequence() +
 											   " with policy v. " + transactionPolicyVersion +
 											   ": PASS");
@@ -675,14 +675,14 @@ public class WorkerThread extends Thread {
 						   version);
 		for (int j = 0; j < queryLog.size(); j++) {
 			if (!checkLocalAuth()) {
-				System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for sequence " + queryLog.get(j).getSequence() +
 								   " with policy v. " + transactionPolicyVersion +
 								   ": FAIL");
 				return "ABORT LOCAL_AUTHORIZATION_FAIL";
 			}
 			else {
-				System.out.println("Auth of " + queryLog.get(j).getQueryType() +
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for sequence " + queryLog.get(j).getSequence() +
 								   " with policy v. " + transactionPolicyVersion +
 								   ": PASS");
