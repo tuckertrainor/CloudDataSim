@@ -84,7 +84,6 @@ public class WorkerThread extends Thread {
 					// Check that we aren't going backwards in a race condition
 					if (my_tm.getPolicy() < update) {
 						my_tm.setPolicy(update);
-						System.out.println("Server Policy Version updated to v." + update);
 					}
 					latencySleep(); // Simulate latency
 					output.writeObject(new Message(msgText)); // send ACK
@@ -337,8 +336,6 @@ public class WorkerThread extends Thread {
 				if (!hasUpdated && (my_tm.validationMode == 1 || my_tm.validationMode == 2)) {
 					forcePolicyUpdate(my_tm.policyPush);
 					hasUpdated = true; // This only needs to be done once
-					// NOTE: this seems to allow a few transactions to pass
-					// before taking effect
 				}
 			}
 
