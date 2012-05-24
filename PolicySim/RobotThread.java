@@ -71,12 +71,17 @@ public class RobotThread extends Thread {
 			generator = new Random(new Date().getTime());
 
 			// Set start time of transaction
-			TransactionLog.entry.get(txnNumber).setStartTime();
+			TransactionLog.entry.get(txnNumber).setStartTime(new Date().getTime());
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
 				Message msg = null, resp = null;
 
+				// If about to commit, record the time
+				if (queryGroups[groupIndex].charAt(0) == 'C') {
+					TransactionLog.entry.get(txnNumber).setCommitStartTime(new Date().getTime());
+				}
+				
 				// Send message after latencySleep()
 				latencySleep();
 				msg = new Message(queryGroups[groupIndex]);
