@@ -12,6 +12,7 @@ public class TransactionData {
 	private int transactionNumber;
 	private String transaction;
 	private long startTime;
+	private long commitStartTime;
 	private	long endTime;
 	private int sleepTime;
 	private String status;
@@ -31,6 +32,18 @@ public class TransactionData {
 	
 	public void setStartTime() {
 		startTime = new Date().getTime();
+	}
+	
+	public void setStartTime(long _startTime) {
+		startTime = _startTime;
+	}
+	
+	public void setCommitStartTime() {
+		commitStartTime = new Date().getTime();
+	}
+	
+	public void setCommitStartTime(long _commitStartTime) {
+		commitStartTime = _commitStartTime;
 	}
 	
 	public void setEndTime() {
