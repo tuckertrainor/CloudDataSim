@@ -86,6 +86,14 @@ public class TransactionData {
 		return endTime - startTime;
 	}
 	
+	public long getTxnTime() {
+		return commitStartTime - startTime;
+	}
+	
+	public long getCommitTime() {
+		return endTime - commitStartTime;
+	}
+	
 	public int getSleepTime() {
 		return sleepTime;
 	}
