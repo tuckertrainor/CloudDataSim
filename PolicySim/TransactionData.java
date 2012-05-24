@@ -74,6 +74,10 @@ public class TransactionData {
 		return startTime;
 	}
 	
+	public long getCommitStartTime() {
+		return commitStartTime;
+	}
+	
 	public long getEndTime() {
 		return endTime;
 	}
