@@ -132,13 +132,6 @@ public class WorkerThread extends Thread {
 												   "READ for transaction " + query[1] +
 												   " sequence " + query[3]);
 							}
-							// Check data access for error
-							else if (checkDataAccess() == false) {
-								msgText = "ABORT DATA_ACCESS_FAIL";
-								System.out.println("ABORT DATA_ACCESS_FAIL: " +
-												   "READ for transaction " + query[1] +
-												   " sequence " + query[3]);
-							}
 							else { // OK to read
 								System.out.println("READ for transaction " + query[1] +
 												   " sequence " + query[3]);
@@ -182,13 +175,6 @@ public class WorkerThread extends Thread {
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
 								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
-												   "WRITE for transaction " + query[1] +
-												   " sequence " + query[3]);
-							}
-							// Check data access for error
-							else if (checkDataAccess() == false) {
-								msgText = "ABORT DATA_ACCESS_FAIL";
-								System.out.println("ABORT DATA_ACCESS_FAIL: " +
 												   "WRITE for transaction " + query[1] +
 												   " sequence " + query[3]);
 							}
@@ -827,17 +813,6 @@ public class WorkerThread extends Thread {
 		else {
 			totalSleepTime += 150 + generator.nextInt(75);
 		}
-	}
-	
-	/**
-	 * Checks if accessing requested data was successful
-	 *
-	 * @return boolean - true if access was successful, else false
-	 */
-	public boolean checkDataAccess() {
-		/* STUB */
-		// perform random success operation
-		return true;
 	}
 	
 	/**
