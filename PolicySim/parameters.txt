@@ -12,7 +12,7 @@ VM 4
 # 3: update global but do not push (for global consistency check testing)
 PUSH 3
 # MT maxTransactions - number of transactions to perform
-MT 3
+MT 100
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction

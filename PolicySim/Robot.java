@@ -630,7 +630,7 @@ public class Robot {
 			/*** Output metrics ***/
 			// Total time of run
 			outputBuf.write("Total Time=" +
-							(TransactionLog.entry.get(1).getStartTime() - TransactionLog.entry.get(maxTransactions).getEndTime()));
+							(TransactionLog.entry.get(maxTransactions).getEndTime() - TransactionLog.entry.get(1).getStartTime()));
 			outputBuf.newLine();
 			// Calculate averages
 			for (int i = 1; i <= maxTransactions; i++) {
