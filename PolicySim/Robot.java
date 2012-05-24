@@ -574,6 +574,9 @@ public class Robot {
 		long fileTime = new Date().getTime();
 		String filename = "Log_" + Long.toString(fileTime) + ".txt";
 		boolean success = true;
+		long avgFullTxn = 0l; // Start to finish
+		long avgTxnTime = 0l; // Reads and writes only
+		long avgCommitTime = 0l; // From commit call to finish
 		
 		// Create an output stream
 		try {			
@@ -623,13 +626,35 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("RS=" + randomSeed);
 			outputBuf.newLine();
+
+			/*** Output metrics ***/
+			// Total time of run
+			outputBuf.write("Total Time=" +
+							(TransactionLog.entry.get(1).getStartTime() - TransactionLog.entry.get(maxTransactions).getEndTime()));
+			outputBuf.newLine();
+			// Calculate averages
+			for (int i = 1; i <= maxTransactions; i++) {
+				avgFullTxn += TransactionLog.entry.get(i).getDuration();
+				avgTxnTime += TransactionLog.entry.get(i).getTxnTime();
+				avgCommitTime += TransactionLog.entry.get(i).getCommitTime();
+			}
+			outputBuf.write("Avg Full Txn Time=" + (avgFullTxn / maxTransactions));
+			outputBuf.newLine();
+			outputBuf.write("Avg Txn Time=" + (avgTxnTime / maxTransactions));
+			outputBuf.newLine();
+			outputBuf.write("Avg Commit Time=" + (avgCommitTime / maxTransactions));
+			outputBuf.newLine();
+			// Full data output
 			if (threadSleep) {
 				for (int i = 1; i <= maxTransactions; i++) {
 					outputBuf.write(TransactionLog.entry.get(i).getTxnNumber() + "\t" +
 									TransactionLog.entry.get(i).getTxn() + "\t" +
 									TransactionLog.entry.get(i).getStartTime() + "\t" +
+									TransactionLog.entry.get(i).getCommitStartTime() + "\t" +
 									TransactionLog.entry.get(i).getEndTime() + "\t" +
 									TransactionLog.entry.get(i).getDuration() + "\t" +
+									TransactionLog.entry.get(i).getTxnTime() + "\t" +
+									TransactionLog.entry.get(i).getCommitTime() + "\t" +
 									TransactionLog.entry.get(i).getStatus());
 					outputBuf.newLine();
 				}
@@ -639,8 +664,11 @@ public class Robot {
 					outputBuf.write(TransactionLog.entry.get(i).getTxnNumber() + "\t" +
 									TransactionLog.entry.get(i).getTxn() + "\t" +
 									TransactionLog.entry.get(i).getStartTime() + "\t" +
+									TransactionLog.entry.get(i).getCommitStartTime() + "\t" +
 									TransactionLog.entry.get(i).getEndTime() + "\t" +
 									TransactionLog.entry.get(i).getDuration() + "\t" +
+									TransactionLog.entry.get(i).getTxnTime() + "\t" +
+									TransactionLog.entry.get(i).getCommitTime() + "\t" +
 									TransactionLog.entry.get(i).getSleepTime() + "\t" +
 									TransactionLog.entry.get(i).getStatus());
 					outputBuf.newLine();
