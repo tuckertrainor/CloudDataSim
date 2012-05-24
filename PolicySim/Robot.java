@@ -165,7 +165,6 @@ public class Robot {
 					txn = TransactionLog.entry.get(i).getTxn();
 					txnSplit = txn.split(" ");
 					coordinator = Integer.parseInt(txnSplit[2]);
-					TransactionLog.entry.get(i).setStartTime();
 					thread = new RobotThread(i,
 											 coordinator,
 											 txn,

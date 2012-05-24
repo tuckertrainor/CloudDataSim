@@ -69,6 +69,9 @@ public class RobotThread extends Thread {
 			
 			// Seed Random for latency, pauses
 			generator = new Random(new Date().getTime());
+
+			// Set start time of transaction
+			TransactionLog.entry.get(txnNumber).setStartTime();
 			
 			// Loop to send query qroups
 			while (groupIndex < queryGroups.length) {
