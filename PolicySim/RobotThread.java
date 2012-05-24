@@ -26,7 +26,6 @@ public class RobotThread extends Thread {
 	private final int latencyMin;
 	private final int latencyMax;
 	private final boolean threadSleep;
-	private ArrayList<CommitItem> commitStack = new ArrayList<CommitItem>();
 	private Random generator;
 
 	/**
@@ -85,13 +84,6 @@ public class RobotThread extends Thread {
 				String respSplit[] = resp.theMessage.split(" ");
 
 				if (respSplit[0].equals("ACK")) {
-					Thread.yield();
-				}
-				else if (respSplit[0].equals("ACS")) { // Add to commitStack
-					// parse data from message
-					commitStack.add(new CommitItem(Integer.parseInt(respSplit[1]),
-												   Integer.parseInt(respSplit[2]),
-												   Integer.parseInt(respSplit[3])));
 					Thread.yield();
 				}
 				else if (respSplit[0].equals("COMMIT")) { // Successful commit

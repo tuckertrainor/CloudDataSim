@@ -207,9 +207,6 @@ public class WorkerThread extends Thread {
 								else {
 									System.out.println("Error logging query.");
 								}
-								// Tell RobotThread to add this server to its commitStack
-								// server is query[2], transaction is query[1], sequence is query[3]
-								msgText = "ACS " + query[2] + " " + query[1] + " " + query[3] + " " + transactionPolicyVersion;
 							}
 						}
 						else { // Pass to server
