@@ -43,8 +43,8 @@ public class Robot {
 	 * argument specifies the port number
 	 */
     public static void main(String[] args) {
-		// Error checking for arguments (0, 1, 3, or 4 args)
-		if (args.length == 2 || args.length > 4) {
+		// Error checking for arguments (0, 1, or 6 args)
+		if (args.length != 0 && args.length != 1 && args.length != 6) {
 			System.err.println("Improper argument count.");
 			argsError();
 			System.exit(-1);
