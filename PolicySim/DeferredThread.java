@@ -2,8 +2,6 @@
  * File: DeferredThread.java
  * @author: Tucker Trainor <tmt33@pitt.edu>
  *
- * Based on original code "EchoThread.java" by Adam J. Lee (adamlee@cs.pitt.edu) 
- *
  * A server thread to handle deferred proofs of authorization. Extends the
  * WorkerThread base class.
  */

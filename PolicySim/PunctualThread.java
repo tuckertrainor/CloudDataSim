@@ -2,10 +2,8 @@
  * File: PunctualThread.java
  * @author: Tucker Trainor <tmt33@pitt.edu>
  *
- * Based on original code "EchoThread.java" by Adam J. Lee (adamlee@cs.pitt.edu) 
- *
  * A server thread to handle punctual proofs of authorization. Extends the
- * WorkerThread base class.
+ * DeferredThread base class.
  */
 
 import java.lang.Thread;
@@ -14,7 +12,7 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
-public class PunctualThread extends WorkerThread {
+public class PunctualThread extends DeferredThread {
 	
 	/**
 	 * Constructor that sets up the socket we'll chat over
