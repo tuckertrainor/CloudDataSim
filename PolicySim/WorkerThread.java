@@ -206,16 +206,6 @@ public class WorkerThread extends Thread {
 											   ": " + msgText);
 						}
 					}
-					else if (query[0].equals("A")) { // Re-authorize a query
-						// Query example: "A <global policy version>"
-						// Retrieve policy version: Integer.parseInt(query[1])
-						if (checkLocalAuth()) {
-							msgText = "GLOBALPASS";
-						}
-						else {
-							msgText = "GLOBALFAIL";
-						}
-					}
 					else if (query[0].equals("RUNAUTHS")) { // Run authorizations on all queries
 						int version = Integer.parseInt(query[1]);
 						System.out.println("Running auth. on transaction " +
