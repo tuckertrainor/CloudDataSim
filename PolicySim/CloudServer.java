@@ -105,12 +105,14 @@ public class CloudServer {
 			
 			// A simple infinite loop to accept connections
 			Socket sock = null;
-			WorkerThread thread = null;
+//			WorkerThread thread = null;
+			DeferredThread thread = null;
 			while(true) {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				thread = new WorkerThread(sock, this);
+//				thread = new WorkerThread(sock, this);
+				thread = new DeferredThread(sock, this);
 				thread.start(); // Fork the thread
 			}					// Loop to work on new connections while this
 								// the accept()ed connection is handled
