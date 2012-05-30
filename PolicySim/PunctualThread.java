@@ -460,6 +460,13 @@ public class PunctualThread extends DeferredThread {
 				}
 			}			
 			else { // (globalVersion == transactionPolicyVersion) 
+				for (int j = 0; j < queryLog.size(); j++) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + globalVersion +
+									   ": ALREADY DONE");
+				}
 				// Perform integrity check
 				if (integrityCheck()) {
 					return "YES TRUE"; // (integrity and authorizations pass)
@@ -594,6 +601,15 @@ public class PunctualThread extends DeferredThread {
 						queryLog.get(j).setPolicy(globalVersion); // Update policy in log
 					}
 				}
+			}
+		}
+		else { // transactionPolicyVersion == globalVersion
+			for (int j = 0; j < queryLog.size(); j++) {
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+								   " for txn " + queryLog.get(j).getTransaction() +
+								   ", seq " + queryLog.get(j).getSequence() +
+								   " with policy v. " + globalVersion +
+								   ": ALREADY DONE");
 			}
 		}
 		// Call all participants, send PTC and global version
