@@ -7,7 +7,7 @@ PROOF PUNCTUAL
 # Deferred 2: view consistency second chance
 # Deferred 3: global consistency coordinator calls policy server
 # Deferred 4: global consistency any participant can call policy server
-VM 2
+VM 4
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 PUSH 2
