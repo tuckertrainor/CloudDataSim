@@ -106,6 +106,13 @@ public class Robot {
 		char prevQuery;
 		int queryServer;
 		int operations;
+		// Set up variables for random server policy updates
+		ArrayList<Integer> usedServers = new ArrayList<Integer>();
+		boolean pickRandomServer = false;
+		if (proof.equals("PUNCTUAL") &&
+			(validationMode == 2 || validationMode == 4)) {
+			pickRandomServer = true;
+		}
 		for (int i = 1; i <= maxTransactions; i++) {
 			newTrans = "";
 			prevQuery = 'B';
@@ -114,7 +121,7 @@ public class Robot {
 			operations = minOperations + generator.nextInt(maxOperations - minOperations);
 			for (int j = 0; j < operations; j++) {
 				String newQuery = new String();
-				// make READ or WRITE
+				// Make a READ or WRITE
 				if (generator.nextBoolean()) {
 					if (prevQuery == 'R') {
 						newQuery += ";R " + i; // ,
@@ -122,7 +129,7 @@ public class Robot {
 					else if (prevQuery == 'W') {
 						newQuery += ";R " + i;
 					}
-					else { // first operation
+					else { // First operation
 						newQuery += "R " + i;
 					}
 					prevQuery = 'R';
@@ -134,19 +141,31 @@ public class Robot {
 					else if (prevQuery == 'R') {
 						newQuery += ";W " + i;
 					}
-					else { // first operation
+					else { // First operation
 						newQuery += "W " + i;
 					}
 					prevQuery = 'W';
 				}
-				// make server number
+				// Make a server number
 				queryServer = generator.nextInt(maxServers) + 1;
 				newQuery += " " + queryServer;
-				// add sequence number
+				// Add server number to list if not already present
+				if (pickRandomServer) {
+					if (!usedServers.contains(queryServer)) {
+						usedServers.add(queryServer);
+					}
+				}
+				// Add the sequence number
 				newQuery += " " + (j + 1);
 				newTrans += newQuery;
 			}
 			newTrans += ";C " + i + ";exit";
+			// Add a random server to beginning of transaction for random picking
+			if (pickRandomServer) {
+				// Get one of the servers in the list (but not the first, which
+				// is the coordinator) - choose from index 1 to index (size - 1)
+				newTrans = usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + newTrans;
+			}
 			tData = new TransactionData(i, newTrans);
 			tData.setStartTime();
 			TransactionLog.entry.add(tData);
