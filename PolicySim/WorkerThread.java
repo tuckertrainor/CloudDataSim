@@ -360,9 +360,43 @@ public class WorkerThread extends Thread {
 		String status = "COMMIT";
 		Message msg = null;
 		
+		// Check coordinator's integrity
+		if (!integrityCheck()) {
+			return "ABORT PTC_RESPONSE_NO";
+		}
+		
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
-		int globalVersion = my_tm.callPolicyServer();		
+		int globalVersion = my_tm.callPolicyServer();
+		
+		// Check coordinator for its version
+		if (transactionPolicyVersion != globalVersion) {
+			if (my_tm.validationMode == 3) {
+				return "ABORT PTC_RESPONSE_FALSE";
+			}
+			else { // mode == 4
+				// Re-run auths with global version
+				for (int j = 0; j < queryLog.size(); j++) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + globalVersion +
+										   ": FAIL");
+						return "ABORT PTC_RESPONSE_FALSE";
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + globalVersion +
+										   ": PASS");
+						queryLog.get(j).setPolicy(globalVersion); // Update policy in log
+					}
+				}
+			}
+		}
+		
 		// Call all participants, send PTC and global version
 		if (sockList.size() > 0) {
 			int serverNum;
