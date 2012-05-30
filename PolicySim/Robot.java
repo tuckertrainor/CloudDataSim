@@ -164,7 +164,7 @@ public class Robot {
 			if (pickRandomServer) {
 				// Get one of the servers in the list (but not the first, which
 				// is the coordinator) - choose from index 1 to index (size - 1)
-				newTrans = usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + ";" + newTrans;
+				newTrans = "RSERV " + usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + ";" + newTrans;
 			}
 			tData = new TransactionData(i, newTrans);
 			tData.setStartTime();
