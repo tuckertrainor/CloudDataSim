@@ -14,11 +14,6 @@ import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
 
-/* TODO: maybe have the server set up a persistent connection with the policy 
- * server for pushed updates, and have the worker thread invoke pushes through
- * the server 
- */
-
 public class WorkerThread extends Thread {
     public final Socket socket; // The socket that we'll be talking over
 	public CloudServer my_tm; // The Transaction Manager that called the thread
