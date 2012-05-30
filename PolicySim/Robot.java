@@ -183,7 +183,12 @@ public class Robot {
 				if (ThreadCounter.activeThreads < maxDegree) {
 					txn = TransactionLog.entry.get(i).getTxn();
 					txnSplit = txn.split(" ");
-					coordinator = Integer.parseInt(txnSplit[2]);
+					if (pickRandomServer) {
+						coordinator = Integer.parseInt(txnSplit[3]);
+					}
+					else {
+						coordinator = Integer.parseInt(txnSplit[2]);
+					}
 					thread = new RobotThread(i,
 											 coordinator,
 											 txn,
