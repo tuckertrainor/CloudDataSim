@@ -570,20 +570,31 @@ public class PunctualThread extends DeferredThread {
 						   " queries using policy version " +
 						   version);
 		for (int j = 0; j < queryLog.size(); j++) {
-			if (!checkLocalAuth()) {
-				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-								   " for transaction " + queryLog.get(j).getTransaction() +
-								   ", sequence " + queryLog.get(j).getSequence() +
-								   " with policy v. " + version +
-								   ": FAIL");
-				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			// If policy used for proof during transaction differs
+			if (queryLog.get(j).getPolicy() != version) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": FAIL");
+					return "ABORT LOCAL_AUTHORIZATION_FAIL";
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": PASS");
+					queryLog.get(j).setPolicy(version); // Update policy in log
+				}
 			}
-			else {
+			else { // Output message of same policy
 				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for transaction " + queryLog.get(j).getTransaction() +
 								   ", sequence " + queryLog.get(j).getSequence() +
 								   " with policy v. " + version +
-								   ": PASS");
+								   ": ALREADY DONE");
 			}
 		}
 		
