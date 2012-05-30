@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.*;
 
 public class PunctualThread extends DeferredThread {
+	public int randomServer;
 	
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -246,6 +247,9 @@ public class PunctualThread extends DeferredThread {
 						msgText = coordinatorCommit();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
 										   ": " + msgText);
+					}
+					else if (query[0].equals("RSERV")) { // Random server for policy pushing
+						randomServer = Integer.parseInt(query[1]);
 					}
 					else if (query[0].equals("S")) { // Sleep for debugging
 						Thread.sleep(Integer.parseInt(query[1]));
