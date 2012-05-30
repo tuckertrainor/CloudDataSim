@@ -13,7 +13,7 @@ import java.io.*;
 import java.util.*;
 
 public class PunctualThread extends DeferredThread {
-	public int randomServer;
+	public int randomServer = 0;
 	
 	/**
 	 * Constructor that sets up the socket we'll chat over
