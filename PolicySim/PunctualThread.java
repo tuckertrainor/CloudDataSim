@@ -190,7 +190,8 @@ public class PunctualThread extends DeferredThread {
 											   ": " + msgText);
 						}
 					}
-					else if (query[0].equals("RUNAUTHS")) { // Run authorizations on all queries
+					else if (query[0].equals("RUNAUTHS")) {
+						// Run any necessary re-authorizations on queries
 						int version = Integer.parseInt(query[1]);
 						System.out.println("Running auth. on transaction " +
 										   queryLog.get(0).getTransaction() + 
@@ -273,5 +274,336 @@ public class PunctualThread extends DeferredThread {
 		}
 		System.out.flush();
 		System.setOut(printStreamOriginal);
+	}
+	
+	/**
+	 * The prepare-to-commit method that is invoked when participating servers
+	 * received the PTC call from the coordinator
+	 *
+	 * @param globalVersion - used for global consistency check
+	 * @return boolean
+	 */
+	public String prepareToCommit(int globalVersion) {
+		// Receive PTC message, handle options
+		if (my_tm.validationMode == 0) { // 2PC only
+			// Return integrity status
+			if (integrityCheck()) {
+				return "YES";
+			}
+			else {
+				return "NO";
+			}
+		}
+		else if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
+			// 1. Rec'v PTC, request for policy version
+			//    Return integrity status (YES/NO), Policy version
+			if (integrityCheck()) {
+				return "YES " + transactionPolicyVersion;
+			}
+			else {
+				return "NO";
+			}
+		}
+		else if (my_tm.validationMode == 3) {
+			// Check global master policy version against transaction version
+			if (globalVersion == transactionPolicyVersion) {
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					System.out.println("Running auth. on transaction " +
+									   queryLog.get(0).getTransaction() + 
+									   " queries using policy version " +
+									   transactionPolicyVersion);
+					for (int j = 0; j < queryLog.size(); j++) {
+						if (!checkLocalAuth()) {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": PASS");
+						}
+					}
+					return "YES TRUE"; // (integrity and authorizations pass)
+				}
+				else {
+					return "NO FALSE"; // (integrity fail)
+				}
+			}
+			else {
+				return "YES FALSE"; // (policy inequality)
+			}
+		}
+		else { // (my_tm.validationMode == 4)
+			// Check global master policy version against transaction version
+			if (globalVersion != transactionPolicyVersion) {
+				// Have server get global version from the policy server
+				int calledGlobal = my_tm.callPolicyServer();
+				// Check version for possible race condition
+				if (calledGlobal > globalVersion) {
+					calledGlobal = globalVersion;
+				}
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					System.out.println("Running auth. on transaction " +
+									   queryLog.get(0).getTransaction() + 
+									   " queries using policy version " +
+									   calledGlobal);
+					for (int j = 0; j < queryLog.size(); j++) {
+						if (!checkLocalAuth()) {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + calledGlobal +
+											   ": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + calledGlobal +
+											   ": PASS");
+						}
+					}
+					return "YES TRUE"; // (integrity and authorizations pass)
+				}
+				else {
+					return "NO FALSE"; // (integrity fail)
+				}
+			}			
+			else { // (globalVersion == transactionPolicyVersion) 
+				// Perform integrity check
+				if (integrityCheck()) {
+					// Run local authorizations
+					System.out.println("Running auth. on transaction " +
+									   queryLog.get(0).getTransaction() + 
+									   " queries using policy version " +
+									   transactionPolicyVersion);
+					for (int j = 0; j < queryLog.size(); j++) {
+						if (!checkLocalAuth()) {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": PASS");
+						}
+					}
+					return "YES TRUE"; // (integrity and authorizations pass)
+				}
+				else {
+					return "NO FALSE"; // (integrity fail)
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Handles the 2PV view consistency check. Calls each participant with the
+	 * PTC command, receives back their policy versions, and determines whether
+	 * or not to run proofs of authorization.
+	 *
+	 * @return String - COMMIT or ABORT under view consistency
+	 */
+	public String viewConsistencyCheck() {
+		String status = "COMMIT";
+		Message msg = null;
+		ArrayList<Integer> versions = new ArrayList<Integer>();
+		
+		// Add coordinator's policy version to ArrayList
+		versions.add(transactionPolicyVersion);
+		// Call all participants, send PTC and gather policy versions
+		if (sockList.size() > 0) {
+			int serverNum;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC");
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Check response, add policy version to ArrayList
+						if (msg.theMessage.indexOf("YES") != -1) {
+							if (my_tm.validationMode != 0) { // Not 2PC only
+								String msgSplit[] = msg.theMessage.split(" ");
+								versions.add(Integer.parseInt(msgSplit[1]));
+							}
+						}
+						else { // ABORT - someone responded with a NO
+							return "ABORT PTC_RESPONSE_NO";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("Policy Check Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		
+		// If 2PC only, no need to check policies or run auths
+		if (my_tm.validationMode == 0) {
+			return status;
+		}
+		
+		// Turn ArrayList into an array of ints, sort and compare versions
+		Integer versionArray[] = new Integer[versions.size()];
+		versionArray = versions.toArray(versionArray);
+		// Sort array, compare first value with last
+		Arrays.sort(versionArray);
+		if (versionArray[0] == versionArray[versionArray.length - 1]) {
+			// Policy versions match across servers - run authorizations
+			
+			status = runAuths((int)versionArray[0]);
+		}
+		else { // Handle inequality
+			if (my_tm.validationMode == 1) { // ABORT
+				status = "ABORT VIEW_CONSISTENCY_FAIL";
+			}
+			else { // Find common policy and run authorizations with it
+				// For simplicity, use minimum of versions as common policy
+				status = runAuths((int)versionArray[0]);
+			}
+		}
+		
+		return status;
+	}
+	
+	/**
+	 * Handles the 2PV global consistency check. Sends each participant the PTC
+	 * command and the global master policy version. If all participants are
+	 * using the global version, then authorizations can be performed. Otherwise
+	 * a decision is made whether to allow calls to the policy server to refresh
+	 * or to ABORT.
+	 *
+	 * @return String - COMMIT or ABORT
+	 */
+	public String globalConsistencyCheck() {
+		String status = "COMMIT";
+		Message msg = null;
+		
+		// Have coordinator's server call the policy server and retrieve the
+		// current global master policy version
+		int globalVersion = my_tm.callPolicyServer();		
+		// Call all participants, send PTC and global version
+		if (sockList.size() > 0) {
+			int serverNum;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC " + globalVersion);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						
+						// mode 3: if all participants are using global, they
+						// run auths and return YES/NO, TRUE/FALSE
+						// if any are not using global, ABORT
+						
+						// mode 4: if any not using global, they call policy
+						// server and get global, run auths, return Y/N, T/F
+						// if auths fail, ABORT
+						
+						// Check response
+						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
+							return "ABORT PTC_RESPONSE_NO";
+						}
+						else if (msg.theMessage.indexOf("FALSE") != -1) { // Someone responded FALSE
+							return "ABORT PTC_RESPONSE_FALSE";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("Global Consistency Check Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		
+		return status;
+	}
+	
+	/**
+	 * Method to run authorizations on each query performed on all participating
+	 * servers, including the coordinator.
+	 *
+	 * @return String - COMMIT or ABORT
+	 */
+	public String runAuths(int version) {
+		// Check local auths on coordinator
+		System.out.println("Running auth. on transaction " +
+						   queryLog.get(0).getTransaction() + 
+						   " queries using policy version " +
+						   version);
+		for (int j = 0; j < queryLog.size(); j++) {
+			if (!checkLocalAuth()) {
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+								   " for transaction " + queryLog.get(j).getTransaction() +
+								   ", sequence " + queryLog.get(j).getSequence() +
+								   " with policy v. " + version +
+								   ": FAIL");
+				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			}
+			else {
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+								   " for transaction " + queryLog.get(j).getTransaction() +
+								   ", sequence " + queryLog.get(j).getSequence() +
+								   " with policy v. " + version +
+								   ": PASS");
+			}
+		}
+		
+		// Contact all other participants, have them run authorizations and return results
+		if (sockList.size() > 0) {
+			Message msg = null;
+			int serverNum;
+			
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("RUNAUTHS " + version);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Check response, add policy version to ArrayList
+						if (msg.theMessage.equals("FALSE")) {
+							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("runAuths() error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		
+		return "COMMIT";
 	}
 }
