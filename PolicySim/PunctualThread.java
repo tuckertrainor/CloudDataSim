@@ -313,10 +313,20 @@ public class PunctualThread extends DeferredThread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
-				// If pushing updates for view consistency testing, do it now
-				if (!hasUpdated && (my_tm.validationMode == 1 || my_tm.validationMode == 2)) {
-					forcePolicyUpdate(my_tm.policyPush);
-					hasUpdated = true; // This only needs to be done once
+				// Push policy updates as necessary
+				if (!hasUpdated) {
+					if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+						// We can update at the addition of any participant
+						forcePolicyUpdate(my_tm.policyPush);
+						hasUpdated = true; // This only needs to be done once
+					}
+					else if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+						// We want to randomize when the policy update is pushed
+						if (otherServer == randomServer) { // Do if random server is picked
+							forcePolicyUpdate(my_tm.policyPush);
+							hasUpdated = true; // This only needs to be done once	
+						}
+					}
 				}
 			}
 			
