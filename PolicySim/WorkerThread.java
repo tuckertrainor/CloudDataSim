@@ -369,7 +369,7 @@ public class WorkerThread extends Thread {
 				return "ABORT PTC_RESPONSE_FALSE";
 			}
 			else { // mode == 4
-				// Re-run auths with global version
+				// Run auths using global version
 				for (int j = 0; j < queryLog.size(); j++) {
 					if (!checkLocalAuth()) {
 						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
