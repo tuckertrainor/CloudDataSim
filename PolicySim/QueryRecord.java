@@ -36,6 +36,10 @@ public class QueryRecord {
 		return sequenceNumber;
 	}
 	
+	public void setPolicy(int policy) {
+		policyVersion = policy;
+	}
+	
 	public int getPolicy() {
 		return policyVersion;
 	}
