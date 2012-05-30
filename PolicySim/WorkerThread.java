@@ -331,7 +331,6 @@ public class WorkerThread extends Thread {
 		Arrays.sort(versionArray);
 		if (versionArray[0] == versionArray[versionArray.length - 1]) {
 			// Policy versions match across servers - run authorizations
-			
 			status = runAuths((int)versionArray[0]);
 		}
 		else { // Handle inequality
