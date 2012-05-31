@@ -88,6 +88,9 @@ public class PunctualThread extends DeferredThread {
 					my_tm.validationMode = Integer.parseInt(msgSplit[2]);
 					my_tm.policyPush = Integer.parseInt(msgSplit[3]);
 					System.out.println("Server parameters updated: " + msg.theMessage);
+					System.out.println("Proof: " + my_tm.proof);
+					System.out.println("Validation mode: " + my_tm.validationMode);
+					System.out.println("Policy push mode: " + my_tm.policyPush);
 					// No artificial latency needed, send ACK
 					output.writeObject(new Message(msgText));
 					break;
