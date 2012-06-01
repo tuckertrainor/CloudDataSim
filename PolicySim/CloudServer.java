@@ -105,25 +105,21 @@ public class CloudServer {
 			
 			// A simple infinite loop to accept connections
 			Socket sock = null;
-			if (proof.equalsIgnoreCase("DEFERRED")) {
-				DeferredThread thread = null;
-				while(true) {
-					// Accept an incoming connection
-					sock = serverSock.accept();
-					// Create a thread to handle this connection
-					thread = new DeferredThread(sock, this);
-					thread.start();
+			DeferredThread threadD = null;
+			PunctualThread threadP = null;
+			while(true) {
+				// Accept an incoming connection
+				sock = serverSock.accept();
+				// Create a thread to handle this connection
+				if (proof.equalsIgnoreCase("DEFERRED")) {
+					threadD = new DeferredThread(sock, this);
+					threadD.start();
 				}
-			}
-			else if (proof.equalsIgnoreCase("PUNCTUAL")) {
-				PunctualThread thread = null;
-				while(true) {
-					// Accept an incoming connection
-					sock = serverSock.accept();
-					// Create a thread to handle this connection
-					thread = new PunctualThread(sock, this);
-					thread.start();
+				else if (proof.equalsIgnoreCase("PUNCTUAL")) {
+					threadP = new PunctualThread(sock, this);
+					threadP.start();
 				}
+				// Additional proofs handling here
 			}
 		}
 		catch (Exception e) {
