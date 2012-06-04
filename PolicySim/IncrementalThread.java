@@ -371,7 +371,71 @@ public class IncrementalThread extends PunctualThread {
 		System.out.flush();
 		System.setOut(printStreamOriginal);
 	}
+
 	
+	/**
+	 * Passes a query to other specified server
+	 *
+	 * @param otherServer - The number of the server to pass to
+	 * @param query - The query that must be performed on another server
+	 *
+	 * @return String - the ACK/ABORT from the other server
+	 */
+	public String passQuery(int otherServer, String query) {
+		String server = my_tm.serverList.get(otherServer).getAddress();
+		int port = my_tm.serverList.get(otherServer).getPort();
+		Message msg = null;
+		try {
+			// Check SocketList for an existing socket, else create and add new
+			if (!sockList.hasSocket(otherServer)) {
+				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
+				Socket sock = new Socket(server, port);
+				sockList.addSocketObj(otherServer, new SocketObject(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),	
+																	new ObjectInputStream(sock.getInputStream())));
+				// Push policy updates as necessary
+				if (!hasUpdated) {
+					if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+						// We can update at the addition of any participant
+						forcePolicyUpdate(my_tm.policyPush);
+						hasUpdated = true; // This only needs to be done once
+					}
+					else if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+						// We want to randomize when the policy update is pushed
+						if (otherServer == randomServer) { // Do if random server is picked
+							forcePolicyUpdate(my_tm.policyPush);
+							hasUpdated = true; // This only needs to be done once	
+						}
+					}
+				}
+			}
+
+			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
+			msg = new Message("PASS" + query);
+			// Send query
+			latencySleep(); // Simulate latency to other server
+			sockList.get(otherServer).output.writeObject(msg);
+			msg = (Message)sockList.get(otherServer).input.readObject();
+			System.out.println("Server " + otherServer +
+							   " says: " + msg.theMessage +
+							   " for passed query " + query);
+			// else it is an ABORT, no need to log, will be handled by RobotThread
+			return msg.theMessage;
+		}
+		catch (ConnectException ce) {
+			System.err.println(ce.getMessage() +
+							   ": Check server address and port number.");
+			ce.printStackTrace(System.err);
+		}
+		catch (Exception e) {
+			System.err.println("Error during passQuery(): " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		return "FAIL";
+	}
+
 	public boolean checkTxnConsistency(int mode) {
 		if (mode == 0) {
 			// What is 2PC for Incremental Punctual?
