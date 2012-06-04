@@ -355,15 +355,8 @@ public class IncrementalThread extends PunctualThread {
 					}
 				}
 			}
-		}
-						
-		
-		if (mode == 1 || mode == 2) {
 			
+			return true;
 		}
-		else { // mode == 3 || mode == 4
-			// Global consistency
-		}
-		return true;
 	}
 }
