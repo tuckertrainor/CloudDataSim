@@ -2,11 +2,19 @@
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
 PROOF INCREMENTAL
 # VM validationMode - integer for setting mode of proof
-# Deferred 0: 2PC only
-# Deferred 1: view consistency single chance
-# Deferred 2: view consistency second chance
-# Deferred 3: global consistency coordinator calls policy server
-# Deferred 4: global consistency any participant can call policy server
+#
+# Deferred/Punctual 0: 2PC only
+# Deferred/Punctual 1: view consistency single chance
+# Deferred/Punctual 2: view consistency second chance
+# Deferred/Punctual 3: global consistency coordinator calls policy server
+# Deferred/Punctual 4: global consistency any participant can call policy server
+#
+# Incremental 0: 2PC only
+# Incremental 1: TXN: view consistency PTC: global single chance
+# Incremental 2: TXN: view consistency PTC: global second chance
+# Incremental 3: TXN: global consistency PTC: global single chance
+# Incremental 4: TXN: global consistency PTC: global second chance
+#
 VM 2
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
