@@ -107,6 +107,7 @@ public class CloudServer {
 			Socket sock = null;
 			DeferredThread threadD = null;
 			PunctualThread threadP = null;
+			IncrementalThread threadI = null;
 			while(true) {
 				// Accept an incoming connection
 				sock = serverSock.accept();
@@ -118,6 +119,10 @@ public class CloudServer {
 				else if (proof.equalsIgnoreCase("PUNCTUAL")) {
 					threadP = new PunctualThread(sock, this);
 					threadP.start();
+				}
+				else if (proof.equalsIgnoreCase("INCREMENTAL")) {
+					threadI = new IncrementalThread(sock, this);
+					threadI.start();
 				}
 				// Additional proofs handling here
 			}
