@@ -106,7 +106,13 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = my_tm.getPolicy();
+								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();									
+								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
@@ -249,6 +255,9 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 					}
+					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
+						msgText = "VERSION " + transactionPolicyVersion;
+					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
 						if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
 							msgText = prepareToCommit(0); // No global version
@@ -312,11 +321,49 @@ public class IncrementalThread extends PunctualThread {
 			// What is 2PC for Incremental Punctual?
 			return true;
 		}
-		else if (mode == 1 || mode == 2) {
-			// View consistency
+		else {
+			// View consistency - call all participants, see if versions match
+			// Call all participants, send PTC and global version
+			if (sockList.size() > 0) {
+				int serverNum;
+				Message msg = null;
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					serverNum = socketList.nextElement();
+					if (serverNum != 0) { // Don't call the Policy server
+						try {
+							System.out.println("Asking server " + serverNum +
+											   " for txn policy version.");
+							msg = new Message("VERSION");
+							latencySleep(); // Simulate latency
+							// Send
+							sockList.get(serverNum).output.writeObject(msg);
+							// Rec'v
+							msg = (Message)sockList.get(serverNum).input.readObject();
+							// Check response
+							String msgSplit[] = msg.theMessage.split(" ");
+							System.out.println("Server " + serverNum +
+											   " is using txn policy version " +
+											   Integer.parseInt(msgSplit[1]));
+							if (Integer.parseInt(msgSplit[1]) != transactionPolicyVersion) {
+								return false;
+							}
+						}
+						catch (Exception e) {
+							System.err.println("checkTxnConsistency() Error: " + e.getMessage());
+							e.printStackTrace(System.err);
+						}
+					}
+				}
+			}
+		}
+						
+		
+		if (mode == 1 || mode == 2) {
+			
 		}
 		else { // mode == 3 || mode == 4
 			// Global consistency
 		}
+		return true;
 	}
 }
