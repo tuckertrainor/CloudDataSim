@@ -164,7 +164,8 @@ public class IncrementalThread extends PunctualThread {
 					else if (query[0].equals("W")) { // WRITE
 						// Check server number, perform query or pass on
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
-							// Check that if a fresh Policy version is needed, it is gotten
+							// Check that if a fresh Policy version is needed
+							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
 								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
 									transactionPolicyVersion = my_tm.getPolicy();
@@ -222,6 +223,21 @@ public class IncrementalThread extends PunctualThread {
 						}
 					}
 					else if (query[0].equals("PASSR")) { // Passed read operation
+						// Check that if a fresh Policy version is needed
+						// (e.g. if this query has been passed in) it is set
+						if (transactionPolicyVersion == 0) {
+							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+								transactionPolicyVersion = my_tm.getPolicy();
+							}
+							else { // Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();									
+							}
+							System.out.println("Transaction " + query[1] +
+											   " Policy version set: " +
+											   transactionPolicyVersion);
+						}
+						
 						// Check transaction policy against server policy
 						if (checkLocalAuth() == false) {
 							msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -247,6 +263,21 @@ public class IncrementalThread extends PunctualThread {
 						}
 					}
 					else if (query[0].equals("PASSW")) { // Passed write operation
+						// Check that if a fresh Policy version is needed
+						// (e.g. if this query has been passed in) it is set
+						if (transactionPolicyVersion == 0) {
+							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+								transactionPolicyVersion = my_tm.getPolicy();
+							}
+							else { // Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();									
+							}
+							System.out.println("Transaction " + query[1] +
+											   " Policy version set: " +
+											   transactionPolicyVersion);
+						}
+						
 						// Check transaction policy against server policy
 						if (checkLocalAuth() == false) {
 							msgText = "ABORT LOCAL_POLICY_FAIL";

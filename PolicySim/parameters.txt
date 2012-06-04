@@ -15,16 +15,16 @@ PROOF INCREMENTAL
 # Incremental 3: TXN: global consistency PTC: global single chance
 # Incremental 4: TXN: global consistency PTC: global second chance
 #
-VM 2
+VM 1
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 PUSH 2
 # MT maxTransactions - number of transactions to perform
-MT 5
+MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
-OPMIN 16
+OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
-OPMAX 30
+OPMAX 15
 # MS maxServers - number of servers available
 MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
