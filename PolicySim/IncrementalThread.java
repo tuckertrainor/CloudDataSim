@@ -166,7 +166,13 @@ public class IncrementalThread extends PunctualThread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
-								transactionPolicyVersion = my_tm.getPolicy();
+								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();									
+								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
@@ -213,6 +219,56 @@ public class IncrementalThread extends PunctualThread {
 											   " sequence " + query[3] +
 											   " to server " + query[2] +
 											   ": " + msgText);
+						}
+					}
+					else if (query[0].equals("PASSR")) { // Passed read operation
+						// Check transaction policy against server policy
+						if (checkLocalAuth() == false) {
+							msgText = "ABORT LOCAL_POLICY_FAIL";
+							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+											   "READ for txn " + query[1] +
+											   " sequence " + query[3]);
+						}
+						else { // OK to read
+							System.out.println("READ for txn " + query[1] +
+											   " sequence " + query[3]);
+							databaseRead();
+							// Add policy version for passed query logging
+							msgText += " " + transactionPolicyVersion;
+							// Add to query log
+							if (addToQueryLog(query, transactionPolicyVersion)) {
+								System.out.println("Transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " query logged.");
+							}
+							else {
+								System.out.println("Error logging query.");
+							}
+						}
+					}
+					else if (query[0].equals("PASSW")) { // Passed write operation
+						// Check transaction policy against server policy
+						if (checkLocalAuth() == false) {
+							msgText = "ABORT LOCAL_POLICY_FAIL";
+							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+											   "WRITE for txn " + query[1] +
+											   " sequence " + query[3]);
+						}
+						else { // OK to write
+							System.out.println("WRITE for txn " + query[1] +
+											   " sequence " + query[3]);
+							databaseWrite();
+							// Add policy version for passed query logging
+							msgText += " " + transactionPolicyVersion;
+							// Add to query log
+							if (addToQueryLog(query, transactionPolicyVersion)) {
+								System.out.println("Transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " query logged.");
+							}
+							else {
+								System.out.println("Error logging query.");
+							}
 						}
 					}
 					else if (query[0].equals("RUNAUTHS")) {
