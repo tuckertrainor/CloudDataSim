@@ -346,12 +346,7 @@ public class IncrementalThread extends PunctualThread {
 						msgText = "VERSION " + transactionPolicyVersion;
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-							msgText = prepareToCommit(0); // No global version
-						}
-						else { // Uses a global version, pass to method
-							msgText = prepareToCommit(Integer.parseInt(query[1]));
-						}
+						msgText = prepareToCommit(Integer.parseInt(query[1]));
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
@@ -509,5 +504,176 @@ public class IncrementalThread extends PunctualThread {
 			
 			return true;
 		}
+	}
+	
+	/**
+	 * When the coordinator receives a request to COMMIT, it directs the flow
+	 * of the transaction to a global consistency check.
+	 *
+	 * @return String - the result of the 2PV check, either COMMIT or ABORT
+	 */
+	public String coordinatorCommit() {
+		// Call each participating server with a PTC message
+		if (my_tm.validationMode >= 0 && my_tm.validationMode <= 4) {
+			if (my_tm.validationMode == 0) {
+				// 2PC only - Check integrity, call participants
+				if (integrityCheck()) {
+					// Get YES/NO from all participants
+					if (prepareCall(0).equals("NO")) {
+						return "ABORT PTC_RESPONSE_NO";
+					}
+				}
+			}
+			else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+				// Check freshest global policy version == txn version
+				if (my_tm.callPolicyServer() == transactionPolicyVersion) {
+					// If integrity check passes, get YES/NO from all participants
+					if (integrityCheck()) {
+						if (prepareCall(0).equals("NO")) {
+							return "ABORT PTC_RESPONSE_NO";
+						}
+					}
+				}
+			}
+			else { // VM == 2 || VM == 4
+				// Get current global policy from policy server
+				int globalVersion = my_tm.callPolicyServer();
+				if (globalVersion == transactionPolicyVersion) {
+					// If integrity check passes, get YES/NO from all participants
+					if (integrityCheck()) {
+						if (prepareCall(0).equals("NO")) {
+							return "ABORT PTC_RESPONSE_NO";
+						}
+					}
+				}
+				else {
+					// If integrity check passes, send PTC and version to
+					// other participants, get YES,TRUE / NO,FALSE
+					if (integrityCheck()) {
+						// Perform re-authorizations on self
+						transactionPolicyVersion = globalVersion;
+						System.out.println("Running auth. on transaction " +
+										   queryLog.get(0).getTransaction() + 
+										   " queries using policy version " +
+										   transactionPolicyVersion);
+						for (int j = 0; j < queryLog.size(); j++) {
+							if (!checkLocalAuth()) {
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+												   " for txn " + queryLog.get(j).getTransaction() +
+												   ", seq " + queryLog.get(j).getSequence() +
+												   " with policy v. " + transactionPolicyVersion +
+												   " (was v. " + queryLog.get(j).getPolicy() +
+												   "): FAIL");
+								return "ABORT PTC_RESPONSE_FALSE"; // (authorization failed)
+							}
+							else {
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+												   " for txn " + queryLog.get(j).getTransaction() +
+												   ", seq " + queryLog.get(j).getSequence() +
+												   " with policy v. " + transactionPolicyVersion +
+												   " (was v. " + queryLog.get(j).getPolicy() +
+												   "): PASS");
+							}
+						}
+						// Call other participants
+						String response = prepareCall(globalVersion);
+						if (response.equals("NO")) {
+							return "ABORT PTC_RESPONSE_NO";
+						}
+						else if (response.equals("YES FALSE")) {
+							return "ABORT PTC_RESPONSE_FALSE";
+						}
+					}
+				}
+			}
+		}
+		else {
+			return "ABORT UNKNOWN_MODE";
+		}
+		
+		return "COMMIT";
+	}
+	
+	/**
+	 * The prepare-to-commit method that is invoked when participating servers
+	 * received the PTC call from the coordinator
+	 *
+	 * @param globalVersion - used for global consistency check
+	 * @return boolean
+	 */
+	public String prepareToCommit(int globalVersion) {
+		// Receive PTC message, handle options
+		if (my_tm.validationMode == 0 || my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+			// Return integrity status
+			if (integrityCheck()) {
+				return "YES";
+			}
+		}
+		else if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+			// Check integrity, then call Policy Server for freshest policy,
+			// re-run authorizations
+			if (integrityCheck()) {
+				// Get fresh policy - this is a bit of a hack, just call server
+				// and set transaction policy from globalVersion
+				my_tm.callPolicyServer(); // For posterity
+				transactionPolicyVersion = globalVersion;
+				// Re-run authorizations
+				System.out.println("Running auth. on transaction " +
+								   queryLog.get(0).getTransaction() + 
+								   " queries using policy version " +
+								   transactionPolicyVersion);
+				for (int j = 0; j < queryLog.size(); j++) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for txn " + queryLog.get(j).getTransaction() +
+										   ", seq " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   " (was v. " + queryLog.get(j).getPolicy() +
+										   "): FAIL");
+						return "YES FALSE"; // (authorization failed)
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for txn " + queryLog.get(j).getTransaction() +
+										   ", seq " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   " (was v. " + queryLog.get(j).getPolicy() +
+										   "): PASS");
+					}
+				}
+				return "YES TRUE"; // Successful re-authorizations
+			}
+		}
+		return "NO";
+	}
+		
+	public String prepareCall(int version) {
+		// Call all participants, send PTC and get YES/NO
+		if (sockList.size() > 0) {
+			int serverNum;
+			Message msg = null;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC " + version);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Parse response
+						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
+							return "NO";
+						}
+					}
+					catch (Exception e) {
+						System.err.println("prepareCall() Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+		}
+		return "YES";
 	}
 }
