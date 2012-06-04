@@ -12,9 +12,7 @@
 import java.net.Socket;
 import java.net.ConnectException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Date;
+import java.util.*;
 
 public class Robot {
 	static String proof;
@@ -165,6 +163,8 @@ public class Robot {
 				// Get one of the servers in the list (but not the first, which
 				// is the coordinator) - choose from index 1 to index (size - 1)
 				newTrans = "RSERV " + usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + ";" + newTrans;
+				// Clear the ArrayList for the next txn
+				usedServers.clear();
 			}
 			tData = new TransactionData(i, newTrans);
 			tData.setStartTime();
