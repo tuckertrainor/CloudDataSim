@@ -370,6 +370,10 @@ public class IncrementalThread extends PunctualThread {
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
+						// Force global update if necessary
+						if (my_tm.policyPush == 5) {
+							forcePolicyUpdate(3);
+						}
 						// Begin 2PC/2PV methods
 						msgText = coordinatorCommit();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
@@ -556,7 +560,7 @@ public class IncrementalThread extends PunctualThread {
 	 * When the coordinator receives a request to COMMIT, it directs the flow
 	 * of the transaction to a global consistency check.
 	 *
-	 * @return String - the result of the 2PV check, either COMMIT or ABORT
+	 * @return String - the result of the 2PC/2PV check, either COMMIT or ABORT
 	 */
 	public String coordinatorCommit() {
 		// Call each participating server with a PTC message
@@ -579,6 +583,9 @@ public class IncrementalThread extends PunctualThread {
 							return "ABORT PTC_RESPONSE_NO";
 						}
 					}
+				}
+				else {
+					return "ABORT GLOBAL_CONSISTENCY_FAIL";
 				}
 			}
 			else { // VM == 2 || VM == 4
@@ -649,8 +656,14 @@ public class IncrementalThread extends PunctualThread {
 	 */
 	public String prepareToCommit(int globalVersion) {
 		// Receive PTC message, handle options
-		if (my_tm.validationMode == 0 || my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+		if (my_tm.validationMode == 0) { // 2PC only
 			// Return integrity status
+			if (integrityCheck()) {
+				return "YES";
+			}
+		}
+		else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
+			// Global single chance
 			if (integrityCheck()) {
 				return "YES";
 			}
