@@ -463,8 +463,8 @@ public class Robot {
 		// Check arg for proper value, range
 		try {
 			number = Integer.parseInt(str);
-			if (number < 0 || number > 3) {
-				System.err.println("Error in PUSH. Please set a value in the range of 0 - 3.");
+			if (number < 0 || number > 5) {
+				System.err.println("Error in PUSH. Please set a value in the range of 0 - 5.");
 				System.exit(-1);
 			}
 			policyPush = number;
