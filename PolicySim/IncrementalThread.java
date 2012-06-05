@@ -441,18 +441,35 @@ public class IncrementalThread extends PunctualThread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
-				// Push policy updates as necessary
-				if (!hasUpdated) {
-					if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
-						// We can update at the addition of any participant
-						forcePolicyUpdate(my_tm.policyPush);
-						hasUpdated = true; // This only needs to be done once
-					}
-					else if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
-						// We want to randomize when the policy update is pushed
-						if (otherServer == randomServer) { // Do if random server is picked
-							forcePolicyUpdate(my_tm.policyPush);
-							hasUpdated = true; // This only needs to be done once	
+				// Push policy update if necessary
+				if (my_tm.policyPush == 4) { // Do during operations
+					if (otherServer == randomServer) { // Do if random server is picked
+						System.out.println("*** Pushing policy update ***");
+						// Send policy server msg, wait for ACK
+						try {
+							Message pushMsg = new Message("POLICYPUSH");
+							// Connect to the policy server
+							final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
+														   my_tm.serverList.get(0).getPort());
+							// Set up I/O streams with the policy server
+							final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
+							final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
+							System.out.println("Connected to Policy Server at " +
+											   my_tm.serverList.get(0).getAddress() + ":" +
+											   my_tm.serverList.get(0).getPort());
+							// Send
+							output.writeObject(pushMsg);
+							// Rec'v ACK
+							pushMsg = (Message)input.readObject();
+							if (!pushMsg.theMessage.equals("ACK")) {
+								System.err.println("*** Error with Policy Server during POLICYPUSH.");
+							}
+							// Close the socket - won't be calling again on this thread
+							pSock.close();
+						}
+						catch (Exception e) {
+							System.err.println("Error: " + e.getMessage());
+							e.printStackTrace(System.err);
 						}
 					}
 				}

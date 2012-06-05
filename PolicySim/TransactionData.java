@@ -12,7 +12,7 @@ public class TransactionData {
 	private int transactionNumber;
 	private String transaction;
 	private long startTime;
-	private long commitStartTime;
+	private long commitStartTime = 0;
 	private	long endTime;
 	private int sleepTime;
 	private String status;
@@ -87,11 +87,17 @@ public class TransactionData {
 	}
 	
 	public long getTxnTime() {
-		return commitStartTime - startTime;
+		if (commitStartTime != 0) {
+			return commitStartTime - startTime;
+		}
+		return endTime - startTime;
 	}
 	
 	public long getCommitTime() {
-		return endTime - commitStartTime;
+		if (commitStartTime != 0) {
+			return endTime - commitStartTime;
+		}
+		return 0;
 	}
 	
 	public int getSleepTime() {
