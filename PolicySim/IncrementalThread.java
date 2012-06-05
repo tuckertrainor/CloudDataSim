@@ -119,7 +119,7 @@ public class IncrementalThread extends PunctualThread {
 							}
 							
 							// Check view/global consistency
-							if (checkTxnConsistency(my_tm.validationMode) == false) {
+							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
 												   "READ for txn " + query[1] +
@@ -152,7 +152,7 @@ public class IncrementalThread extends PunctualThread {
 						}
 						else { // Pass to server
 							// Check view/global consistency first
-							if (checkTxnConsistency(my_tm.validationMode) == false) {
+							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
 												   "READ for txn " + query[1] +
@@ -190,7 +190,7 @@ public class IncrementalThread extends PunctualThread {
 							}
 							
 							// Check view/global consistency
-							if (checkTxnConsistency(my_tm.validationMode) == false) {
+							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
 												   "WRITE for txn " + query[1] +
@@ -223,7 +223,7 @@ public class IncrementalThread extends PunctualThread {
 						}
 						else { // Pass to server
 							// Check view/global consistency first
-							if (checkTxnConsistency(my_tm.validationMode) == false) {
+							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
 												   "READ for txn " + query[1] +
@@ -503,7 +503,8 @@ public class IncrementalThread extends PunctualThread {
 		return "FAIL";
 	}
 
-	public boolean checkTxnConsistency(int mode) {
+	public boolean checkTxnConsistency() {
+		int mode = my_tm.validationMode;
 		System.out.println("checkTxnConsistency() called, mode " + mode);
 		if (mode == 0 || mode == 1 || mode == 2) {
 			// View consistency - call all participants, see if versions match
@@ -568,6 +569,7 @@ public class IncrementalThread extends PunctualThread {
 								msg = (Message)sockList.get(serverNum).input.readObject();
 								// Check response
 								String msgSplit[] = msg.theMessage.split(" ");
+								
 								System.out.println("Server " + serverNum +
 												   " is using txn policy version " +
 												   Integer.parseInt(msgSplit[1]));
