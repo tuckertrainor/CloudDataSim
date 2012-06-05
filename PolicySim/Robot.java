@@ -107,7 +107,7 @@ public class Robot {
 		// Set up variables for random server policy updates
 		ArrayList<Integer> usedServers = new ArrayList<Integer>();
 		boolean pickRandomServer = false;
-		if (proof.equals("PUNCTUAL") &&
+		if ((proof.equals("PUNCTUAL") || proof.equals("INCREMENTAL")) &&
 			(validationMode == 2 || validationMode == 4)) {
 			pickRandomServer = true;
 		}
