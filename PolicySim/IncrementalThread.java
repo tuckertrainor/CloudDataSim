@@ -151,14 +151,24 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							System.out.println("Pass READ of transaction " + query[1] +
-											   " sequence " + query[3] +
-											   " to server " + query[2]);
-							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-							System.out.println("Response to READ of transaction " + query[1] +
-											   " sequence " + query[3] +
-											   " to server " + query[2] +
-											   ": " + msgText);
+							// Check view/global consistency first
+							if (checkTxnConsistency(my_tm.validationMode) == false) {
+								msgText = "ABORT TXN_CONSISTENCY_FAIL";
+								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+												   "READ for txn " + query[1] +
+												   " sequence " + query[3]);
+							}
+							else {
+								System.out.println("*** Txn consistency validated for sequence " + query[3]);
+								System.out.println("Pass READ of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2]);
+								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+								System.out.println("Response to READ of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2] +
+												   ": " + msgText);
+							}
 						}
 					}
 					else if (query[0].equals("W")) { // WRITE
@@ -212,14 +222,24 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							System.out.println("Pass WRITE of transaction " + query[1] +
-											   " sequence " + query[3] +
-											   " to server " + query[2]);
-							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-							System.out.println("Response to WRITE of transaction " + query[1] +
-											   " sequence " + query[3] +
-											   " to server " + query[2] +
-											   ": " + msgText);
+							// Check view/global consistency first
+							if (checkTxnConsistency(my_tm.validationMode) == false) {
+								msgText = "ABORT TXN_CONSISTENCY_FAIL";
+								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+												   "READ for txn " + query[1] +
+												   " sequence " + query[3]);
+							}
+							else {
+								System.out.println("*** Txn consistency validated for sequence " + query[3]);
+								System.out.println("Pass WRITE of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2]);
+								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+								System.out.println("Response to WRITE of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2] +
+												   ": " + msgText);
+							}
 						}
 					}
 					else if (query[0].equals("PASSR")) { // Passed read operation
@@ -463,11 +483,12 @@ public class IncrementalThread extends PunctualThread {
 	}
 
 	public boolean checkTxnConsistency(int mode) {
+		System.out.println("checkTxnConsistency() called, mode " + mode);
 		if (mode == 0) {
 			// What is 2PC for Incremental Punctual?
 			return true;
 		}
-		else {
+		else if (mode == 1 || mode == 2) {
 			// View consistency - call all participants, see if versions match
 			// Call all participants, send PTC and global version
 			if (sockList.size() > 0) {
@@ -503,6 +524,14 @@ public class IncrementalThread extends PunctualThread {
 			}
 			
 			return true;
+		}
+		else if (mode == 3 || mode == 4) {
+			return true;
+		}
+		else {
+			System.out.println("*** Unknown validation mode: " + mode +
+							   " ***");
+			return false;
 		}
 	}
 	
