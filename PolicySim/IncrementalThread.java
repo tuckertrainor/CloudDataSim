@@ -526,11 +526,22 @@ public class IncrementalThread extends PunctualThread {
 							msg = (Message)sockList.get(serverNum).input.readObject();
 							// Check response
 							String msgSplit[] = msg.theMessage.split(" ");
-							System.out.println("Server " + serverNum +
-											   " is using txn policy version " +
-											   Integer.parseInt(msgSplit[1]));
-							if (Integer.parseInt(msgSplit[1]) != transactionPolicyVersion) {
-								return false;
+							if (my_tm.policyPush == 4) { // Check version
+								System.out.println("Server " + serverNum +
+												   " is using txn policy version " +
+												   Integer.parseInt(msgSplit[1]));
+								if (Integer.parseInt(msgSplit[1]) != transactionPolicyVersion) {
+									return false;
+								}
+							}
+							else if (my_tm.policyPush == 5) { // Not checking until PTC time
+								System.out.println("Server " + serverNum +
+												   " is using txn policy version " +
+												   Integer.parseInt(msgSplit[1]) +
+												   " (allowing for simulation)");
+							}
+							else {
+								System.out.println("Invalid policy push variable is set: " + my_tm.policyPush);
 							}
 						}
 						catch (Exception e) {
@@ -548,7 +559,12 @@ public class IncrementalThread extends PunctualThread {
 			int globalVersion = my_tm.callPolicyServer();
 			// Compare to coordinator's version first
 			if (globalVersion != transactionPolicyVersion) {
-				return false;
+				if (my_tm.policyPush == 4) { // Check version
+					return false;
+				}
+				else { // Not checking until PTC time
+					// We're cool
+				}
 			}
 			else { // Check any participants
 				// Call all participants, ask for version
@@ -569,12 +585,22 @@ public class IncrementalThread extends PunctualThread {
 								msg = (Message)sockList.get(serverNum).input.readObject();
 								// Check response
 								String msgSplit[] = msg.theMessage.split(" ");
-								
-								System.out.println("Server " + serverNum +
-												   " is using txn policy version " +
-												   Integer.parseInt(msgSplit[1]));
-								if (Integer.parseInt(msgSplit[1]) != globalVersion) {
-									return false;
+								if (my_tm.policyPush == 4) { // Check version
+									System.out.println("Server " + serverNum +
+													   " is using txn policy version " +
+													   Integer.parseInt(msgSplit[1]));
+									if (Integer.parseInt(msgSplit[1]) != globalVersion) {
+										return false;
+									}
+								}
+								else if (my_tm.policyPush == 5) { // Not checking until PTC time
+									System.out.println("Server " + serverNum +
+													   " is using txn policy version " +
+													   Integer.parseInt(msgSplit[1]) +
+													   " (allowing for simulation)");
+								}
+								else {
+									System.out.println("Invalid policy push variable is set: " + my_tm.policyPush);
 								}
 							}
 							catch (Exception e) {
