@@ -505,13 +505,9 @@ public class IncrementalThread extends PunctualThread {
 
 	public boolean checkTxnConsistency(int mode) {
 		System.out.println("checkTxnConsistency() called, mode " + mode);
-		if (mode == 0) {
-			// What is 2PC for Incremental Punctual?
-			return true;
-		}
-		else if (mode == 1 || mode == 2) {
+		if (mode == 0 || mode == 1 || mode == 2) {
 			// View consistency - call all participants, see if versions match
-			// Call all participants, send PTC and global version
+			// Call all participants, ask for version
 			if (sockList.size() > 0) {
 				int serverNum;
 				Message msg = null;
@@ -547,6 +543,46 @@ public class IncrementalThread extends PunctualThread {
 			return true;
 		}
 		else if (mode == 3 || mode == 4) {
+			// Get global version, compare against all participants
+			int globalVersion = my_tm.callPolicyServer();
+			// Compare to coordinator's version first
+			if (globalVersion != transactionPolicyVersion) {
+				return false;
+			}
+			else { // Check any participants
+				// Call all participants, ask for version
+				if (sockList.size() > 0) {
+					int serverNum;
+					Message msg = null;
+					for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+						serverNum = socketList.nextElement();
+						if (serverNum != 0) { // Don't call the Policy server
+							try {
+								System.out.println("Asking server " + serverNum +
+												   " for txn policy version.");
+								msg = new Message("VERSION");
+								latencySleep(); // Simulate latency
+								// Send
+								sockList.get(serverNum).output.writeObject(msg);
+								// Rec'v
+								msg = (Message)sockList.get(serverNum).input.readObject();
+								// Check response
+								String msgSplit[] = msg.theMessage.split(" ");
+								System.out.println("Server " + serverNum +
+												   " is using txn policy version " +
+												   Integer.parseInt(msgSplit[1]));
+								if (Integer.parseInt(msgSplit[1]) != globalVersion) {
+									return false;
+								}
+							}
+							catch (Exception e) {
+								System.err.println("checkTxnConsistency() Error: " + e.getMessage());
+								e.printStackTrace(System.err);
+							}
+						}
+					}
+				}
+			}
 			return true;
 		}
 		else {
