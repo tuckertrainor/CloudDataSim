@@ -469,52 +469,9 @@ public class IncrementalThread extends PunctualThread {
 	 * @return String - the ACK/ABORT from the other server
 	 */
 	public String passQuery(int otherServer, String query) {
-		String server = my_tm.serverList.get(otherServer).getAddress();
-		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
+		
 		try {
-			// Check SocketList for an existing socket, else create and add new
-			if (!sockList.hasSocket(otherServer)) {
-				// Create new socket, add it to SocketGroup
-				System.out.println("Connecting to " + server +
-								   " on port " + port);
-				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(otherServer, new SocketObject(sock,
-																	new ObjectOutputStream(sock.getOutputStream()),	
-																	new ObjectInputStream(sock.getInputStream())));
-				// Push policy update if necessary
-				if (my_tm.policyPush == 4) { // Do during operations
-					if (otherServer == randomServer) { // Do if random server is picked
-						System.out.println("*** Pushing policy update ***");
-						// Send policy server msg, wait for ACK
-						try {
-							Message pushMsg = new Message("POLICYPUSH");
-							// Connect to the policy server
-							final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
-														   my_tm.serverList.get(0).getPort());
-							// Set up I/O streams with the policy server
-							final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
-							final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
-							System.out.println("Connected to Policy Server at " +
-											   my_tm.serverList.get(0).getAddress() + ":" +
-											   my_tm.serverList.get(0).getPort());
-							// Send
-							output.writeObject(pushMsg);
-							// Rec'v ACK
-							pushMsg = (Message)input.readObject();
-							if (!pushMsg.theMessage.equals("ACK")) {
-								System.err.println("*** Error with Policy Server during POLICYPUSH.");
-							}
-							// Close the socket - won't be calling again on this thread
-							pSock.close();
-						}
-						catch (Exception e) {
-							System.err.println("Error: " + e.getMessage());
-							e.printStackTrace(System.err);
-						}
-					}
-				}
-			}
 
 			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
 			msg = new Message("PASS" + query);
