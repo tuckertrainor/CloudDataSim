@@ -151,7 +151,14 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							// Check view/global consistency first
+							int passServer = Integer.parseInt(query[2]);
+							// Check if server has participated yet
+							if (!sockList.hasSocket(passServer)) {
+								if (!join(passServer)) {
+									msgText = "FAIL during join(" + passServer + ")"; 
+								}
+							}
+							// Check transaction view/global consistency
 							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
@@ -222,7 +229,14 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							// Check view/global consistency first
+							int passServer = Integer.parseInt(query[2]);
+							// Check if server has participated yet
+							if (!sockList.hasSocket(passServer)) {
+								if (!join(passServer)) {
+									msgText = "FAIL during join(" + passServer + ")"; 
+								}
+							}
+							// Check transaction view/global consistency
 							if (checkTxnConsistency() == false) {
 								msgText = "ABORT TXN_CONSISTENCY_FAIL";
 								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
@@ -243,21 +257,6 @@ public class IncrementalThread extends PunctualThread {
 						}
 					}
 					else if (query[0].equals("PASSR")) { // Passed read operation
-						// Check that if a fresh Policy version is needed
-						// (e.g. if this query has been passed in) it is set
-						if (transactionPolicyVersion == 0) {
-							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-								transactionPolicyVersion = my_tm.getPolicy();
-							}
-							else { // Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();									
-							}
-							System.out.println("Transaction " + query[1] +
-											   " Policy version set: " +
-											   transactionPolicyVersion);
-						}
-						
 						// Check transaction policy against server policy
 						if (checkLocalAuth() == false) {
 							msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -283,21 +282,6 @@ public class IncrementalThread extends PunctualThread {
 						}
 					}
 					else if (query[0].equals("PASSW")) { // Passed write operation
-						// Check that if a fresh Policy version is needed
-						// (e.g. if this query has been passed in) it is set
-						if (transactionPolicyVersion == 0) {
-							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-								transactionPolicyVersion = my_tm.getPolicy();
-							}
-							else { // Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();									
-							}
-							System.out.println("Transaction " + query[1] +
-											   " Policy version set: " +
-											   transactionPolicyVersion);
-						}
-						
 						// Check transaction policy against server policy
 						if (checkLocalAuth() == false) {
 							msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -320,6 +304,26 @@ public class IncrementalThread extends PunctualThread {
 							else {
 								System.out.println("Error logging query.");
 							}
+						}
+					}
+					else if (query[0].equals("JOIN")) {
+						// Coordinator is requesting server to join txn,
+						// set the transaction policy version for this server
+						if (transactionPolicyVersion == 0) {
+							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+								// Get policy from the server
+								transactionPolicyVersion = my_tm.getPolicy();
+							}
+							else { // Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();									
+							}
+							System.out.println("Transaction " + query[1] +
+											   " Policy version set: " +
+											   transactionPolicyVersion);
+						}
+						if (transactionPolicyVersion < 1) {
+							msgText = "JOIN_FAIL"; // Error message if policy is not properly set
 						}
 					}
 					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
@@ -382,6 +386,79 @@ public class IncrementalThread extends PunctualThread {
 		System.setOut(printStreamOriginal);
 	}
 
+	public boolean join(int otherServer) {
+		// Do only if server has not participated yet
+		if (!sockList.hasSocket(otherServer)) {
+			String server = my_tm.serverList.get(otherServer).getAddress();
+			int port = my_tm.serverList.get(otherServer).getPort();
+			Message msg = null;
+			try {
+				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
+				Socket sock = new Socket(server, port);
+				sockList.addSocketObj(otherServer, new SocketObject(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),	
+																	new ObjectInputStream(sock.getInputStream())));
+				// Push policy update if necessary
+				if (my_tm.policyPush == 4) { // Do during operations
+					if (otherServer == randomServer) { // Do if random server is picked
+						System.out.println("*** Pushing policy update ***");
+						// Send policy server msg, wait for ACK
+						try {
+							Message pushMsg = new Message("POLICYPUSH");
+							// Connect to the policy server
+							final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
+															my_tm.serverList.get(0).getPort());
+							// Set up I/O streams with the policy server
+							final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
+							final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
+							System.out.println("Connected to Policy Server at " +
+											   my_tm.serverList.get(0).getAddress() + ":" +
+											   my_tm.serverList.get(0).getPort());
+							// Send
+							output.writeObject(pushMsg);
+							// Rec'v ACK
+							pushMsg = (Message)input.readObject();
+							if (!pushMsg.theMessage.equals("ACK")) {
+								System.err.println("*** Error with Policy Server during POLICYPUSH.");
+							}
+							// Close the socket - won't be calling again on this thread
+							pSock.close();
+						}
+						catch (Exception e) {
+							System.err.println("Error: " + e.getMessage());
+							e.printStackTrace(System.err);
+						}
+					}
+				}
+				// Tell new participant that they are about to join
+				msg = new Message("JOIN");
+				// Send message
+				latencySleep(); // Simulate latency to other server
+				sockList.get(otherServer).output.writeObject(msg);
+				// Get response
+				msg = (Message)sockList.get(otherServer).input.readObject();
+				if (!msg.theMessage.equals("ACK")) {
+					return false; // Failure to join properly
+				}
+				return true; // Successful join
+			}
+			catch (ConnectException ce) {
+				System.err.println(ce.getMessage() +
+								   ": Check server address and port number.");
+				ce.printStackTrace(System.err);
+			}
+			catch (Exception e) {
+				System.err.println("Error during join(): " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
 	
 	/**
 	 * Passes a query to other specified server
