@@ -8,8 +8,7 @@
 import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public class PolicyRequestThread extends Thread {
 	private PolicyServer my_ps;
@@ -30,6 +29,17 @@ public class PolicyRequestThread extends Thread {
 	}
 	
 	public void run() {
+		PrintStream printStreamOriginal = System.out;
+		if (!my_ps.verbose) {
+			System.setOut(new PrintStream(new OutputStream() {
+				public void close() {}
+				public void flush() {}
+				public void write(byte[] b) {}
+				public void write(byte[] b, int off, int len) {}
+				public void write(int b) {}
+			}));
+		}
+
 		try {
 			// Print incoming message
 			System.out.println("** New connection from " + socket.getInetAddress() +
@@ -130,5 +140,7 @@ public class PolicyRequestThread extends Thread {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
+		System.out.flush();
+		System.setOut(printStreamOriginal);
 	}
 }

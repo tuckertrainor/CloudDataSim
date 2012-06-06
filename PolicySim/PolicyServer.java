@@ -19,11 +19,23 @@ public class PolicyServer {
 	static int policyUpdateMin;
 	static int policyUpdateMax;
 	static ArrayList<ServerID> serverList;
+	static boolean verbose = false;
 
 	public PolicyServer() {
 	}
 
-    public static void main(String[] args) {		
+    public static void main(String[] args) {	
+		if (args.length == 1) {
+			if (args[1].equalsIgnoreCase("V")) {
+				verbose = true;
+			}
+			else {
+				System.err.println("Error parsing argument. Please use valid argument.");
+				System.err.println("Usage: java PolicyServer <V|v>\n");
+				System.exit(-1);
+			}
+	    }
+
 		// Load the parameters file to get maximum number of servers
 		if (loadParameters("parameters.txt")) {
 			System.out.println("Parameters file loaded.");
