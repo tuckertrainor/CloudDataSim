@@ -152,10 +152,12 @@ public class IncrementalThread extends PunctualThread {
 						}
 						else { // Pass to server
 							int passServer = Integer.parseInt(query[2]);
+							int txnNum = Integer.parseInt(query[1]);
 							// Check if server has participated yet
 							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer)) {
-									msgText = "FAIL during join(" + passServer + ")"; 
+								if (!join(passServer, txnNum)) {
+									msgText = "FAIL during join(" + passServer +
+									") for txn " + txnNum; 
 								}
 							}
 							// Check transaction view/global consistency
@@ -230,10 +232,12 @@ public class IncrementalThread extends PunctualThread {
 						}
 						else { // Pass to server
 							int passServer = Integer.parseInt(query[2]);
+							int txnNum = Integer.parseInt(query[1]);
 							// Check if server has participated yet
 							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer)) {
-									msgText = "FAIL during join(" + passServer + ")"; 
+								if (!join(passServer, txnNum)) {
+									msgText = "FAIL during join(" + passServer +
+											  ") for txn " + txnNum; 
 								}
 							}
 							// Check transaction view/global consistency
@@ -386,7 +390,7 @@ public class IncrementalThread extends PunctualThread {
 		System.setOut(printStreamOriginal);
 	}
 
-	public boolean join(int otherServer) {
+	public boolean join(int otherServer, int txnNumber) {
 		// Do only if server has not participated yet
 		if (!sockList.hasSocket(otherServer)) {
 			String server = my_tm.serverList.get(otherServer).getAddress();
@@ -433,7 +437,7 @@ public class IncrementalThread extends PunctualThread {
 					}
 				}
 				// Tell new participant that they are about to join
-				msg = new Message("JOIN");
+				msg = new Message("JOIN " + txnNumber);
 				// Send message
 				latencySleep(); // Simulate latency to other server
 				sockList.get(otherServer).output.writeObject(msg);
