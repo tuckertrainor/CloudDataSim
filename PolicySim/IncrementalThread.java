@@ -322,46 +322,6 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 					}
-					else if (query[0].equals("RUNAUTHS")) {
-						// Run any necessary re-authorizations on queries
-						int version = Integer.parseInt(query[1]);
-						System.out.println("Running auth. on transaction " +
-										   queryLog.get(0).getTransaction() + 
-										   " queries using policy version " +
-										   version);
-						msgText = "TRUE";
-						for (int j = 0; j < queryLog.size(); j++) {
-							// If policy used for proof during transaction differs
-							if (queryLog.get(j).getPolicy() != version) {
-								if (!checkLocalAuth()) {
-									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-													   " for txn " + queryLog.get(j).getTransaction() +
-													   ", seq " + queryLog.get(j).getSequence() +
-													   " with policy v. " + version +
-													   " (was v. " + queryLog.get(j).getPolicy() +
-													   "): FAIL");
-									msgText = "FALSE";
-									break;
-								}
-								else {
-									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-													   " for txn " + queryLog.get(j).getTransaction() +
-													   ", seq " + queryLog.get(j).getSequence() +
-													   " with policy v. " + version +
-													   " (was v. " + queryLog.get(j).getPolicy() +
-													   "): PASS");
-									queryLog.get(j).setPolicy(version); // Update policy in log
-								}
-							}
-							else { // Output message of same policy
-								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-												   " for txn " + queryLog.get(j).getTransaction() +
-												   ", seq " + queryLog.get(j).getSequence() +
-												   " with policy v. " + version +
-												   ": ALREADY DONE");
-							}
-						}
-					}
 					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
 						msgText = "VERSION " + transactionPolicyVersion;
 					}
