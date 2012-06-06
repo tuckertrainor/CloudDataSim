@@ -280,6 +280,11 @@ public class WorkerThread extends Thread {
 		Message msg = null;
 		ArrayList<Integer> versions = new ArrayList<Integer>();
 
+		// Check coordinator's integrity
+		if (!integrityCheck()) {
+			return "ABORT PTC_RESPONSE_NO";
+		}
+
 		// Add coordinator's policy version to ArrayList
 		versions.add(transactionPolicyVersion);
 		// Call all participants, send PTC and gather policy versions
@@ -314,7 +319,7 @@ public class WorkerThread extends Thread {
 			}
 		}
 		
-		// If 2PC only, no need to check policies or run auths
+		// If 2PC only, no need to compare policy versions or run auths
 		if (my_tm.validationMode == 0) {
 			return status;
 		}
@@ -354,11 +359,6 @@ public class WorkerThread extends Thread {
 		String status = "COMMIT";
 		Message msg = null;
 		
-		// Check coordinator's integrity
-		if (!integrityCheck()) {
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
 		int globalVersion = my_tm.callPolicyServer();
@@ -366,9 +366,14 @@ public class WorkerThread extends Thread {
 		// Check coordinator for its version
 		if (transactionPolicyVersion != globalVersion) {
 			if (my_tm.validationMode == 3) {
-				return "ABORT PTC_RESPONSE_FALSE";
+				return "ABORT GLOBAL_CONSISTENCY_FAIL";
 			}
 			else { // mode == 4
+				// Check coordinator's integrity
+				if (!integrityCheck()) {
+					return "ABORT PTC_RESPONSE_NO";
+				}
+				
 				// Run auths using global version
 				for (int j = 0; j < queryLog.size(); j++) {
 					if (!checkLocalAuth()) {
