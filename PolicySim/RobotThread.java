@@ -103,8 +103,7 @@ public class RobotThread extends Thread {
 					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + txnNumber + " " +
-									   TransactionLog.entry.get(txnNumber).getStatus() + " " +
-									   ThreadCounter.threadCount + ":" + ThreadCounter.activeThreads);
+									   TransactionLog.entry.get(txnNumber).getStatus());
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
@@ -114,8 +113,7 @@ public class RobotThread extends Thread {
 					}
 					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + txnNumber + " " +
-									   TransactionLog.entry.get(txnNumber).getStatus() + " " +
-									   ThreadCounter.threadCount + ":" + ThreadCounter.activeThreads);
+									   TransactionLog.entry.get(txnNumber).getStatus());
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: Query handling error - received \"" + respSplit[0] + "\" from server.");
