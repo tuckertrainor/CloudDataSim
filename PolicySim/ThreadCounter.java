@@ -14,11 +14,11 @@ public class ThreadCounter {
 	public static int maxThreads = 0;
 	
 	public static void addNewThread() {
-		threadCount++;
-		activeThreads++;
+		++threadCount;
+		++activeThreads;
 	}
 	
 	public static void threadComplete() {
-		activeThreads--;
+		--activeThreads;
 	}
 }

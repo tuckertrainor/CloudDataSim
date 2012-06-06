@@ -217,6 +217,7 @@ public class Robot {
 		
 		// Wait for all threads to complete
 		while (ThreadCounter.activeThreads != 0) {
+//			System.out.println(ThreadCounter.activeThreads);
 			Thread.yield();
 		}
 		
