@@ -13,6 +13,9 @@ import java.net.Socket;
 import java.net.ConnectException;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Robot {
 	static String proof;
@@ -33,6 +36,7 @@ public class Robot {
 	static int policyUpdateMax;
 	static long randomSeed;
 	static Random generator;
+	static ExecutorService execSvc;
 
 	/**
 	 * Main method.
@@ -174,51 +178,41 @@ public class Robot {
 			TransactionLog.entry.add(tData);
 		}
 		
-		// Communicate with CloudServer through RobotThread
-		try {
-			RobotThread thread = null;
-			int i = 1;
-			int coordinator = 0;
-			String txn;
-			String txnSplit[];
+		// Communicate with CloudServer through pool of RobotThreads
+		int coordinator = 0;
+		String txn;
+		String txnSplit[];
+		execSvc = Executors.newFixedThreadPool(maxDegree);
 			
-			while (ThreadCounter.threadCount < maxTransactions) {
-				if (ThreadCounter.activeThreads < maxDegree) {
-					txn = TransactionLog.entry.get(i).getTxn();
-					txnSplit = txn.split(" ");
-					if (pickRandomServer) {
-						coordinator = Integer.parseInt(txnSplit[3]);
-					}
-					else {
-						coordinator = Integer.parseInt(txnSplit[2]);
-					}
-					thread = new RobotThread(i,
+		for (int i = 1; i <= maxTransactions; i++) {
+			txn = TransactionLog.entry.get(i).getTxn();
+			txnSplit = txn.split(" ");
+			if (pickRandomServer) {
+				coordinator = Integer.parseInt(txnSplit[3]);
+			}
+			else {
+				coordinator = Integer.parseInt(txnSplit[2]);
+			}
+			execSvc.execute( new RobotThread(i,
 											 coordinator,
 											 txn,
 											 serverList.get(coordinator).getAddress(),
 											 serverList.get(coordinator).getPort(),
 											 latencyMin,
 											 latencyMax,
-											 threadSleep);
-					thread.start();
-					ThreadCounter.addNewThread();
-					i++;
-				}
-				else {
-					// Release I/O block
-					Thread.yield();
-				}
-			}
-		}
-		catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
-			e.printStackTrace(System.err);
+											 threadSleep) );
 		}
 		
-		// Wait for all threads to complete
-		while (ThreadCounter.activeThreads != 0) {
-//			System.out.println(ThreadCounter.activeThreads);
-			Thread.yield();
+		execSvc.shutdown();
+		try {
+			// The tasks are now running concurrently. We wait until all work is
+			// done, with a timeout of 30 minutes
+			boolean poolean = execSvc.awaitTermination(30, TimeUnit.MINUTES);
+			// If the execution timed out, false is returned
+			System.out.println("Execution complete: " + poolean);
+		}
+		catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 		
 		// Shut down Policy Server, Cloud Servers
