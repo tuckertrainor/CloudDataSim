@@ -13,11 +13,9 @@ import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
-public class RobotThread extends Thread {
+public class RobotThread implements Runnable {
 	private final int txnNumber;
 	private final int coordinator;
     private final String transactions;
@@ -32,10 +30,14 @@ public class RobotThread extends Thread {
 	 * Constructor that sets up transaction communication
 	 *
 	 * @param _txnNumber - the number of this transaction set
+	 * @param _coordinator
 	 * @param _transactions - A string representing the queries to be run
 	 * @param _server - The server name where the primary Transaction Manager
 	 * is located
 	 * @param _port - The port number of the server
+	 * @param _lMin
+	 * @param _lMax
+	 * @param _threadSleep
 	 */
 	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep) {
 		coordinator = _coordinator;
@@ -101,7 +103,6 @@ public class RobotThread extends Thread {
 				else if (respSplit[0].equals("ABORT")) { // Unsuccessful transaction
 					TransactionLog.entry.get(txnNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
 					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
-					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + txnNumber + " " +
 									   TransactionLog.entry.get(txnNumber).getStatus());
 					break;
@@ -111,7 +112,6 @@ public class RobotThread extends Thread {
 					if (!threadSleep) {
 						TransactionLog.entry.get(txnNumber).addSleepTime(Integer.parseInt(respSplit[1]));
 					}
-					ThreadCounter.threadComplete(); // remove thread from active count
 					System.out.println("RobotThread: Transaction " + txnNumber + " " +
 									   TransactionLog.entry.get(txnNumber).getStatus());
 				}
@@ -157,5 +157,4 @@ public class RobotThread extends Thread {
 			TransactionLog.entry.get(txnNumber).addSleepTime(latency);
 		}
 	}
-
 }
