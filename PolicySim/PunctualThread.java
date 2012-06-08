@@ -574,11 +574,6 @@ public class PunctualThread extends DeferredThread {
 		String status = "COMMIT";
 		Message msg = null;
 		
-		// Check coordinator's integrity
-		if (!integrityCheck()) {
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
 		int globalVersion = my_tm.callPolicyServer();
@@ -588,6 +583,11 @@ public class PunctualThread extends DeferredThread {
 				return "ABORT PTC_RESPONSE_FALSE";
 			}
 			else { // mode == 4
+				// Check coordinator's integrity
+				if (!integrityCheck()) {
+					return "ABORT PTC_RESPONSE_NO";
+				}
+
 				// Re-run auths with global version
 				for (int j = 0; j < queryLog.size(); j++) {
 					if (!checkLocalAuth()) {
