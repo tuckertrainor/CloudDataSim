@@ -118,14 +118,6 @@ public class IncrementalThread extends PunctualThread {
 												   transactionPolicyVersion);
 							}
 							
-							// Check view/global consistency
-							if (checkTxnConsistency() == false) {
-								msgText = "ABORT TXN_CONSISTENCY_FAIL";
-								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-												   "READ for txn " + query[1] +
-												   " sequence " + query[3]);
-							}
-							
 							// Check transaction policy against server policy
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -159,19 +151,31 @@ public class IncrementalThread extends PunctualThread {
 									msgText = "FAIL during join(" + passServer +
 									") for txn " + txnNum; 
 								}
-							}
-							// Check transaction view/global consistency
-							if (checkTxnConsistency() == false) {
-								msgText = "ABORT TXN_CONSISTENCY_FAIL";
-								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-												   "READ for txn " + query[1] +
-												   " sequence " + query[3]);
+								else {
+									// The other server has joined, so now run
+									// a transaction consistency check
+									if (checkTxnConsistency() == false) {
+										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+														   "READ for txn " + query[1] +
+														   " sequence " + query[3]);
+									}
+									else {
+										// Consistency confirmed, pass operation
+										System.out.println("*** Txn consistency validated for sequence " + query[3]);
+										System.out.println("Pass READ of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2]);
+										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+										System.out.println("Response to READ of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2] +
+														   ": " + msgText);
+									}
+								}
 							}
 							else {
-								System.out.println("*** Txn consistency validated for sequence " + query[3]);
-								System.out.println("Pass READ of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2]);
+								// Server has previously joined, pass operation
 								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 								System.out.println("Response to READ of transaction " + query[1] +
 												   " sequence " + query[3] +
@@ -196,14 +200,6 @@ public class IncrementalThread extends PunctualThread {
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
-							}
-							
-							// Check view/global consistency
-							if (checkTxnConsistency() == false) {
-								msgText = "ABORT TXN_CONSISTENCY_FAIL";
-								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-												   "WRITE for txn " + query[1] +
-												   " sequence " + query[3]);
 							}
 							
 							// Check transaction policy against server policy
@@ -239,19 +235,31 @@ public class IncrementalThread extends PunctualThread {
 									msgText = "FAIL during join(" + passServer +
 											  ") for txn " + txnNum; 
 								}
+								else {
+									// The other server has joined, so now run
+									// a transaction consistency check
+									if (checkTxnConsistency() == false) {
+										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+														   "WRITE for txn " + query[1] +
+														   " sequence " + query[3]);
+									}
+									else {
+										// Consistency confirmed, pass operation
+										System.out.println("*** Txn consistency validated for sequence " + query[3]);
+										System.out.println("Pass WRITE of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2]);
+										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+										System.out.println("Response to WRITE of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2] +
+														   ": " + msgText);
+									}
+								}
 							}
-							// Check transaction view/global consistency
-							if (checkTxnConsistency() == false) {
-								msgText = "ABORT TXN_CONSISTENCY_FAIL";
-								System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-												   "READ for txn " + query[1] +
-												   " sequence " + query[3]);
-							}
+							// Server has previously joined, pass operation
 							else {
-								System.out.println("*** Txn consistency validated for sequence " + query[3]);
-								System.out.println("Pass WRITE of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2]);
 								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 								System.out.println("Response to WRITE of transaction " + query[1] +
 												   " sequence " + query[3] +
