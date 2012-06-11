@@ -15,13 +15,13 @@ PROOF INCREMENTAL
 # Incremental 3: TXN: global consistency PTC: global single chance
 # Incremental 4: TXN: global consistency PTC: global second chance
 #
-VM 3
+VM 1
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 # 4: during operations (for inc.) 5: at PTC time (for inc.)
-PUSH 5
+PUSH 4
 # MT maxTransactions - number of transactions to perform
-MT 1000
+MT 100
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction

@@ -45,6 +45,13 @@ public class Robot {
 	 * argument specifies the port number
 	 */
     public static void main(String[] args) {
+		/* To allow outputErrorLog() to properly shut down other servers,
+		 * which is useful if running a series of simulations via shell script,
+		 * we need to be able to send the method the addresses of the servers
+		 * as well as the number of servers being used (i.e., maxServers), so
+		 * we need to load serverConfig.txt and parameters.txt before checking
+		 * for any other errors, e.g., improper command line arguments.
+		 */
 		// Load server information from server configuration file
 		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
 		if (serverList == null) {
@@ -55,14 +62,6 @@ public class Robot {
 		else {
 			System.out.println("Server configuration file read successfully.");
 		}
-
-		// Error checking for arguments (0, 1, or 6 args)
-		if (args.length != 0 && args.length != 1 && args.length != 6) {
-			System.err.println("Improper argument count.");
-			argsError();
-			outputErrorLog(serverList, "Improper argument count.");
-			System.exit(-1);
-	    }
 		
 		// Load the parameters for this simulation
 		if (loadParameters("parameters.txt")) {
@@ -73,6 +72,14 @@ public class Robot {
 			outputErrorLog(serverList, "Error loading parameters file.");
 			System.exit(-1);
 		}
+
+		// Error checking for arguments (0, 1, or 6 args)
+		if (args.length != 0 && args.length != 1 && args.length != 6) {
+			System.err.println("Improper argument count.");
+			argsError();
+			outputErrorLog(serverList, "Improper argument count.");
+			System.exit(-1);
+	    }
 		
 		switch (args.length) {
 			case 0:
@@ -82,7 +89,7 @@ public class Robot {
 				break;
 			case 6:
 				setSeed(serverList, args[0]);
-				proof = args[1];
+				proof = args[1]; // Note that this does not check against typo
 				setVM(serverList, args[2]);
 				setPush(serverList, args[3]);
 				setOpMin(serverList, args[4]);
