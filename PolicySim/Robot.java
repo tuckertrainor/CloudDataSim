@@ -45,10 +45,22 @@ public class Robot {
 	 * argument specifies the port number
 	 */
     public static void main(String[] args) {
+		// Load server information from server configuration file
+		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
+		if (serverList == null) {
+			System.err.println("Error loading server configuration file. Exiting.");
+			outputErrorLog(serverList, "Error loading server configuration file.");
+			System.exit(-1);
+		}
+		else {
+			System.out.println("Server configuration file read successfully.");
+		}
+
 		// Error checking for arguments (0, 1, or 6 args)
 		if (args.length != 0 && args.length != 1 && args.length != 6) {
 			System.err.println("Improper argument count.");
 			argsError();
+			outputErrorLog(serverList, "Improper argument count.");
 			System.exit(-1);
 	    }
 		
@@ -58,36 +70,27 @@ public class Robot {
 		}
 		else {
 			System.err.println("Error loading parameters file. Exiting.");
+			outputErrorLog(serverList, "Error loading parameters file.");
 			System.exit(-1);
 		}
-		
-		// Load server information from server configuration file
-		ArrayList<ServerID> serverList = loadConfig("serverConfig.txt");
-		if (serverList == null) {
-			System.err.println("Error loading configuration file. Exiting.");
-			System.exit(-1);
-		}
-		else {
-			System.out.println("Server configuration file read successfully.");
-		}
-		//		System.err.println("Usage: java Robot <Seed> <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
 		
 		switch (args.length) {
 			case 0:
 				break;
 			case 1:
-				setSeed(args[0]);
+				setSeed(serverList, args[0]);
 				break;
 			case 6:
-				setSeed(args[0]);
+				setSeed(serverList, args[0]);
 				proof = args[1];
-				setVM(args[2]);
-				setPush(args[3]);
-				setOpMin(args[4]);
-				setOpMax(minOperations, args[5]);
+				setVM(serverList, args[2]);
+				setPush(serverList, args[3]);
+				setOpMin(serverList, args[4]);
+				setOpMax(serverList, minOperations, args[5]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
+				outputErrorLog(serverList, "Default case reached in switch.");
 				System.exit(-1);
 				break;
 		}
@@ -95,6 +98,7 @@ public class Robot {
 		// Push parameters to active servers
 		if (!parameterPush(serverList)) {
 			System.err.println("Error pushing parameters. Exiting.");
+			outputErrorLog(serverList, "Error pushing parameters.");
 			System.exit(-1);
 		}
 		
@@ -377,35 +381,39 @@ public class Robot {
 			number = Integer.parseInt(str);
 			if (number < 1 || number >= _serverList.size()) {
 				System.err.println("Error in server number. Please check server configuration.");
+				outputErrorLog(_serverList, "getTM(): Error in server number.");
 				System.exit(-1);
 			}
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for TM. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "getTM(): Error parsing argument for TM.");
 			System.exit(-1);
 		}
 		return number;
 	}
 		
-	public static void setSeed(String str) {
+	public static void setSeed(ArrayList<ServerID> _serverList, String str) {
 		try {
 			randomSeed = Long.parseLong(str);
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for seed. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "setSeed(): Error parsing argument for seed.");
 			System.exit(-1);
 		}
 	}
 	
-	public static void setOpMin(String str) {
+	public static void setOpMin(ArrayList<ServerID> _serverList, String str) {
 		int min = 0;
 		// Check arg for proper value, range
 		try {
 			min = Integer.parseInt(str);
 			if (min < 1) {
 				System.err.println("Error in OPMIN. Please set a minimum of at least 1.");
+				outputErrorLog(_serverList, "setOpMin(): Error in OPMIN.");
 				System.exit(-1);
 			}
 			minOperations = min;
@@ -413,17 +421,19 @@ public class Robot {
 		catch (Exception e) {
 			System.err.println("Error parsing argument for OPMIN. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "setOpMin(): Error parsing argument for OPMIN.");
 			System.exit(-1);
 		}
 	}
 	
-	public static void setOpMax(int min, String str) {
+	public static void setOpMax(ArrayList<ServerID> _serverList, int min, String str) {
 		int max = 0;
 		// Check arg for proper value, range
 		try {
 			max = Integer.parseInt(str);
 			if (max < min) {
 				System.err.println("Error in OPMAX. Please set a value equal to or greater than OPMIN.");
+				outputErrorLog(_serverList, "setOpMax(): Error in OPMAX.");
 				System.exit(-1);
 			}
 			maxOperations = max;
@@ -431,17 +441,19 @@ public class Robot {
 		catch (Exception e) {
 			System.err.println("Error parsing argument for OPMAX. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "setOpMax(): Error parsing argument for OPMAX.");
 			System.exit(-1);
 		}
 	}
 	
-	public static void setVM(String str) {
+	public static void setVM(ArrayList<ServerID> _serverList, String str) {
 		int number = -1;
 		// Check arg for proper value, range
 		try {
 			number = Integer.parseInt(str);
 			if (number < 0 || number > 4) {
 				System.err.println("Error in VM. Please set a value in the range of 0 - 4.");
+				outputErrorLog(_serverList, "setVM(): Error in VM.");
 				System.exit(-1);
 			}
 			validationMode = number;
@@ -449,17 +461,19 @@ public class Robot {
 		catch (Exception e) {
 			System.err.println("Error parsing argument for VM. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "setVM(): Error parsing argument for VM.");
 			System.exit(-1);
 		}
 	}
 
-	public static void setPush(String str) {
+	public static void setPush(ArrayList<ServerID> _serverList, String str) {
 		int number = -1;
 		// Check arg for proper value, range
 		try {
 			number = Integer.parseInt(str);
 			if (number < 0 || number > 5) {
 				System.err.println("Error in PUSH. Please set a value in the range of 0 - 5.");
+				outputErrorLog(_serverList, "setPush(): Error in PUSH.");
 				System.exit(-1);
 			}
 			policyPush = number;
@@ -467,6 +481,7 @@ public class Robot {
 		catch (Exception e) {
 			System.err.println("Error parsing argument for PUSH. Please use a valid integer.");
 			argsError();
+			outputErrorLog(_serverList, "setPush(): Error parsing argument for PUSH.");
 			System.exit(-1);
 		}
 
@@ -715,4 +730,82 @@ public class Robot {
 		
 		return success;
 	}
+	
+	/**
+     * Output a file if an error occurs.
+     */
+	private static boolean outputErrorLog(ArrayList<ServerID> servers, String reason) {
+		FileWriter outputFile = null;
+		BufferedWriter outputBuf = null;
+		long fileTime = new Date().getTime();
+		String filename = "Log_ERROR_" + Long.toString(fileTime) + ".txt";
+		boolean success = true;
+		long avgFullTxn = 0l; // Start to finish
+		long avgTxnTime = 0l; // Reads and writes only
+		long avgCommitTime = 0l; // From commit call to finish
+		
+		// Create an output stream
+		try {			
+			outputFile = new FileWriter(filename, true);
+			// create a BufferedWriter object for the output methods
+			outputBuf = new BufferedWriter(outputFile);
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException during output file creation.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		
+		// Write to file
+		try {
+			outputBuf.write("ERROR:");
+			outputBuf.newLine();
+			outputBuf.write(reason);
+			outputBuf.newLine();
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException while writing to output file.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		
+		// Close the output stream
+		try {
+			outputBuf.close();
+		}
+		catch(IOException ioe) {
+			System.out.println("IOException while closing the output file.");
+			ioe.printStackTrace();
+			success = false;
+		}
+		
+		// Shut down Policy Server, Cloud Servers
+		for (int i = 0; i <= maxServers; i++) {
+			try {
+				// Connect to the specified server
+				Socket sock = new Socket(servers.get(i).getAddress(),
+										 servers.get(i).getPort());
+				// Set up I/O streams with the server
+				ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
+				ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
+				// Send KILL
+				output.writeObject(new Message("KILL"));
+				// Disconnect from server
+				sock.close();
+			}
+			catch (ConnectException ce) {
+				System.err.println(ce.getMessage() +
+								   ": Check server address and port number.");
+				ce.printStackTrace(System.err);
+			}
+			catch (Exception e) {
+				System.err.println("Error during KILL: " + e.getMessage());
+				e.printStackTrace(System.err);
+			}
+		}
+		
+		
+		return success;
+	}
+
 }
