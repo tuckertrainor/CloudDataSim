@@ -505,7 +505,10 @@ public class WorkerThread extends Thread {
 	 * @param mode - the integer value of policyPush from parameters.txt file
 	 */
 	public void forcePolicyUpdate(int mode) {
-		if (sockList.size() > 0) { // Can only perform if more than one server
+		if (mode == 0) {
+			// No push, do nothing
+		}
+		else if (sockList.size() > 0) { // Can only perform if more than one server
 			String msgText = "POLICYPUSH";
 			
 			if (mode == 1) { // Push an update to a single server
