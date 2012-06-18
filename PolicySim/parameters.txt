@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
-PROOF INCREMENTAL
+PROOF CONTINUOUS
 # VM validationMode - integer for setting mode of proof
 #
 # Deferred/Punctual 0: 2PC only
@@ -14,6 +14,10 @@ PROOF INCREMENTAL
 # Incremental 2: TXN: view consistency PTC: global second chance
 # Incremental 3: TXN: global consistency PTC: global single chance
 # Incremental 4: TXN: global consistency PTC: global second chance
+#
+# Continuous 0: 2PC only (Is there such a thing? Nothing coded for this yet in run())
+# Continuous 1: View consistency (2PC for commit)
+# Continuous 2: Global consistency (2PVC for commit)
 #
 VM 1
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,

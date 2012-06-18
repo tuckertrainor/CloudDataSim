@@ -6,6 +6,10 @@
  * Extends the IncrementalThread class.
  */
 
+/* TODO: pore through run(), make adjustments as necessary, will need to redo passQuery and join at minimum, last edit near R's passQuery
+ * 
+ */
+
 import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
@@ -27,6 +31,7 @@ public class ContinuousThread extends IncrementalThread {
 	/* View consistency
 	 * 1.  get freshest policy off own server
 	 * 2.  perform first operation, double check local policy, perform proof, perform operation, PASS,ACK or FAIL
+	       how do we double check local policy on own server without involving PS?
 	 * 3.  repeat if next operation on coordinator's server, else have participant join
 	 
 	 * 4.  have server join (and set up update condition)
@@ -45,4 +50,387 @@ public class ContinuousThread extends IncrementalThread {
 	 
 	 * 13. continues until PTC
 	 */
+	
+	/**
+	 * run() is basically the main method of a thread. This thread
+	 * simply reads Message objects off of the socket.
+	 */
+	public void run() {
+		generator = new Random(new Date().getTime());
+		
+		PrintStream printStreamOriginal = System.out;
+		if (!my_tm.verbose) {
+			System.setOut(new PrintStream(new OutputStream() {
+				public void close() {}
+				public void flush() {}
+				public void write(byte[] b) {}
+				public void write(byte[] b, int off, int len) {}
+				public void write(int b) {}
+			}));
+		}
+		
+		try {
+			// Print incoming message
+			System.out.println("** New connection from " + socket.getInetAddress() +
+							   ":" + socket.getPort() + " **");
+			
+			// Set up I/O streams with the calling thread
+			final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+			final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+			
+			Message msg = null;
+			Message resp = null;
+			
+			while (true) {
+				// Loop to read messages
+				String msgText = "ACK";
+				// Read and print message
+				msg = (Message)input.readObject();
+				System.out.println("[" + socket.getInetAddress() +
+								   ":" + socket.getPort() + "] " + msg.theMessage);
+				
+				if (msg.theMessage.equals("DONE")) {
+					break;
+				}
+				else if (msg.theMessage.equals("KILL")) {
+					my_tm.shutdownServer();
+					break;
+				}
+				else if (msg.theMessage.indexOf("POLICYUPDATE") != -1) { // Policy update from Policy Server
+					String msgSplit[] = msg.theMessage.split(" ");
+					int update = Integer.parseInt(msgSplit[1]);
+					// Check that we aren't going backwards in a race condition
+					if (my_tm.getPolicy() < update) {
+						my_tm.setPolicy(update);
+					}
+					latencySleep(); // Simulate latency
+					output.writeObject(new Message(msgText)); // send ACK
+					break;
+				}
+				else if (msg.theMessage.indexOf("PARAMETERS") != -1) { // Configuration change
+					// PARAMETERS <PROOF> <VM> <PUSH>
+					String msgSplit[] = msg.theMessage.split(" ");
+					my_tm.proof = msgSplit[1];
+					my_tm.validationMode = Integer.parseInt(msgSplit[2]);
+					my_tm.policyPush = Integer.parseInt(msgSplit[3]);
+					System.out.println("Server parameters updated: " + msg.theMessage);
+					System.out.println("Proof: " + my_tm.proof);
+					System.out.println("Validation mode: " + my_tm.validationMode);
+					System.out.println("Policy push mode: " + my_tm.policyPush);
+					// No artificial latency needed, send ACK
+					output.writeObject(new Message(msgText));
+					break;
+				}
+				
+				// Separate queries
+				String queryGroup[] = msg.theMessage.split(",");
+				for (int i = 0; i < queryGroup.length; i++) {
+					// Handle instructions
+					String query[] = queryGroup[i].split(" ");
+					if (query[0].equals("R")) { // READ
+						// Check server number, perform query or pass on
+						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
+							// Check that if a fresh Policy version is needed
+							// (e.g. if this query has been passed in) it is set
+							if (transactionPolicyVersion == 0) {
+								if (my_tm.validationMode == 1) {
+									// Get freshest policy on local server
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // my_tm.validationMode == 2
+									// Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();									
+								}
+								System.out.println("Transaction " + query[1] +
+												   " Policy version set: " +
+												   transactionPolicyVersion);
+							}
+							
+							// Check transaction policy against server policy
+							if (checkLocalAuth() == false) {
+								msgText = "ABORT LOCAL_POLICY_FAIL";
+								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+												   "READ for txn " + query[1] +
+												   " sequence " + query[3]);
+							}
+							else { // OK to read
+								System.out.println("READ for txn " + query[1] +
+												   " sequence " + query[3]);
+								databaseRead();
+								// Add policy version for passed query logging
+								msgText += " " + transactionPolicyVersion;
+								// Add to query log
+								if (addToQueryLog(query, transactionPolicyVersion)) {
+									System.out.println("Transaction " + query[1] +
+													   " sequence " + query[3] +
+													   " query logged.");
+								}
+								else {
+									System.out.println("Error logging query.");
+								}
+							}
+						}
+						else { // Pass to server
+							int passServer = Integer.parseInt(query[2]);
+							int txnNum = Integer.parseInt(query[1]);
+							// Check if server has participated yet
+							if (!sockList.hasSocket(passServer)) {
+								if (!join(passServer, txnNum)) {
+									msgText = "FAIL during join(" + passServer +
+									") for txn " + txnNum; 
+								}
+								else {
+									/* View consistency:
+									 * Send transactionPolicyVersion, operation
+									 * Rec'v PASS, ACK, policy used or FAIL, policy used
+									 */
+									// The other server has joined, so now run
+									// a transaction consistency check
+//									if (checkTxnConsistency() == false) {
+//										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+//										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+//														   "READ for txn " + query[1] +
+//														   " sequence " + query[3]);
+									}
+									else {
+										// Consistency confirmed, pass operation
+										System.out.println("*** Txn consistency validated for sequence " + query[3]);
+										System.out.println("Pass READ of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2]);
+										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+										System.out.println("Response to READ of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2] +
+														   ": " + msgText);
+									}
+								}
+							}
+							else {
+								// Server has previously joined, pass operation
+								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+								System.out.println("Response to READ of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2] +
+												   ": " + msgText);
+							}
+						}
+					}
+					else if (query[0].equals("W")) { // WRITE
+						// Check server number, perform query or pass on
+						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
+							// Check that if a fresh Policy version is needed
+							// (e.g. if this query has been passed in) it is set
+							if (transactionPolicyVersion == 0) {
+								if (my_tm.validationMode == 1) {
+									// Get freshest policy on local server
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // my_tm.validationMode == 2
+									// Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();									
+								}
+								System.out.println("Transaction " + query[1] +
+								System.out.println("Transaction " + query[1] +
+												   " Policy version set: " +
+												   transactionPolicyVersion);
+							}
+							
+							// Check transaction policy against server policy
+							if (checkLocalAuth() == false) {
+								msgText = "ABORT LOCAL_POLICY_FAIL";
+								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+												   "WRITE for txn " + query[1] +
+												   " sequence " + query[3]);
+							}
+							else { // OK to write
+								System.out.println("WRITE for txn " + query[1] +
+												   " sequence " + query[3]);
+								databaseWrite();
+								// Add policy version for passed query logging
+								msgText += " " + transactionPolicyVersion;
+								// Add to query log
+								if (addToQueryLog(query, transactionPolicyVersion)) {
+									System.out.println("Transaction " + query[1] +
+													   " sequence " + query[3] +
+													   " query logged.");
+								}
+								else {
+									System.out.println("Error logging query.");
+								}
+							}
+						}
+						else { // Pass to server
+							int passServer = Integer.parseInt(query[2]);
+							int txnNum = Integer.parseInt(query[1]);
+							// Check if server has participated yet
+							if (!sockList.hasSocket(passServer)) {
+								if (!join(passServer, txnNum)) {
+									msgText = "FAIL during join(" + passServer +
+									") for txn " + txnNum; 
+								}
+								else {
+									// The other server has joined, so now run
+									// a transaction consistency check
+									if (checkTxnConsistency() == false) {
+										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+														   "WRITE for txn " + query[1] +
+														   " sequence " + query[3]);
+									}
+									else {
+										// Consistency confirmed, pass operation
+										System.out.println("*** Txn consistency validated for sequence " + query[3]);
+										System.out.println("Pass WRITE of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2]);
+										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+										System.out.println("Response to WRITE of transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " to server " + query[2] +
+														   ": " + msgText);
+									}
+								}
+							}
+							// Server has previously joined, pass operation
+							else {
+								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+								System.out.println("Response to WRITE of transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " to server " + query[2] +
+												   ": " + msgText);
+							}
+						}
+					}
+					else if (query[0].equals("PASSR")) { // Passed read operation
+						// Check transaction policy against server policy
+						if (checkLocalAuth() == false) {
+							msgText = "ABORT LOCAL_POLICY_FAIL";
+							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+											   "READ for txn " + query[1] +
+											   " sequence " + query[3]);
+						}
+						else { // OK to read
+							System.out.println("READ for txn " + query[1] +
+											   " sequence " + query[3]);
+							databaseRead();
+							// Add policy version for passed query logging
+							msgText += " " + transactionPolicyVersion;
+							// Add to query log
+							if (addToQueryLog(query, transactionPolicyVersion)) {
+								System.out.println("Transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " query logged.");
+							}
+							else {
+								System.out.println("Error logging query.");
+							}
+						}
+					}
+					else if (query[0].equals("PASSW")) { // Passed write operation
+						// Check transaction policy against server policy
+						if (checkLocalAuth() == false) {
+							msgText = "ABORT LOCAL_POLICY_FAIL";
+							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
+											   "WRITE for txn " + query[1] +
+											   " sequence " + query[3]);
+						}
+						else { // OK to write
+							System.out.println("WRITE for txn " + query[1] +
+											   " sequence " + query[3]);
+							databaseWrite();
+							// Add policy version for passed query logging
+							msgText += " " + transactionPolicyVersion;
+							// Add to query log
+							if (addToQueryLog(query, transactionPolicyVersion)) {
+								System.out.println("Transaction " + query[1] +
+												   " sequence " + query[3] +
+												   " query logged.");
+							}
+							else {
+								System.out.println("Error logging query.");
+							}
+						}
+					}
+					else if (query[0].equals("JOIN")) {
+						// Coordinator is requesting server to join txn,
+						// set the transaction policy version for this server
+						if (transactionPolicyVersion == 0) {
+							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+								// Get policy from the server
+								transactionPolicyVersion = my_tm.getPolicy();
+							}
+							else { // Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();									
+							}
+							System.out.println("Transaction " + query[1] +
+											   " Policy version set: " +
+											   transactionPolicyVersion);
+						}
+						if (transactionPolicyVersion < 1) {
+							msgText = "JOIN_FAIL"; // Error message if policy is not properly set
+						}
+					}
+					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
+						msgText = "VERSION " + transactionPolicyVersion;
+					}
+					else if (query[0].equals("PTC")) { // Prepare-to-Commit
+						msgText = prepareToCommit(Integer.parseInt(query[1]));
+					}
+					else if (query[0].equals("C")) { // COMMIT
+						System.out.println("COMMIT phase - transaction " + query[1]);
+						// Force global update if necessary
+						if (my_tm.policyPush == 5) {
+							forcePolicyUpdate(3);
+						}
+						// Begin 2PC/2PV methods
+						msgText = coordinatorCommit();
+						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
+										   ": " + msgText);
+					}
+					else if (query[0].equals("RSERV")) { // Random server for policy pushing
+						randomServer = Integer.parseInt(query[1]);
+					}
+					else if (query[0].equals("S")) { // Sleep for debugging
+						Thread.sleep(Integer.parseInt(query[1]));
+					}
+					else if (query[0].toUpperCase().equals("EXIT")) { // end of transaction
+						// send exit flag to RobotThread
+						msgText = "FIN";
+						if (!my_tm.threadSleep) { // append total sleep time to message
+							msgText += " " + totalSleepTime;
+						}
+					}
+				}
+				latencySleep(); // Simulate latency to RobotThread
+				// ACK completion of this query group to RobotThread
+				output.writeObject(new Message(msgText));
+			}
+			// Close any SocketGroup connection
+			if (sockList.size() > 0) {
+				int serverNum;
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					msg = new Message("DONE");
+					serverNum = socketList.nextElement();
+					latencySleep(); // Simulate latency
+					sockList.get(serverNum).output.writeObject(msg);
+					sockList.get(serverNum).socket.close();
+				}
+			}
+			
+			// Close and cleanup
+			System.out.println("** Closing connection with " + socket.getInetAddress() +
+							   ":" + socket.getPort() + " **");
+			socket.close();
+		}
+		catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		System.out.flush();
+		System.setOut(printStreamOriginal);
+	}
 }
