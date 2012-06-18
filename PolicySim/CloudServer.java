@@ -108,6 +108,7 @@ public class CloudServer {
 			DeferredThread threadD = null;
 			PunctualThread threadP = null;
 			IncrementalThread threadI = null;
+			ContinuousThread threadC = null;
 			while(true) {
 				// Accept an incoming connection
 				sock = serverSock.accept();
@@ -124,7 +125,13 @@ public class CloudServer {
 					threadI = new IncrementalThread(sock, this);
 					threadI.start();
 				}
-				// Additional proofs handling here
+				else if (proof.equalsIgnoreCase("CONTINUOUS")) {
+					threadC = new ContinuousThread(sock, this);
+					threadC.start();
+				}
+				else {
+					System.err.println("*** Unknown proof method received: " + proof);
+				}
 			}
 		}
 		catch (Exception e) {
