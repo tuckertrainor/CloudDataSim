@@ -769,7 +769,40 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write(reason);
 			outputBuf.newLine();
-		}
+			outputBuf.write("PARAMETERS:");
+			outputBuf.newLine();
+			outputBuf.write("PROOF=" + proof);
+			outputBuf.newLine();
+			outputBuf.write("VM=" + validationMode);
+			outputBuf.newLine();
+			outputBuf.write("PUSH=" + policyPush);
+			outputBuf.newLine();
+			outputBuf.write("MT=" + maxTransactions);
+			outputBuf.newLine();
+			outputBuf.write("OPMIN=" + minOperations);
+			outputBuf.newLine();
+			outputBuf.write("OPMAX=" + maxOperations);
+			outputBuf.newLine();
+			outputBuf.write("MS=" + maxServers);
+			outputBuf.newLine();
+			outputBuf.write("MD=" + maxDegree);
+			outputBuf.newLine();
+			outputBuf.write("LMIN=" + latencyMin);
+			outputBuf.newLine();
+			outputBuf.write("LMAX=" + latencyMax);
+			outputBuf.newLine();
+			outputBuf.write("SLEEP=" + threadSleep);
+			outputBuf.newLine();
+			outputBuf.write("ICSR=" + integrityCheckSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("LASR=" + localAuthSuccessRate);
+			outputBuf.newLine();
+			outputBuf.write("PMIN=" + policyUpdateMin);
+			outputBuf.newLine();
+			outputBuf.write("PMAX=" + policyUpdateMax);
+			outputBuf.newLine();
+			outputBuf.write("RS=" + randomSeed);
+			outputBuf.newLine();		}
 		catch(IOException ioe) {
 			System.out.println("IOException while writing to output file.");
 			ioe.printStackTrace();
