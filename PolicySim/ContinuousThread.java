@@ -452,6 +452,7 @@ public class ContinuousThread extends IncrementalThread {
 		try {
 			
 			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
+			// and the txn policy version
 			msg = new Message("PASS" + query + " " + transactionPolicyVersion);
 			// Send query
 			latencySleep(); // Simulate latency to other server
