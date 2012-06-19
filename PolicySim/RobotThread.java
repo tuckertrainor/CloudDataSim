@@ -117,7 +117,7 @@ public class RobotThread implements Runnable {
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: Query handling error - received \"" + respSplit[0] + "\" from server.");
-					// break; // ?
+					break;
 				}
 				groupIndex++;
 			}
