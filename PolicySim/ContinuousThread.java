@@ -187,11 +187,12 @@ public class ContinuousThread extends IncrementalThread {
 									 */
 									// The other server has joined, so now run
 									// a transaction consistency check
-//									if (checkTxnConsistency() == false) {
-//										msgText = "ABORT TXN_CONSISTENCY_FAIL";
-//										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-//														   "READ for txn " + query[1] +
-//														   " sequence " + query[3]);
+/* NEED TO EDIT FROM HERE */
+									if (checkTxnConsistency() == false) {
+										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+														   "READ for txn " + query[1] +
+														   " sequence " + query[3]);
 									}
 									else {
 										// Consistency confirmed, pass operation
@@ -232,7 +233,6 @@ public class ContinuousThread extends IncrementalThread {
 									my_tm.setPolicy(my_tm.callPolicyServer());
 									transactionPolicyVersion = my_tm.getPolicy();									
 								}
-								System.out.println("Transaction " + query[1] +
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
@@ -432,5 +432,46 @@ public class ContinuousThread extends IncrementalThread {
 		}
 		System.out.flush();
 		System.setOut(printStreamOriginal);
+	}
+	
+	/**
+	 * Passes a query to other specified server
+	 *
+	 * @param otherServer - The number of the server to pass to
+	 * @param query - The query that must be performed on another server
+	 *
+	 * @return String - the response from the other server
+	 */
+	public String passQuery(int otherServer, String query) {
+		/* View consistency:
+		 * Send transactionPolicyVersion, operation
+		 * Rec'v PASS, ACK, policy used or FAIL, policy used
+		 */
+		Message msg = null;
+		
+		try {
+			
+			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
+			msg = new Message("PASS" + query + " " + transactionPolicyVersion);
+			// Send query
+			latencySleep(); // Simulate latency to other server
+			sockList.get(otherServer).output.writeObject(msg);
+			msg = (Message)sockList.get(otherServer).input.readObject();
+			System.out.println("Server " + otherServer +
+							   " says: " + msg.theMessage +
+							   " for passed query " + query);
+			// else it is an ABORT, no need to log, will be handled by RobotThread
+			return msg.theMessage;
+		}
+		catch (ConnectException ce) {
+			System.err.println(ce.getMessage() +
+							   ": Check server address and port number.");
+			ce.printStackTrace(System.err);
+		}
+		catch (Exception e) {
+			System.err.println("Error during passQuery(): " + e.getMessage());
+			e.printStackTrace(System.err);
+		}
+		return "FAIL";
 	}
 }
