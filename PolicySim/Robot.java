@@ -129,6 +129,9 @@ public class Robot {
 		else if (proof.equals("INCREMENTAL") && policyPush == 4) {
 			pickRandomServer = true;
 		}
+		else if (proof.equals("CONTINUOUS") && policyPush == 1) {
+			pickRandomServer = true;
+		}
 		for (int i = 1; i <= maxTransactions; i++) {
 			newTrans = "";
 			prevQuery = 'B';
