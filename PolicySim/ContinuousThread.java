@@ -185,27 +185,48 @@ public class ContinuousThread extends IncrementalThread {
 									 * Send transactionPolicyVersion, operation
 									 * Rec'v PASS, ACK, policy used or FAIL, policy used
 									 */
-									// The other server has joined, so now run
-									// a transaction consistency check
 /* NEED TO EDIT FROM HERE */
-									if (checkTxnConsistency() == false) {
-										msgText = "ABORT TXN_CONSISTENCY_FAIL";
-										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+									// The other server has joined - send passQuery message, parse response
+									String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+									// Expecting PASS ACK POLICY or FAIL POLICY
+									System.out.println("Response to READ of transaction " + query[1] +
+													   " sequence " + query[3] +
+													   " to server " + query[2] +
+													   ": " + response);
+									String respSplit[] = response.split(" ");
+									if (respSplit[0].equals("PASS") && respSplit[1].equals("ACK")) {
+										// Check policy returned from server
+										int returnPolicy = Integer.parseInt(respSplit[2]);
+										if (returnPolicy > transactionPolicyVersion) {
+											// Run 2PV
+											
+										}
+									}
+									else { // FAIL
+										msgText = "ABORT LOCAL_POLICY_FAIL";
+										System.out.println("ABORT LOCAL_POLICY_FAIL: " +
 														   "READ for txn " + query[1] +
-														   " sequence " + query[3]);
-									}
-									else {
-										// Consistency confirmed, pass operation
-										System.out.println("*** Txn consistency validated for sequence " + query[3]);
-										System.out.println("Pass READ of transaction " + query[1] +
 														   " sequence " + query[3] +
-														   " to server " + query[2]);
-										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-										System.out.println("Response to READ of transaction " + query[1] +
-														   " sequence " + query[3] +
-														   " to server " + query[2] +
-														   ": " + msgText);
+														   ", policy version " + respSplit[1]);
 									}
+//									if (checkTxnConsistency() == false) {
+//										msgText = "ABORT TXN_CONSISTENCY_FAIL";
+//										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
+//														   "READ for txn " + query[1] +
+//														   " sequence " + query[3]);
+//									}
+//									else {
+//										// Consistency confirmed, pass operation
+//										System.out.println("*** Txn consistency validated for sequence " + query[3]);
+//										System.out.println("Pass READ of transaction " + query[1] +
+//														   " sequence " + query[3] +
+//														   " to server " + query[2]);
+//										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+//										System.out.println("Response to READ of transaction " + query[1] +
+//														   " sequence " + query[3] +
+//														   " to server " + query[2] +
+//														   ": " + msgText);
+//									}
 								}
 							}
 							else {
@@ -475,4 +496,29 @@ public class ContinuousThread extends IncrementalThread {
 		}
 		return "FAIL";
 	}
+	
+	/**
+	 * Performs the 2PV algorithm with the servers participating in the
+	 * transaction.
+	 *
+	 * @param int - the policy version to perform 2PV with
+	 *
+	 * @return String - the result of the 2PV process
+	 */
+	public String run2PV(int policyVersion) {
+		return "run2PV() stub";
+	}
+	
+	/**
+	 * Performs the 2PVC algorithm with the servers participating in the
+	 * transaction.
+	 *
+	 * @param int - the policy version to perform 2PVC with
+	 *
+	 * @return String - the result of the 2PVC process
+	 */
+	public String run2PVC(int policyVersion) {
+		return "run2PVC stub";
+	}
+	
 }
