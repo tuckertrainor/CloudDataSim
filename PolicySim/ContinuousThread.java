@@ -6,7 +6,7 @@
  * Extends the IncrementalThread class.
  */
 
-/* TODO: pore through run(), make adjustments as necessary, will need to redo passQuery and join at minimum, last edit near R's passQuery
+/* TODO: finish view consistency by handling run2PV() policy returns, start global consistency
  * 
  */
 
