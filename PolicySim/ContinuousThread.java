@@ -401,13 +401,15 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 					}
-/* NEED TO EDIT FROM HERE */
-					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
-						msgText = "VERSION " + transactionPolicyVersion;
-					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
-						msgText = prepareToCommit(Integer.parseInt(query[1]));
+						if (integrityCheck()) {
+							msgText = "YES";
+						}
+						else {
+							msgText = "NO";
+						}
 					}
+/* NEED TO EDIT FROM HERE */
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
 						// Force global update if necessary
