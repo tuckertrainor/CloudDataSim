@@ -673,6 +673,39 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return boolean - the result of the 2PV process
 	 */
 	public boolean run2PV(int policyVersion) {
+		// Contact all servers, send 2PV [policy version] and gather responses
+		if (sockList.size() > 0) {
+			int serverNum;
+			Message msg = null;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("2PV " + policyVersion);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						System.out.println("Response of server " + serverNum +
+										   " for message 2PV " + policyVersion +
+										   ": " + msg.theMessage);
+						// Parse response
+						
+						// Check for fresher policies than policyVersion
+						
+//						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
+//							return false;
+//						}
+					}
+					catch (Exception e) {
+						System.err.println("run2PV() Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+						return false;
+					}
+				}
+			}
+		}
 		return true;
 	}
 	
