@@ -580,6 +580,48 @@ public class ContinuousThread extends IncrementalThread {
 		}
 	}
 
+	public String commitPhase() {
+		
+		return "COMMIT";
+	}
+	
+	/**
+	 * Performs the 2PC algorithm with the servers participating in the
+	 * transaction.
+	 *
+	 * @return boolean - the result of the 2PV process
+	 */
+	public boolean run2PC() {
+		// Call all participants, send PTC and get YES/NO
+		if (sockList.size() > 0) {
+			int serverNum;
+			Message msg = null;
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum = socketList.nextElement();
+				if (serverNum != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC");
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum).output.writeObject(msg);
+						// Rec'v
+						msg = (Message)sockList.get(serverNum).input.readObject();
+						// Parse response
+						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
+							return false;
+						}
+					}
+					catch (Exception e) {
+						System.err.println("run2PC() Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Performs the 2PV algorithm with the servers participating in the
 	 * transaction.
