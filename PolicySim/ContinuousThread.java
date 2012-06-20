@@ -654,6 +654,8 @@ public class ContinuousThread extends IncrementalThread {
 						sockList.get(serverNum).output.writeObject(msg);
 						// Rec'v
 						msg = (Message)sockList.get(serverNum).input.readObject();
+						System.out.println("Response of server " + serverNum +
+										   " for message PTC: " + msg.theMessage);
 						// Parse response
 						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
 							return false;
