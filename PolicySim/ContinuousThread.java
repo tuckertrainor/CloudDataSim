@@ -425,38 +425,12 @@ public class ContinuousThread extends IncrementalThread {
 						// YES FALSE [greater of policy versions]
 						// YES TRUE [greater of policy versions]
 						if (integrityCheck()) { // If integrity check passes
-							msgText = "YES TRUE " + transactionPolicyVersion;
-							int sentPolicy = Integer.parseInt(query[1]);
-							if (sentPolicy > transactionPolicyVersion) {
-								transactionPolicyVersion = sentPolicy;
-								msgText = "YES TRUE " + transactionPolicyVersion;
-								// Re-run proofs
-								System.out.println("Running auth. on transaction " +
-												   queryLog.get(0).getTransaction() + 
-												   " queries using policy version " +
-												   transactionPolicyVersion);
-								for (int j = 0; j < queryLog.size(); j++) {
-									if (!checkLocalAuth()) {
-										System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-														   " for txn " + queryLog.get(j).getTransaction() +
-														   ", seq " + queryLog.get(j).getSequence() +
-														   " with policy v. " + transactionPolicyVersion +
-														   " (was v. " + queryLog.get(j).getPolicy() +
-														   "): FAIL");
-										msgText =  "YES FALSE " + transactionPolicyVersion; // (authorization failed)
-										break;
-									}
-									else {
-										System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-														   " for txn " + queryLog.get(j).getTransaction() +
-														   ", seq " + queryLog.get(j).getSequence() +
-														   " with policy v. " + transactionPolicyVersion +
-														   " (was v. " + queryLog.get(j).getPolicy() +
-														   "): PASS");
-										// Update policy version used for proof
-										queryLog.get(j).setPolicy(transactionPolicyVersion);
-									}
-								}
+							String result2PV = answer2PV(Integer.parseInt(query[1]));
+							if (result2PV.indexOf("PASS") != -1) { // 2PV successful
+								msgText = "YES TRUE " + Integer.parseInt(query[1]);
+							}
+							else {
+								msgText = "YES FALSE " + Integer.parseInt(query[1]);
 							}
 						}
 						else {
@@ -467,8 +441,8 @@ public class ContinuousThread extends IncrementalThread {
 						// receives: 2PV [policy from coord]
 						// Reruns auths (if necessary) with greater of local/coord policy
 						// returns:
-						// PASS [greater of policy versions]
-						// FAIL [greater of policy versions]
+						// PASS [policy version used]
+						// FAIL [policy version used]
 						msgText = answer2PV(Integer.parseInt(query[1]));
 					}
 					else if (query[0].equals("RSERV")) { // Random server for policy pushing
