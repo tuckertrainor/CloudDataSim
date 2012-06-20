@@ -673,9 +673,40 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return boolean - the result of the 2PV process
 	 */
 	public boolean run2PV(int policyVersion) {
+		// Check that coordinator's policy version is up to date
+		if (policyVersion > transactionPolicyVersion) {
+			// Re-run proofs on coordinator
+			transactionPolicyVersion = policyVersion;
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   transactionPolicyVersion);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): FAIL");
+					return false; // (authorization failed)
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): PASS");
+					// Update policy version used for proof
+					queryLog.get(j).setPolicy(transactionPolicyVersion);
+				}
+			}
+		}
 		// Contact all servers, send 2PV [policy version] and gather responses
 		if (sockList.size() > 0) {
 			int serverNum;
+			int recdPolicy;
 			Message msg = null;
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
 				serverNum = socketList.nextElement();
@@ -690,13 +721,19 @@ public class ContinuousThread extends IncrementalThread {
 						System.out.println("Response of server " + serverNum +
 										   " for message 2PV " + policyVersion +
 										   ": " + msg.theMessage);
-						// Parse response
-						
-						// Check for fresher policies than policyVersion
-						
-//						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
-//							return false;
-//						}
+						// Parse response: PASS [policy version] or FAIL [policy version]
+						String msgSplit[] = msg.theMessage.split(" ");
+						recdPolicy = Integer.parseInt(msgSplit[1]);
+						if (msgSplit[0].equals("PASS")) {
+							// Check for fresher policies than policyVersion
+							if (recdPolicy > transactionPolicyVersion) {
+								// Set transaction policy, start over
+								System.out.println("Set transaction policy, start over");
+							}
+						}
+						else {
+							return false; // Proof FAIL
+						}
 					}
 					catch (Exception e) {
 						System.err.println("run2PV() Error: " + e.getMessage());
