@@ -23,6 +23,7 @@ VM 1
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 # 4: during operations (for inc.) 5: at PTC time (for inc.)
+#
 # For continuous - 0: no push; 1: single push to random server; 2: push for each
 # join (up to PTC); 3: ???
 PUSH 0
