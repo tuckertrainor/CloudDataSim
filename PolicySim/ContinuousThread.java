@@ -139,7 +139,7 @@ public class ContinuousThread extends IncrementalThread {
 								else { // my_tm.validationMode == 2
 									// Get and set freshest global policy
 									my_tm.setPolicy(my_tm.callPolicyServer());
-									transactionPolicyVersion = my_tm.getPolicy();									
+									transactionPolicyVersion = my_tm.getPolicy();								
 								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
@@ -409,15 +409,10 @@ public class ContinuousThread extends IncrementalThread {
 							msgText = "NO";
 						}
 					}
-/* NEED TO EDIT FROM HERE */
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
-						// Force global update if necessary
-						if (my_tm.policyPush == 5) {
-							forcePolicyUpdate(3);
-						}
 						// Begin 2PC/2PV methods
-						msgText = coordinatorCommit();
+						msgText = commitPhase();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
 										   ": " + msgText);
 					}
@@ -583,6 +578,28 @@ public class ContinuousThread extends IncrementalThread {
 	}
 
 	public String commitPhase() {
+		if (my_tm.validationMode == 0) { // 2PC only? Valid option?
+			if (!run2PC()) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
+		}
+		else if (my_tm.validationMode == 1) { // View consistency - 2PC only
+			if (!run2PC()) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
+		}
+		else if (my_tm.validationMode == 2) { // Global consistency - 2PVC
+			// Set txn policy version to most up to date policy
+			my_tm.setPolicy(my_tm.callPolicyServer());
+			transactionPolicyVersion = my_tm.getPolicy();
+			
+			if (!run2PVC(transactionPolicyVersion)) {
+				return "ABORT 2PVC_FAIL";
+			}
+		}
+		else {
+			return "ABORT UNKNOWN_VALIDATION_MODE";
+		}
 		
 		return "COMMIT";
 	}
@@ -642,10 +659,10 @@ public class ContinuousThread extends IncrementalThread {
 	 *
 	 * @param int - the policy version to perform 2PVC with
 	 *
-	 * @return String - the result of the 2PVC process
+	 * @return boolean - the result of the 2PVC process
 	 */
-	public String run2PVC(int policyVersion) {
-		return "run2PVC stub";
+	public boolean run2PVC(int policyVersion) {
+		return true;
 	}
 	
 }
