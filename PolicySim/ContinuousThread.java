@@ -321,7 +321,6 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 					}
-/* NEED TO EDIT FROM HERE */
 					else if (query[0].equals("PASSR")) { // Passed read operation
 						// Compare passed policy with local policy
 						int sentPolicy = Integer.parseInt(query[1]);
@@ -355,19 +354,26 @@ public class ContinuousThread extends IncrementalThread {
 						}
 					}
 					else if (query[0].equals("PASSW")) { // Passed write operation
-						// Check transaction policy against server policy
+						// Compare passed policy with local policy
+						int sentPolicy = Integer.parseInt(query[1]);
+						if (sentPolicy > transactionPolicyVersion) {
+							transactionPolicyVersion = sentPolicy;
+							// Re-run previous auths now? Can previous auths occur?
+						}
+						
+						// Run proof of authorization
 						if (checkLocalAuth() == false) {
-							msgText = "ABORT LOCAL_POLICY_FAIL";
+							msgText = "FAIL LOCAL_POLICY_FAIL";
 							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
-											   "WRITE for txn " + query[1] +
+											   "READ for txn " + query[1] +
 											   " sequence " + query[3]);
 						}
-						else { // OK to write
+						else { // OK to read
 							System.out.println("WRITE for txn " + query[1] +
 											   " sequence " + query[3]);
 							databaseWrite();
-							// Add policy version for passed query logging
-							msgText += " " + transactionPolicyVersion;
+							// Respond with PASS ACK [policy version]
+							msgText = "PASS ACK " + transactionPolicyVersion;
 							// Add to query log
 							if (addToQueryLog(query, transactionPolicyVersion)) {
 								System.out.println("Transaction " + query[1] +
@@ -379,6 +385,7 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 					}
+/* NEED TO EDIT FROM HERE */
 					else if (query[0].equals("JOIN")) {
 						// Coordinator is requesting server to join txn,
 						// set the transaction policy version for this server
