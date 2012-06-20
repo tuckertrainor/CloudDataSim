@@ -205,7 +205,7 @@ public class ContinuousThread extends IncrementalThread {
 															   " sequence " + query[3] +
 															   " policy version " + returnPolicy);
 										}
-										else {
+										else { // FAIL returned
 											msgText = "ABORT LOCAL_POLICY_FAIL_2PV";
 											System.out.println("ABORT LOCAL_POLICY_FAIL_2PV: " +
 															   " txn " + query[1] +
@@ -323,9 +323,16 @@ public class ContinuousThread extends IncrementalThread {
 					}
 /* NEED TO EDIT FROM HERE */
 					else if (query[0].equals("PASSR")) { // Passed read operation
-						// Check transaction policy against server policy
+						// Compare passed policy with local policy
+						int sentPolicy = Integer.parseInt(query[1]);
+						if (sentPolicy > transactionPolicyVersion) {
+							transactionPolicyVersion = sentPolicy;
+							// Re-run previous auths now? Can previous auths occur?
+						}
+						
+						// Run proof of authorization
 						if (checkLocalAuth() == false) {
-							msgText = "ABORT LOCAL_POLICY_FAIL";
+							msgText = "FAIL LOCAL_POLICY_FAIL";
 							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
 											   "READ for txn " + query[1] +
 											   " sequence " + query[3]);
@@ -334,8 +341,8 @@ public class ContinuousThread extends IncrementalThread {
 							System.out.println("READ for txn " + query[1] +
 											   " sequence " + query[3]);
 							databaseRead();
-							// Add policy version for passed query logging
-							msgText += " " + transactionPolicyVersion;
+							// Respond with PASS ACK [policy version]
+							msgText = "PASS ACK " + transactionPolicyVersion;
 							// Add to query log
 							if (addToQueryLog(query, transactionPolicyVersion)) {
 								System.out.println("Transaction " + query[1] +
