@@ -453,6 +453,7 @@ public class ContinuousThread extends IncrementalThread {
 														   " with policy v. " + transactionPolicyVersion +
 														   " (was v. " + queryLog.get(j).getPolicy() +
 														   "): PASS");
+										// Update policy version used for proof
 										queryLog.get(j).setPolicy(transactionPolicyVersion);
 									}
 								}
@@ -468,6 +469,7 @@ public class ContinuousThread extends IncrementalThread {
 						// returns:
 						// PASS [greater of policy versions]
 						// FAIL [greater of policy versions]
+						msgText = answer2PV(Integer.parseInt(query[1]));
 					}
 					else if (query[0].equals("RSERV")) { // Random server for policy pushing
 						randomServer = Integer.parseInt(query[1]);
@@ -704,6 +706,46 @@ public class ContinuousThread extends IncrementalThread {
 	 */
 	public boolean run2PV(int policyVersion) {
 		return true;
+	}
+	
+	/**
+	 * Performs the local checks when 2PV is called from the coordinator
+	 * transaction.
+	 *
+	 * @param int - the policy version to perform proofs with
+	 *
+	 * @return String - the result of the process (PASS/FAIL [policy version]
+	 */
+	public String answer2PV(int coordPolicy) {
+		if (coordPolicy > transactionPolicyVersion) { // Re-run proofs with fresher policy
+			transactionPolicyVersion = coordPolicy;
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   transactionPolicyVersion);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): FAIL");
+					return "YES FALSE " + transactionPolicyVersion; // (authorization failed)
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): PASS");
+					// Update policy version used for proof
+					queryLog.get(j).setPolicy(transactionPolicyVersion);
+				}
+			}
+		}
+		return "PASS " + transactionPolicyVersion;
 	}
 	
 	/**
