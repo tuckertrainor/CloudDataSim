@@ -402,26 +402,6 @@ public class ContinuousThread extends IncrementalThread {
 						}
 					}
 /* NEED TO EDIT FROM HERE */
-					else if (query[0].equals("JOIN")) {
-						// Coordinator is requesting server to join txn, check
-						// for a new policy version
-						if (transactionPolicyVersion == 0) {
-							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-								// Get policy from the server
-								transactionPolicyVersion = my_tm.getPolicy();
-							}
-							else { // Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();									
-							}
-							System.out.println("Transaction " + query[1] +
-											   " Policy version set: " +
-											   transactionPolicyVersion);
-						}
-						if (transactionPolicyVersion < 1) {
-							msgText = "JOIN_FAIL"; // Error message if policy is not properly set
-						}
-					}
 					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
 						msgText = "VERSION " + transactionPolicyVersion;
 					}
