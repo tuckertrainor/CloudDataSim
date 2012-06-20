@@ -304,7 +304,6 @@ public class Robot {
 					}
 					else if (tuple[0].equals("MT")) {
 						maxTransactions = Integer.parseInt(tuple[1]);
-						ThreadCounter.maxThreads = maxTransactions;
 					}
 					else if (tuple[0].equals("OPMIN")) {
 						minOperations = Integer.parseInt(tuple[1]);
