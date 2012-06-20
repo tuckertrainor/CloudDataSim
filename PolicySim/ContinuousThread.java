@@ -189,10 +189,6 @@ public class ContinuousThread extends IncrementalThread {
 								// The other server has joined - send passQuery message, parse response
 								String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 								// Expecting PASS ACK POLICY or FAIL POLICY
-								System.out.println("Response to READ of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   ": " + response);
 								String respSplit[] = response.split(" ");
 								if (respSplit[0].equals("PASS") && respSplit[1].equals("ACK")) {
 									// Check policy returned from server
@@ -285,10 +281,6 @@ public class ContinuousThread extends IncrementalThread {
 								// The other server has joined - send passQuery message, parse response
 								String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
 								// Expecting PASS ACK POLICY or FAIL POLICY
-								System.out.println("Response to WRITE of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   ": " + response);
 								String respSplit[] = response.split(" ");
 								if (respSplit[0].equals("PASS") && respSplit[1].equals("ACK")) {
 									// Check policy returned from server
