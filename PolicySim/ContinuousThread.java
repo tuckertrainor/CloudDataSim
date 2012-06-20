@@ -401,6 +401,13 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 					}
+					else if (query[0].equals("C")) { // COMMIT
+						System.out.println("COMMIT phase - transaction " + query[1]);
+						// Begin 2PC/2PV methods
+						msgText = commitPhase();
+						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
+										   ": " + msgText);
+					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
 						if (integrityCheck()) {
 							msgText = "YES";
@@ -409,12 +416,58 @@ public class ContinuousThread extends IncrementalThread {
 							msgText = "NO";
 						}
 					}
-					else if (query[0].equals("C")) { // COMMIT
-						System.out.println("COMMIT phase - transaction " + query[1]);
-						// Begin 2PC/2PV methods
-						msgText = commitPhase();
-						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
-										   ": " + msgText);
+					else if (query[0].equals("2PVC")) {
+						// receives: 2PVC [policy from coord]
+						// Runs integrity check
+						// Reruns auths (if necessary) with greater of local/coord policy
+						// returns:
+						// NO
+						// YES FALSE [greater of policy versions]
+						// YES TRUE [greater of policy versions]
+						if (integrityCheck()) { // If integrity check passes
+							msgText = "YES TRUE " + transactionPolicyVersion;
+							int sentPolicy = Integer.parseInt(query[1]);
+							if (sentPolicy > transactionPolicyVersion) {
+								transactionPolicyVersion = sentPolicy;
+								msgText = "YES TRUE " + transactionPolicyVersion;
+								// Re-run proofs
+								System.out.println("Running auth. on transaction " +
+												   queryLog.get(0).getTransaction() + 
+												   " queries using policy version " +
+												   transactionPolicyVersion);
+								for (int j = 0; j < queryLog.size(); j++) {
+									if (!checkLocalAuth()) {
+										System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+														   " for txn " + queryLog.get(j).getTransaction() +
+														   ", seq " + queryLog.get(j).getSequence() +
+														   " with policy v. " + transactionPolicyVersion +
+														   " (was v. " + queryLog.get(j).getPolicy() +
+														   "): FAIL");
+										msgText =  "YES FALSE " + transactionPolicyVersion; // (authorization failed)
+										break;
+									}
+									else {
+										System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+														   " for txn " + queryLog.get(j).getTransaction() +
+														   ", seq " + queryLog.get(j).getSequence() +
+														   " with policy v. " + transactionPolicyVersion +
+														   " (was v. " + queryLog.get(j).getPolicy() +
+														   "): PASS");
+										queryLog.get(j).setPolicy(transactionPolicyVersion);
+									}
+								}
+							}
+						}
+						else {
+							msgText = "NO";
+						}
+					}
+					else if (query[0].equals("2PV")) {
+						// receives: 2PV [policy from coord]
+						// Reruns auths (if necessary) with greater of local/coord policy
+						// returns:
+						// PASS [greater of policy versions]
+						// FAIL [greater of policy versions]
 					}
 					else if (query[0].equals("RSERV")) { // Random server for policy pushing
 						randomServer = Integer.parseInt(query[1]);
