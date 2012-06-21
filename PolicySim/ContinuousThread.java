@@ -592,10 +592,6 @@ public class ContinuousThread extends IncrementalThread {
 			return run2PC();
 		}
 		else if (my_tm.validationMode == 2) { // Global consistency - 2PVC
-			// Set txn policy version to most up to date policy
-			my_tm.setPolicy(my_tm.callPolicyServer());
-			transactionPolicyVersion = my_tm.getPolicy();
-			
 			return run2PVC(transactionPolicyVersion);
 		}
 		
@@ -795,16 +791,17 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the result of the 2PVC process
 	 */
 	public String run2PVC(int policyVersion) {
-		// send freshest policy, 2PVC
-		// rec'v YES TRUE [policy] or YES FALSE [policy] or NO
-		// run 2PV if necessary
-
 		// Perform integrity check on coordinator
 		if (!integrityCheck()) {
 			System.out.println("*** Integrity check failed on coordinator ***");
 			return "ABORT PTC_RESPONSE_NO";
 		}
 
+		// Set txn policy version to most up to date policy
+		my_tm.setPolicy(my_tm.callPolicyServer());
+		transactionPolicyVersion = my_tm.getPolicy();
+		
+		boolean start2PV = false;
 		// Contact all servers, send 2PVC [policy] and gather responses
 		if (sockList.size() > 0) {
 			int serverNum;
@@ -812,7 +809,6 @@ public class ContinuousThread extends IncrementalThread {
 			int freshestPolicy = transactionPolicyVersion;
 			int highestPolicyForFalse = 0;
 			boolean recdNO = false;
-			boolean start2PV = false;
 			Message msg = null;
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
 				serverNum = socketList.nextElement();
@@ -863,6 +859,12 @@ public class ContinuousThread extends IncrementalThread {
 			else if (freshestPolicy > transactionPolicyVersion) {
 				transactionPolicyVersion = freshestPolicy;
 				start2PV = true;
+			}
+		}
+		
+		if (start2PV) {
+			if (!run2PV(transactionPolicyVersion)) {
+				return "ABORT LOCAL_POLICY_FALSE_2PV";
 			}
 		}
 		
