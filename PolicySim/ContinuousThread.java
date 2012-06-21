@@ -6,7 +6,7 @@
  * Extends the IncrementalThread class.
  */
 
-/* TODO: finish view consistency by handling run2PV() policy returns, start global consistency
+/* TODO: complete global consistency
  * 
  */
 
@@ -27,29 +27,6 @@ public class ContinuousThread extends IncrementalThread {
 	public ContinuousThread(Socket _socket, CloudServer _my_tm) {
 		super(_socket, _my_tm);
 	}
-	
-	/* View consistency
-	 * 1.  get freshest policy off own server
-	 * 2.  perform first operation, double check local policy, perform proof, perform operation, TRUE,ACK or FALSE
-	       how do we double check local policy on own server without involving PS?
-	 * 3.  repeat if next operation on coordinator's server, else have participant join
-	 
-	 * 4.  have server join (and set up update condition)
-	 * 5.  coordinator sends its txn policy version and operation to server
-	 * 6.  server compares its policy to coordinator's, uses freshest for proof then runs operation, returns TRUE, ACK, v. or FALSE, v.
-	 
-	 * 7.  coordinator receives TRUE, ACK, v. or FALSE, v., compares v. to own version
-	 * 8.  if v. is fresher, update txn policy version, run 2PV starting on own server
-	 
-	 * 9.  2PV: send txn policy version to all participants, along with 2PV msg
-	 *	   just received freshest from server S, send it back to him anyway? eat cost of 2-way msg?
-	 * 10. each participant checks txn policy version, if < v. then sets it to v. and re-runs auths
-	 * 11. sends back TRUE or FALSE along with v.
-	 *     should we have a different response if policy was up to date?
-	 * 12. coordinator gathers policy versions again, repeats 2PV if fresher is found
-	 
-	 * 13. continues until PTC
-	 */
 	
 	/**
 	 * run() is basically the main method of a thread. This thread
