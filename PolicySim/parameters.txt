@@ -28,7 +28,7 @@ VM 1
 # join (up to PTC); 3: ???
 PUSH 2
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 100
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
