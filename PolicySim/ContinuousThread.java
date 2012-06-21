@@ -707,38 +707,43 @@ public class ContinuousThread extends IncrementalThread {
 		if (sockList.size() > 0) {
 			int serverNum;
 			int recdPolicy;
+			int freshestPolicy = transactionPolicyVersion;
+			boolean needToRun = true;
 			Message msg = null;
-			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
-					try {
-						msg = new Message("2PV " + policyVersion);
-						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						System.out.println("Response of server " + serverNum +
-										   " for message 2PV " + policyVersion +
-										   ": " + msg.theMessage);
-						// Parse response: TRUE [policy] or FALSE [policy]
-						String msgSplit[] = msg.theMessage.split(" ");
-						recdPolicy = Integer.parseInt(msgSplit[1]);
-						if (msgSplit[0].equals("TRUE")) {
-							// Check for fresher policies than policyVersion
-							if (recdPolicy > transactionPolicyVersion) {
-								// Set transaction policy, start over
-								System.out.println("Set transaction policy, start over");
+			while (needToRun) {
+				needToRun = false;
+				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+					serverNum = socketList.nextElement();
+					if (serverNum != 0) { // Don't call the Policy server
+						try {
+							msg = new Message("2PV " + policyVersion);
+							latencySleep(); // Simulate latency
+							// Send
+							sockList.get(serverNum).output.writeObject(msg);
+							// Rec'v
+							msg = (Message)sockList.get(serverNum).input.readObject();
+							System.out.println("Response of server " + serverNum +
+											   " for message 2PV " + policyVersion +
+											   ": " + msg.theMessage);
+							// Parse response: TRUE [policy] or FALSE [policy]
+							String msgSplit[] = msg.theMessage.split(" ");
+							recdPolicy = Integer.parseInt(msgSplit[1]);
+							if (msgSplit[0].equals("TRUE")) {
+								// Check for fresher policies than policyVersion
+								if (recdPolicy > transactionPolicyVersion) {
+									// Set transaction policy, start over
+									System.out.println("Set transaction policy, start over");
+								}
+							}
+							else {
+								return false; // Proof FALSE
 							}
 						}
-						else {
-							return false; // Proof FALSE
+						catch (Exception e) {
+							System.err.println("run2PV() Error: " + e.getMessage());
+							e.printStackTrace(System.err);
+							return false;
 						}
-					}
-					catch (Exception e) {
-						System.err.println("run2PV() Error: " + e.getMessage());
-						e.printStackTrace(System.err);
-						return false;
 					}
 				}
 			}
