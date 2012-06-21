@@ -517,7 +517,14 @@ public class ContinuousThread extends IncrementalThread {
 			if (my_tm.validationMode == 2) {
 				// Get and set freshest global policy
 				my_tm.setPolicy(my_tm.callPolicyServer());
-				transactionPolicyVersion = my_tm.getPolicy();
+				int freshestPolicy = my_tm.getPolicy();
+				if (freshestPolicy > transactionPolicyVersion) {
+					transactionPolicyVersion = my_tm.getPolicy();
+					// Coordinator needs to rerun proofs with newer policy
+					if (!rerunAuths(transactionPolicyVersion)) {
+						return false;
+					}
+				}
 			}
 			
 			try {
