@@ -830,22 +830,22 @@ public class ContinuousThread extends IncrementalThread {
 							recdNO = true;
 						}
 						else if (msgSplit[1].equals("FALSE")) {
-							recdPolicy = Integer.parseInt(msgSplit[1]);
+							recdPolicy = Integer.parseInt(msgSplit[2]);
 							if (recdPolicy > highestPolicyForFalse) {
 								highestPolicyForFalse = recdPolicy;
 							}
 						}
 						else { // (msgSplit[1].equals("TRUE"))
-							recdPolicy = Integer.parseInt(msgSplit[1]);
+							recdPolicy = Integer.parseInt(msgSplit[2]);
 							if (recdPolicy > freshestPolicy) {
 								freshestPolicy = recdPolicy;
 							}
 						}
 					}
 					catch (Exception e) {
-						System.err.println("run2PV() Error: " + e.getMessage());
+						System.err.println("run2PVC() Error: " + e.getMessage());
 						e.printStackTrace(System.err);
-						return "ABORT run2PV()_Error";
+						return "ABORT run2PVC()_Error";
 					}
 				}
 			}
