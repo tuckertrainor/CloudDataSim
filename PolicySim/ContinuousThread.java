@@ -116,7 +116,7 @@ public class ContinuousThread extends IncrementalThread {
 								else { // my_tm.validationMode == 2
 									// Get and set freshest global policy
 									my_tm.setPolicy(my_tm.callPolicyServer());
-									transactionPolicyVersion = my_tm.getPolicy();								
+									transactionPolicyVersion = my_tm.getPolicy();						
 								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
@@ -208,7 +208,7 @@ public class ContinuousThread extends IncrementalThread {
 								else { // my_tm.validationMode == 2
 									// Get and set freshest global policy
 									my_tm.setPolicy(my_tm.callPolicyServer());
-									transactionPolicyVersion = my_tm.getPolicy();									
+									transactionPolicyVersion = my_tm.getPolicy();
 								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
@@ -302,7 +302,7 @@ public class ContinuousThread extends IncrementalThread {
 						int sentPolicy = Integer.parseInt(query[1]);
 						if (sentPolicy > transactionPolicyVersion) {
 							transactionPolicyVersion = sentPolicy;
-							// Re-run previous auths now? Can previous auths occur?
+							// Re-run previous proofs if policy versions differ
 						}
 						
 						// Run proof of authorization
@@ -466,14 +466,9 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the response from the other server
 	 */
 	public String passQuery(int otherServer, String query) {
-		/* View consistency:
-		 * Send transactionPolicyVersion, operation
-		 * Rec'v TRUE, ACK, policy used or FALSE, policy used
-		 */
 		Message msg = null;
-		
+
 		try {
-			
 			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
 			// and the txn policy version
 			msg = new Message("PASS" + query + " " + transactionPolicyVersion);
@@ -516,6 +511,15 @@ public class ContinuousThread extends IncrementalThread {
 			String server = my_tm.serverList.get(otherServer).getAddress();
 			int port = my_tm.serverList.get(otherServer).getPort();
 			Message msg = null;
+			
+			// If using global consistency, update coordinator's txn policy
+			// version from the policy server
+			if (my_tm.validationMode == 2) {
+				// Get and set freshest global policy
+				my_tm.setPolicy(my_tm.callPolicyServer());
+				transactionPolicyVersion = my_tm.getPolicy();
+			}
+			
 			try {
 				// Create new socket, add it to SocketGroup
 				System.out.println("Connecting to " + server +
@@ -575,6 +579,11 @@ public class ContinuousThread extends IncrementalThread {
 		}
 	}
 
+	/**
+	 * Performs the actions necessary by the coordinator for committing
+	 *
+	 * @return String - COMMIT or ABORT plus reason
+	 */
 	public String commitPhase() {
 		if (my_tm.validationMode == 0) { // 2PC only? Valid option?
 			if (!run2PC()) {
@@ -601,7 +610,42 @@ public class ContinuousThread extends IncrementalThread {
 		
 		return "COMMIT";
 	}
-	
+
+	/**
+	 * Runs proofs of authorization on operations previously done with an
+	 * earlier version.
+	 *
+	 * @param int - the current policy version that we need to use for auths
+	 *
+	 * @return boolean - false if FALSE, true if TRUE
+	 */
+	public boolean rerunAuths(int currentPolicyVersion) {
+		for (int j = 0; j < queryLog.size(); j++) {
+			if (queryLog.get(j).getPolicy() < currentPolicyVersion) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): FALSE");
+					return false;
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + transactionPolicyVersion +
+									   " (was v. " + queryLog.get(j).getPolicy() +
+									   "): TRUE");
+					// Update policy version used for proof
+					queryLog.get(j).setPolicy(transactionPolicyVersion);
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Performs the 2PC algorithm with the servers participating in the
 	 * transaction.
@@ -658,26 +702,8 @@ public class ContinuousThread extends IncrementalThread {
 							   queryLog.get(0).getTransaction() + 
 							   " queries using policy version " +
 							   transactionPolicyVersion);
-			for (int j = 0; j < queryLog.size(); j++) {
-				if (!checkLocalAuth()) {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): FALSE");
-					return false; // (authorization failed)
-				}
-				else {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): TRUE");
-					// Update policy version used for proof
-					queryLog.get(j).setPolicy(transactionPolicyVersion);
-				}
+			if (!rerunAuths(transactionPolicyVersion)) {
+				return false;
 			}
 		}
 		// Contact all servers, send 2PV [policy] and gather responses
