@@ -782,26 +782,8 @@ public class ContinuousThread extends IncrementalThread {
 							   queryLog.get(0).getTransaction() + 
 							   " queries using policy version " +
 							   transactionPolicyVersion);
-			for (int j = 0; j < queryLog.size(); j++) {
-				if (!checkLocalAuth()) {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): FALSE");
-					return "FALSE " + transactionPolicyVersion; // (authorization failed)
-				}
-				else {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): TRUE");
-					// Update policy version used for proof
-					queryLog.get(j).setPolicy(transactionPolicyVersion);
-				}
+			if (!rerunAuths(transactionPolicyVersion)) {
+				return "FALSE " + transactionPolicyVersion; // (authorization failed)
 			}
 		}
 		return "TRUE " + transactionPolicyVersion;
