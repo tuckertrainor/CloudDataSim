@@ -165,7 +165,7 @@ public class ContinuousThread extends IncrementalThread {
 
 								// The other server has joined - send passQuery message, parse response
 								String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-								// Expecting TRUE ACK POLICY or FALSE POLICY
+								// Expecting TRUE ACK [policy] or FALSE [policy]
 								String respSplit[] = response.split(" ");
 								if (respSplit[0].equals("TRUE") && respSplit[1].equals("ACK")) {
 									// Check policy returned from server
