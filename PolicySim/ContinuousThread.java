@@ -703,11 +703,12 @@ public class ContinuousThread extends IncrementalThread {
 				}
 			}
 		}
-		// Contact all servers, send 2PV [policy version] and gather responses
+		// Contact all servers, send 2PV [policy] and gather responses
 		if (sockList.size() > 0) {
 			int serverNum;
 			int recdPolicy;
 			int freshestPolicy = transactionPolicyVersion;
+			int highestPolicyForFalse = 0;
 			boolean needToRun = true;
 			Message msg = null;
 			while (needToRun) {
@@ -716,27 +717,28 @@ public class ContinuousThread extends IncrementalThread {
 					serverNum = socketList.nextElement();
 					if (serverNum != 0) { // Don't call the Policy server
 						try {
-							msg = new Message("2PV " + policyVersion);
+							msg = new Message("2PV " + transactionPolicyVersion);
 							latencySleep(); // Simulate latency
 							// Send
 							sockList.get(serverNum).output.writeObject(msg);
 							// Rec'v
 							msg = (Message)sockList.get(serverNum).input.readObject();
 							System.out.println("Response of server " + serverNum +
-											   " for message 2PV " + policyVersion +
+											   " for message 2PV " + transactionPolicyVersion +
 											   ": " + msg.theMessage);
 							// Parse response: TRUE [policy] or FALSE [policy]
 							String msgSplit[] = msg.theMessage.split(" ");
 							recdPolicy = Integer.parseInt(msgSplit[1]);
-							if (msgSplit[0].equals("TRUE")) {
-								// Check for fresher policies than policyVersion
-								if (recdPolicy > transactionPolicyVersion) {
-									// Set transaction policy, start over
-									System.out.println("Set transaction policy, start over");
+							
+							if (msgSplit[0].equals("FALSE")) {
+								if (recdPolicy > highestPolicyForFalse) {
+									highestPolicyForFalse = recdPolicy;
 								}
 							}
-							else {
-								return false; // Proof FALSE
+							else { // (msgSplit[0].equals("TRUE"))
+								if (recdPolicy > freshestPolicy) {
+									freshestPolicy = recdPolicy;
+								}
 							}
 						}
 						catch (Exception e) {
@@ -745,6 +747,17 @@ public class ContinuousThread extends IncrementalThread {
 							return false;
 						}
 					}
+				}
+				// If we received a FALSE for a policy version equal to or
+				// greater than the most recent version that returned TRUE
+				if (highestPolicyForFalse >= freshestPolicy) {
+					return false;
+				}
+				// If there was a server with a fresher policy than the
+				// coordinator, run 2PV again with the freshest policy
+				else if (freshestPolicy > transactionPolicyVersion) {
+					transactionPolicyVersion = freshestPolicy;
+					needToRun = true;
 				}
 			}
 		}
