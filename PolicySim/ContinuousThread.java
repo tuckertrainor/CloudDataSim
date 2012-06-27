@@ -6,7 +6,7 @@
  * Extends the IncrementalThread class.
  */
 
-/* TODO: complete global consistency, determine where in join() global cons. pushes should happen, add PUSH 3 handling for global cons.
+/* TODO: run and debug if necessary
  * 
  */
 
