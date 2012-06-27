@@ -624,7 +624,6 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean integrityCheck() {
-		
 		// Sleep for duration of check, between 150ms and 225ms
 		if (my_tm.threadSleep) {
 			try {

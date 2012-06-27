@@ -612,6 +612,10 @@ public class PunctualThread extends DeferredThread {
 			}
 		}
 		else { // transactionPolicyVersion == globalVersion
+			// Check coordinator's integrity
+			if (!integrityCheck()) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
 			for (int j = 0; j < queryLog.size(); j++) {
 				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 								   " for txn " + queryLog.get(j).getTransaction() +
