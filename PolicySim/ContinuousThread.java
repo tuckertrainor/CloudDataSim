@@ -533,32 +533,9 @@ public class ContinuousThread extends IncrementalThread {
 				// PUSH 1: single push to random server
 				// PUSH 2: push for each join (up to PTC)
 				if ( ((my_tm.policyPush == 1) && ((otherServer == randomServer))) || (my_tm.policyPush == 2) ) {
-					System.out.println("*** Pushing policy update ***");
-					// Send policy server msg, wait for ACK
-					try {
-						Message pushMsg = new Message("POLICYPUSH");
-						// Connect to the policy server
-						final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
-														my_tm.serverList.get(0).getPort());
-						// Set up I/O streams with the policy server
-						final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
-						final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
-						System.out.println("Connected to Policy Server at " +
-										   my_tm.serverList.get(0).getAddress() + ":" +
-										   my_tm.serverList.get(0).getPort());
-						// Send
-						output.writeObject(pushMsg);
-						// Rec'v ACK
-						pushMsg = (Message)input.readObject();
-						if (!pushMsg.theMessage.equals("ACK")) {
-							System.err.println("*** Error with Policy Server during POLICYPUSH.");
-						}
-						// Close the socket - won't be calling again on this thread
-						pSock.close();
-					}
-					catch (Exception e) {
-						System.err.println("Error: " + e.getMessage());
-						e.printStackTrace(System.err);
+					if (!callForPolicyPush()) {
+						System.out.println("Error in callForPolicyPush() during join().");
+						return false;
 					}
 				}
 				return true; // Successful join
@@ -579,6 +556,46 @@ public class ContinuousThread extends IncrementalThread {
 		}
 	}
 
+	/**
+	 * Contacts the Policy Server (behind the scenes) to update the global
+	 * policy version and push it to all servers.
+	 *
+	 * @return boolean - whether the push was successful or not
+	 */
+	public boolean callForPolicyPush() {
+		boolean success = true;
+		System.out.println("*** Pushing policy update ***");
+		// Send policy server msg, wait for ACK
+		try {
+			Message pushMsg = new Message("POLICYPUSH");
+			// Connect to the policy server
+			final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
+											my_tm.serverList.get(0).getPort());
+			// Set up I/O streams with the policy server
+			final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
+			final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
+			System.out.println("Connected to Policy Server at " +
+							   my_tm.serverList.get(0).getAddress() + ":" +
+							   my_tm.serverList.get(0).getPort());
+			// Send
+			output.writeObject(pushMsg);
+			// Rec'v ACK
+			pushMsg = (Message)input.readObject();
+			if (!pushMsg.theMessage.equals("ACK")) {
+				System.err.println("*** Error with Policy Server during POLICYPUSH.");
+				success = false;
+			}
+			// Close the socket - won't be calling again on this thread
+			pSock.close();
+		}
+		catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace(System.err);
+			success = false;
+		}
+		return success;
+	}
+	
 	/**
 	 * Performs the actions necessary by the coordinator for committing
 	 *
@@ -796,11 +813,25 @@ public class ContinuousThread extends IncrementalThread {
 			System.out.println("*** Integrity check failed on coordinator ***");
 			return "ABORT PTC_RESPONSE_NO";
 		}
-
-		// Set txn policy version to most up to date policy
-		my_tm.setPolicy(my_tm.callPolicyServer());
-		transactionPolicyVersion = my_tm.getPolicy();
 		
+		// Force policy update if necessary
+		if (my_tm.policyPush == 3) {
+			if (!callForPolicyPush()) {
+				System.out.println("Error in callForPolicyPush() during run2PVC().");
+				return "ABORT run2PVC()_Error";
+			}
+		}
+
+		// Get and set freshest global policy
+		my_tm.setPolicy(my_tm.callPolicyServer());
+		if (my_tm.getPolicy() > transactionPolicyVersion) {
+			transactionPolicyVersion = my_tm.getPolicy();
+			// Coordinator needs to rerun proofs with newer policy
+			if (!rerunAuths(transactionPolicyVersion)) {
+				return "ABORT LOCAL_POLICY_FALSE_2PVC";
+			}
+		}
+
 		boolean start2PV = false;
 		// Contact all servers, send 2PVC [policy] and gather responses
 		if (sockList.size() > 0) {
