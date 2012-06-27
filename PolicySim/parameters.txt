@@ -26,9 +26,9 @@ VM 2
 #
 # For continuous - 0: no push; 1: single push to random server; 2: push for each
 # join (up to PTC); 3: push when entering commit phase (global consistency)
-PUSH 2
+PUSH 3
 # MT maxTransactions - number of transactions to perform
-MT 100
+MT 1
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction

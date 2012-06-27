@@ -220,8 +220,9 @@ public class Robot {
 		execSvc.shutdown();
 		try {
 			// The tasks are now running concurrently. We wait until all work is
-			// done, with a timeout of 30 minutes
-			boolean poolean = execSvc.awaitTermination(1800, TimeUnit.SECONDS);
+			// done, with a timeout of 60 minutes (probably longer than
+			// necessary, but we'll be on the safe side)
+			boolean poolean = execSvc.awaitTermination(3600, TimeUnit.SECONDS);
 			// If the execution timed out, false is returned
 			System.out.println("Execution complete: " + poolean);
 		}
