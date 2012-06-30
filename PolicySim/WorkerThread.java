@@ -655,13 +655,15 @@ public class WorkerThread extends Thread {
 	
 	public void latencySleep() {
 		if (my_tm.threadSleep) {
-			try {
-				// Sleep for a random period of time between min ms and max ms
-				Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
-			}
-			catch(Exception e) {
-				System.err.println("latencySleep() Error: " + e.getMessage());
-				e.printStackTrace(System.err);
+			if (my_tm.latencyMax > 0) { // Check if artificial latency is set
+				try {
+					// Sleep for a random period of time between min ms and max ms
+					Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
+				}
+				catch(Exception e) {
+					System.err.println("latencySleep() Error: " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
 			}
 		}
 		else {
