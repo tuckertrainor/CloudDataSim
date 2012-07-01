@@ -643,6 +643,9 @@ public class IncrementalThread extends PunctualThread {
 						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
+				else { // Coordinator integrity check fail
+					return "ABORT PTC_RESPONSE_NO";
+				}
 			}
 			else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
 				// Check freshest global policy version == txn version
@@ -652,6 +655,9 @@ public class IncrementalThread extends PunctualThread {
 						if (prepareCall(0).equals("NO")) {
 							return "ABORT PTC_RESPONSE_NO";
 						}
+					}
+					else { // Coordinator integrity check fail
+						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
 				else {
@@ -667,6 +673,9 @@ public class IncrementalThread extends PunctualThread {
 						if (prepareCall(0).equals("NO")) {
 							return "ABORT PTC_RESPONSE_NO";
 						}
+					}
+					else { // Coordinator integrity check fail
+						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
 				else {
@@ -706,6 +715,9 @@ public class IncrementalThread extends PunctualThread {
 						else if (response.equals("YES FALSE")) {
 							return "ABORT PTC_RESPONSE_FALSE";
 						}
+					}
+					else { // Coordinator integrity check fail
+						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
 			}
