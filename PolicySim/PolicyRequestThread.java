@@ -57,13 +57,15 @@ public class PolicyRequestThread extends Thread {
 							   ":" + socket.getPort() + "] " + msg.theMessage);
 			
 			if (msg.theMessage.equals("POLICYREQUEST")) {
-				// Sleep to simulate latency of response
-				try {
-					Thread.sleep(latency);
-				}
-				catch(Exception e) {
-					System.err.println("latencySleep() Error: " + e.getMessage());
-					e.printStackTrace(System.err);
+				if (latency > 0) {
+					// Sleep to simulate latency of response
+					try {
+						Thread.sleep(latency);
+					}
+					catch(Exception e) {
+						System.err.println("latencySleep() Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
 				}
 				// Return the current policy version to the requester
 				System.out.println("** Policy version request from " + socket.getInetAddress() +

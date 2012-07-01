@@ -88,7 +88,15 @@ public class PolicyServer {
 				// Accept an incoming connection
 				sock = serverSock.accept();
 				// Create a thread to handle this connection
-				prthread = new PolicyRequestThread(server, sock, (latencyMin + generator.nextInt(latencyMax - latencyMin)));
+				if (latencyMax > latencyMin) { // Range of latency values
+					prthread = new PolicyRequestThread(server, sock, (latencyMin + generator.nextInt(latencyMax - latencyMin)));
+				}
+				else if (latencyMax == 0) { // No artificial latency
+					prthread = new PolicyRequestThread(server, sock, 0);
+				}
+				else { // Fixed latency value
+					prthread = new PolicyRequestThread(server, sock, latencyMax);
+				}
 				prthread.start();
 			}
 		}

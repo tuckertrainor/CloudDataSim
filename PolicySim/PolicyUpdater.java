@@ -47,7 +47,15 @@ public class PolicyUpdater extends Thread {
 				System.out.println("Policy version updated to v. " + policyVersion);
 				// Spread the word
 				for (int i = 1; i <= my_ps.maxServers; i++) {
-					latency = my_ps.latencyMin + generator.nextInt(my_ps.latencyMax - my_ps.latencyMin);
+					if (my_ps.latencyMax > my_ps.latencyMin) { // Range of latency values
+						latency = my_ps.latencyMin + generator.nextInt(my_ps.latencyMax - my_ps.latencyMin);
+					}
+					else if (my_ps.latencyMax == 0) { // No artificial latency
+						latency = 0;
+					}
+					else { // Fixed latency value
+						latency = my_ps.latencyMax;
+					}
 					thread = new PolicyThread(policyVersion,
 											  my_ps.serverList.get(i).getAddress(),
 											  my_ps.serverList.get(i).getPort(),
