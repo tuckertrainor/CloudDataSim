@@ -364,34 +364,32 @@ public class WorkerThread extends Thread {
 		int globalVersion = my_tm.callPolicyServer();
 		
 		// Check coordinator for its version
-		if (transactionPolicyVersion != globalVersion) {
-			if (my_tm.validationMode == 3) {
-				return "ABORT GLOBAL_CONSISTENCY_FAIL";
+		if (transactionPolicyVersion != globalVersion && my_tm.validationMode == 3) {
+			return "ABORT GLOBAL_CONSISTENCY_FAIL";
+		}
+		else { // Policies match, and/or VM == 4
+			// Check coordinator's integrity
+			if (!integrityCheck()) {
+				return "ABORT PTC_RESPONSE_NO";
 			}
-			else { // mode == 4
-				// Check coordinator's integrity
-				if (!integrityCheck()) {
-					return "ABORT PTC_RESPONSE_NO";
+			
+			// Run auths using global version
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + globalVersion +
+									   ": FAIL");
+					return "ABORT PTC_RESPONSE_FALSE";
 				}
-				
-				// Run auths using global version
-				for (int j = 0; j < queryLog.size(); j++) {
-					if (!checkLocalAuth()) {
-						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-										   " for transaction " + queryLog.get(j).getTransaction() +
-										   ", sequence " + queryLog.get(j).getSequence() +
-										   " with policy v. " + globalVersion +
-										   ": FAIL");
-						return "ABORT PTC_RESPONSE_FALSE";
-					}
-					else {
-						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-										   " for transaction " + queryLog.get(j).getTransaction() +
-										   ", sequence " + queryLog.get(j).getSequence() +
-										   " with policy v. " + globalVersion +
-										   ": PASS");
-						queryLog.get(j).setPolicy(globalVersion); // Update policy in log
-					}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + globalVersion +
+									   ": PASS");
+					queryLog.get(j).setPolicy(globalVersion); // Update policy in log
 				}
 			}
 		}
