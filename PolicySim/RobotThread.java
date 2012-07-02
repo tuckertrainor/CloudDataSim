@@ -142,19 +142,27 @@ public class RobotThread implements Runnable {
 	}
 	
 	public void latencySleep() {
-		int latency = latencyMin + generator.nextInt(latencyMax - latencyMin);
-		if (threadSleep) {
-			try {
-				// Sleep for a random period of time between min ms and max ms
-				Thread.sleep(latency);
+		if (latencyMax > 0) { // There is artificial latency
+			int latency;
+			if (latencyMax == latencyMin) { // Fixed latency value
+				latency = latencyMax;
 			}
-			catch(Exception e) {
-				System.err.println("latencySleep() Error: " + e.getMessage());
-				e.printStackTrace(System.err);
+			else { // Generate a random amount within range
+				latency = latencyMin + generator.nextInt(latencyMax - latencyMin);
 			}
-		}
-		else { // add int amount to log entry
-			TransactionLog.entry.get(txnNumber).addSleepTime(latency);
+			if (threadSleep) {
+				try {
+					// Sleep for <latency> ms
+					Thread.sleep(latency);
+				}
+				catch(Exception e) {
+					System.err.println("latencySleep() Error: " + e.getMessage());
+					e.printStackTrace(System.err);
+				}
+			}
+			else { // add int amount to log entry
+				TransactionLog.entry.get(txnNumber).addSleepTime(latency);
+			}
 		}
 	}
 }

@@ -654,21 +654,44 @@ public class WorkerThread extends Thread {
 	}
 	
 	public void latencySleep() {
-		if (my_tm.threadSleep) {
-			if (my_tm.latencyMax > 0) { // Check if artificial latency is set
+		if (my_tm.latencyMax > 0) { // There is artificial latency
+			int latency;
+			if (my_tm.latencyMax == my_tm.latencyMin) { // Fixed latency value
+				latency = my_tm.latencyMax;
+			}
+			else { // Generate a random amount within range
+				latency = my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+			}
+			if (my_tm.threadSleep) {
 				try {
-					// Sleep for a random period of time between min ms and max ms
-					Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
+					// Sleep for <latency> ms
+					Thread.sleep(latency);
 				}
 				catch(Exception e) {
 					System.err.println("latencySleep() Error: " + e.getMessage());
 					e.printStackTrace(System.err);
 				}
 			}
+			else { // add int amount to log entry
+				totalSleepTime += latency;
+			}
 		}
-		else {
-			totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
-		}
+//
+//		if (my_tm.threadSleep) {
+//			if (my_tm.latencyMax > 0) { // Check if artificial latency is set
+//				try {
+//					// Sleep for a random period of time between min ms and max ms
+//					Thread.sleep(my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin));
+//				}
+//				catch(Exception e) {
+//					System.err.println("latencySleep() Error: " + e.getMessage());
+//					e.printStackTrace(System.err);
+//				}
+//			}
+//		}
+//		else {
+//			totalSleepTime += my_tm.latencyMin + generator.nextInt(my_tm.latencyMax - my_tm.latencyMin);
+//		}
 	}
 	
 	/**
