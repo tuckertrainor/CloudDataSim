@@ -544,9 +544,8 @@ public class PunctualThread extends DeferredThread {
 		// Sort array, compare first value with last
 		Arrays.sort(versionArray);
 		if (versionArray[0] == versionArray[versionArray.length - 1]) {
-			// Policy versions match across servers - run authorizations
-			
-			status = runAuths((int)versionArray[0]);
+			// Policy versions match across servers - no further action needed			
+			return status;
 		}
 		else { // Handle inequality
 			if (my_tm.validationMode == 1) { // ABORT
@@ -557,7 +556,6 @@ public class PunctualThread extends DeferredThread {
 				status = runAuths((int)versionArray[0]);
 			}
 		}
-		
 		return status;
 	}
 	
