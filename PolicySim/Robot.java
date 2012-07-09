@@ -183,7 +183,9 @@ public class Robot {
 			if (pickRandomServer) {
 				// Get one of the servers in the list (but not the first, which
 				// is the coordinator) - choose from index 1 to index (size - 1)
-				newTrans = "RSERV " + usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + ";" + newTrans;
+				if (usedServers.size() > 1) {
+					newTrans = "RSERV " + usedServers.get(generator.nextInt(usedServers.size() - 1) + 1) + ";" + newTrans;
+				}
 				// Clear the ArrayList for the next txn
 				usedServers.clear();
 			}
