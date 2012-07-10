@@ -620,8 +620,9 @@ public class Robot {
 	private static boolean outputLog() {
 		FileWriter outputFile = null;
 		BufferedWriter outputBuf = null;
-		long fileTime = new Date().getTime();
-		String filename = "Log_" + Long.toString(fileTime) + ".txt";
+		String logID = Long.toString(new Date().getTime());
+		logID = "" + proof.charAt(0) + validationMode + policyPush + logID.substring(3);
+		String filename = "Log_ERROR_" + logID + ".txt";
 		boolean success = true;
 		long avgFullTxn = 0l; // Start to finish
 		long avgTxnTime = 0l; // Reads and writes only
@@ -749,8 +750,9 @@ public class Robot {
 	private static boolean outputErrorLog(ArrayList<ServerID> servers, String reason) {
 		FileWriter outputFile = null;
 		BufferedWriter outputBuf = null;
-		long fileTime = new Date().getTime();
-		String filename = "Log_ERROR_" + Long.toString(fileTime) + ".txt";
+		String logID = Long.toString(new Date().getTime());
+		logID = "" + proof.charAt(0) + validationMode + policyPush + logID.substring(3);
+		String filename = "Log_ERROR_" + logID + ".txt";
 		boolean success = true;
 		long avgFullTxn = 0l; // Start to finish
 		long avgTxnTime = 0l; // Reads and writes only
