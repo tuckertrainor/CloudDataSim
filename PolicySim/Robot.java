@@ -622,7 +622,7 @@ public class Robot {
 		BufferedWriter outputBuf = null;
 		String logID = Long.toString(new Date().getTime());
 		logID = "" + proof.charAt(0) + validationMode + policyPush + logID.substring(3);
-		String filename = "Log_ERROR_" + logID + ".txt";
+		String filename = "Log_" + logID + ".txt";
 		boolean success = true;
 		long avgFullTxn = 0l; // Start to finish
 		long avgTxnTime = 0l; // Reads and writes only
