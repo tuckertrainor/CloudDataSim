@@ -384,23 +384,111 @@ public class WorkerThread extends Thread {
 	 * @return String - COMMIT or ABORT
 	 */
 	public String globalConsistencyCheck() {
-		String status = "COMMIT";
 		Message msg = null;
+		boolean integrityOkay = true;
+		boolean authorizationsOkay = true;
+		boolean consistencyOkay = true;
 		
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
 		int globalVersion = my_tm.callPolicyServer();
 		
 		// Check coordinator for its version
-		if (transactionPolicyVersion != globalVersion && my_tm.validationMode == 3) {
+		if (my_tm.validationMode == 3 && transactionPolicyVersion != globalVersion) {
 			return "ABORT GLOBAL_CONSISTENCY_FAIL";
 		}
-		else { // Policies match, and/or VM == 4
+		// Else policies match, and/or VM == 4
+		if (sockList.size() > 0) {
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			// Gather server sockets
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("PTC " + globalVersion);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("PTC Call Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
 			// Check coordinator's integrity
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			// Run auths with global version if integrity okay
+			if (integrityOkay) {
+				for (int j = 0; j < queryLog.size(); j++) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + globalVersion +
+										   ": FAIL");
+						authorizationsOkay = false;
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + globalVersion +
+										   ": PASS");
+						queryLog.get(j).setPolicy(globalVersion); // Update policy in log
+					}
+				}
+			}
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						// mode 3: if all participants are using global, they
+						// run auths and return YES/NO, TRUE/FALSE
+						// if any are not using global, ABORT
+						
+						// mode 4: if any not using global, they call policy
+						// server and get global, run auths, return Y/N, T/F
+						
+						// Check response
+						if (msg.theMessage.indexOf("ABORT") != -1) { // Policy inequality
+							consistencyOkay = false;
+						}
+						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
+							integrityOkay = false;
+						}
+						else if (integrityOkay && msg.theMessage.indexOf("FALSE") != -1) { // Someone responded FALSE
+							authorizationsOkay = false;
+						}
+					}
+					catch (Exception e) {
+						System.err.println("PTC Call Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}			
+			if (!consistencyOkay) {
+				return "ABORT GLOBAL_CONSISTENCY_FAIL";
+			}
+			else if (!integrityOkay) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
+			else if (!authorizationsOkay) {
+				return "ABORT PTC_RESPONSE_FALSE";
+			}
+		}
+		else { // No other servers - check only coordinator for integrity
 			if (!integrityCheck()) {
 				return "ABORT PTC_RESPONSE_NO";
 			}
-			
 			// Run auths using global version
 			for (int j = 0; j < queryLog.size(); j++) {
 				if (!checkLocalAuth()) {
@@ -421,46 +509,8 @@ public class WorkerThread extends Thread {
 				}
 			}
 		}
-		
-		// Call all participants, send PTC and global version
-		if (sockList.size() > 0) {
-			int serverNum;
-			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
-					try {
-						msg = new Message("PTC " + globalVersion);
-						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						
-						// mode 3: if all participants are using global, they
-						// run auths and return YES/NO, TRUE/FALSE
-						// if any are not using global, ABORT
-						
-						// mode 4: if any not using global, they call policy
-						// server and get global, run auths, return Y/N, T/F
-						// if auths fail, ABORT
-						
-						// Check response
-						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
-							return "ABORT PTC_RESPONSE_NO";
-						}
-						else if (msg.theMessage.indexOf("FALSE") != -1) { // Someone responded FALSE
-							return "ABORT PTC_RESPONSE_FALSE";
-						}
-					}
-					catch (Exception e) {
-						System.err.println("Global Consistency Check Error: " + e.getMessage());
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
 
-		return status;
+		return "COMMIT";
 	}
 	
 	/**
