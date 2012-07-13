@@ -515,58 +515,98 @@ public class WorkerThread extends Thread {
 	
 	/**
 	 * Method to run authorizations on each query performed on all participating
-	 * servers, including the coordinator.
+	 * servers, including the coordinator, after global consistency checks.
 	 *
 	 * @return String - COMMIT or ABORT
 	 */
 	public String runAuths(int version) {
-		// Check local auths on coordinator
-		System.out.println("Running auth. on transaction " +
-						   queryLog.get(0).getTransaction() + 
-						   " queries using policy version " +
-						   version);
-		for (int j = 0; j < queryLog.size(); j++) {
-			if (!checkLocalAuth()) {
-				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-								   " for transaction " + queryLog.get(j).getTransaction() +
-								   ", sequence " + queryLog.get(j).getSequence() +
-								   " with policy v. " + version +
-								   ": FAIL");
-				return "ABORT LOCAL_AUTHORIZATION_FAIL";
-			}
-			else {
-				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-								   " for transaction " + queryLog.get(j).getTransaction() +
-								   ", sequence " + queryLog.get(j).getSequence() +
-								   " with policy v. " + version +
-								   ": PASS");
-			}
-		}
-		
-		// Contact all other participants, have them run authorizations and return results
 		if (sockList.size() > 0) {
 			Message msg = null;
-			int serverNum;
-			
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			boolean authorizationsOkay = true;
+			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("RUNAUTHS " + version);
 						latencySleep(); // Simulate latency
 						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						// Check response, add policy version to ArrayList
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("RUNAUTHS Call Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+			// Run authorizations on coordinator
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   version);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": FAIL");
+					authorizationsOkay = false;
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": PASS");
+				}
+			}
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						// Check response
 						if (msg.theMessage.equals("FALSE")) {
-							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+							authorizationsOkay = false;
 						}
 					}
 					catch (Exception e) {
-						System.err.println("runAuths() error: " + e.getMessage());
+						System.err.println("RUNAUTHS Call Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
+				}
+			}			
+			if (!authorizationsOkay) {
+				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			}
+		}
+		else { // No other servers - run auths only on coordinator
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   version);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (!checkLocalAuth()) {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": FAIL");
+					return "ABORT LOCAL_AUTHORIZATION_FAIL";
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for transaction " + queryLog.get(j).getTransaction() +
+									   ", sequence " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": PASS");
 				}
 			}
 		}
