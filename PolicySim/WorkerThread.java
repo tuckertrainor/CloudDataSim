@@ -8,6 +8,7 @@
  * over the socket until the socket is closed.
  */
 
+/* TODO: update runAuths and globalConsistencyCheck with new parallelization code */
 import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
