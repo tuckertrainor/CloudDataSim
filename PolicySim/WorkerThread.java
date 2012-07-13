@@ -193,7 +193,7 @@ public class WorkerThread extends Thread {
 				}
 			}
 			else {
-				return "YES FALSE"; // (policy inequality)
+				return "ABORT POLICY_INEQUALITY"; // (policy inequality)
 			}
 		}
 		else { // (my_tm.validationMode == 4)
