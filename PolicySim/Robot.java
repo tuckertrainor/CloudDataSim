@@ -203,7 +203,7 @@ public class Robot {
 		for (int i = 1; i <= maxTransactions; i++) {
 			txn = TransactionLog.entry.get(i).getTxn();
 			txnSplit = txn.split(" ");
-			if (pickRandomServer) {
+			if (pickRandomServer && txnSplit[0].equals("RSERV")) {
 				coordinator = Integer.parseInt(txnSplit[3]);
 			}
 			else {
