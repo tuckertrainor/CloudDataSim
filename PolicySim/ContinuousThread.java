@@ -690,7 +690,7 @@ public class ContinuousThread extends IncrementalThread {
 					try {
 						msg = (Message)sockList.get(serverNum[i]).input.readObject();
 						// Check response, add policy version to ArrayList
-						System.out.println("Response of server " + serverNum +
+						System.out.println("Response of server " + serverNum[i] +
 										   " for message PTC: " + msg.theMessage);
 						// Parse response
 						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
@@ -778,7 +778,7 @@ public class ContinuousThread extends IncrementalThread {
 					if (serverNum[i] != 0) { // Don't listen for the Policy server
 						try {
 							msg = (Message)sockList.get(serverNum[i]).input.readObject();
-							System.out.println("Response of server " + serverNum +
+							System.out.println("Response of server " + serverNum[i] +
 											   " for message 2PV " + transactionPolicyVersion +
 											   ": " + msg.theMessage);
 							// Parse response: TRUE [policy] or FALSE [policy]
@@ -853,12 +853,6 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the result of the 2PVC process
 	 */
 	public String run2PVC(int policyVersion) {
-		// Perform integrity check on coordinator
-		if (!integrityCheck()) {
-			System.out.println("*** Integrity check failed on coordinator ***");
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		
 		// Force policy update if necessary
 		if (my_tm.policyPush == 3) {
 			if (!callForPolicyPush()) {
@@ -867,6 +861,15 @@ public class ContinuousThread extends IncrementalThread {
 			}
 		}
 
+		/*
+		// Perform integrity check on coordinator
+		if (!integrityCheck()) {
+			System.out.println("*** Integrity check failed on coordinator ***");
+			return "ABORT PTC_RESPONSE_NO";
+		}
+		*/
+
+		/*
 		// Get and set freshest global policy
 		my_tm.setPolicy(my_tm.callPolicyServer());
 		if (my_tm.getPolicy() > transactionPolicyVersion) {
@@ -875,35 +878,68 @@ public class ContinuousThread extends IncrementalThread {
 			if (!rerunAuths(transactionPolicyVersion)) {
 				return "ABORT LOCAL_POLICY_FALSE_2PVC";
 			}
-		}
+		}*/
 
+		// Get and set freshest global policy
+		my_tm.setPolicy(my_tm.callPolicyServer());
+		int freshestPolicy = my_tm.getPolicy();
 		boolean start2PV = false;
+		
 		// Contact all servers, send 2PVC [policy] and gather responses
 		if (sockList.size() > 0) {
-			int serverNum;
-			int recdPolicy;
-			int freshestPolicy = transactionPolicyVersion;
-			int highestPolicyForFalse = 0;
-			boolean recdNO = false;
 			Message msg = null;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			int recdPolicy;
+			int highestPolicyForFalse = 0;
+			boolean integrityOkay = true;
+			
+			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("2PVC " + transactionPolicyVersion);
 						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						System.out.println("Response of server " + serverNum +
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("run2PVC() Send Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+
+			// Perform integrity check on coordinator
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			// Check policy version
+			if (freshestPolicy > transactionPolicyVersion) {
+				transactionPolicyVersion = freshestPolicy;
+				// Coordinator needs to rerun proofs with newer policy
+				if (!rerunAuths(transactionPolicyVersion)) {
+					highestPolicyForFalse = transactionPolicyVersion;
+				}
+			}
+
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						System.out.println("Response of server " + serverNum[i] +
 										   " for message 2PVC " + transactionPolicyVersion +
 										   ": " + msg.theMessage);
 						// Parse response: YES TRUE [policy] or YES FALSE [policy] or NO
 						String msgSplit[] = msg.theMessage.split(" ");
 						
 						if (msgSplit[0].equals("NO")) {
-							recdNO = true;
+							integrityOkay = false;
 						}
 						else if (msgSplit[1].equals("FALSE")) {
 							recdPolicy = Integer.parseInt(msgSplit[2]);
@@ -919,11 +955,15 @@ public class ContinuousThread extends IncrementalThread {
 						}
 					}
 					catch (Exception e) {
-						System.err.println("run2PVC() Error: " + e.getMessage());
+						System.err.println("run2PVC() Recv Error: " + e.getMessage());
 						e.printStackTrace(System.err);
-						return "ABORT run2PVC()_Error";
 					}
 				}
+			}
+
+			// If an integrity check failed, abort
+			if (!integrityOkay) {
+				return "ABORT PTC_RESPONSE_NO";
 			}
 			// If we received a FALSE for a policy version equal to or
 			// greater than the most recent version that returned TRUE
@@ -935,6 +975,21 @@ public class ContinuousThread extends IncrementalThread {
 			else if (freshestPolicy > transactionPolicyVersion) {
 				transactionPolicyVersion = freshestPolicy;
 				start2PV = true;
+			}
+		}
+		else { // Coordinator is the only participant
+			// Perform integrity check on coordinator
+			if (!integrityCheck()) {
+				System.out.println("*** Integrity check failed on coordinator ***");
+				return "ABORT PTC_RESPONSE_NO";
+			}
+			// Check policy version
+			if (freshestPolicy > transactionPolicyVersion) {
+				transactionPolicyVersion = freshestPolicy;
+				// Coordinator needs to rerun proofs with newer policy
+				if (!rerunAuths(transactionPolicyVersion)) {
+					return "ABORT LOCAL_POLICY_FALSE_2PVC";
+				}
 			}
 		}
 		
