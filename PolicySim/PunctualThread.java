@@ -481,7 +481,6 @@ public class PunctualThread extends DeferredThread {
 		}
 	}
 	
-	
 	/**
 	 * Handles the 2PV view consistency check. Calls each participant with the
 	 * PTC command, receives back their policy versions, and determines whether
@@ -503,17 +502,40 @@ public class PunctualThread extends DeferredThread {
 		versions.add(transactionPolicyVersion);
 		// Call all participants, send PTC and gather policy versions
 		if (sockList.size() > 0) {
-			int serverNum;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			boolean integrityOkay = true;
+			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC");
 						latencySleep(); // Simulate latency
 						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("PTC Call Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+			
+			// Check coordinator's integrity
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
 						// Check response, add policy version to ArrayList
 						if (msg.theMessage.indexOf("YES") != -1) {
 							if (my_tm.validationMode != 0) { // Not 2PC only
@@ -522,14 +544,23 @@ public class PunctualThread extends DeferredThread {
 							}
 						}
 						else { // ABORT - someone responded with a NO
-							return "ABORT PTC_RESPONSE_NO";
+							integrityOkay = false;
 						}
 					}
 					catch (Exception e) {
-						System.err.println("Policy Check Error: " + e.getMessage());
+						System.err.println("PTC Call Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
 				}
+			}
+			// Check for any reported integrity failures
+			if (!integrityOkay) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
+		}
+		else { // No other servers - check only coordinator for integrity
+			if (!integrityCheck()) {
+				return "ABORT PTC_RESPONSE_NO";
 			}
 		}
 		
