@@ -511,25 +511,42 @@ public class IncrementalThread extends PunctualThread {
 
 	public boolean checkTxnConsistency() {
 		int mode = my_tm.validationMode;
+		Message msg = null;
 		System.out.println("checkTxnConsistency() called, mode " + mode);
 		if (mode == 0 || mode == 1 || mode == 2) {
 			// View consistency - call all participants, see if versions match
 			// Call all participants, ask for version
 			if (sockList.size() > 0) {
-				int serverNum;
-				Message msg = null;
+				int serverNum[] = new int[sockList.size()];
+				int counter = 0;
+				boolean consistencyOkay = true;
+				// Gather server sockets
 				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-					serverNum = socketList.nextElement();
-					if (serverNum != 0) { // Don't call the Policy server
+					serverNum[counter] = socketList.nextElement();
+					counter++;
+				}
+				// Send messages to all participants
+				for (int i = 0; i < sockList.size(); i++) {
+					if (serverNum[i] != 0) { // Don't call the Policy server
 						try {
 							System.out.println("Asking server " + serverNum +
 											   " for txn policy version.");
 							msg = new Message("VERSION");
 							latencySleep(); // Simulate latency
 							// Send
-							sockList.get(serverNum).output.writeObject(msg);
-							// Rec'v
-							msg = (Message)sockList.get(serverNum).input.readObject();
+							sockList.get(serverNum[i]).output.writeObject(msg);
+						}
+						catch (Exception e) {
+							System.err.println("VERSION Send Error: " + e.getMessage());
+							e.printStackTrace(System.err);
+						}
+					}
+				}
+				// Receive responses
+				for (int i = 0; i < sockList.size(); i++) {
+					if (serverNum[i] != 0) { // Don't listen for the Policy server
+						try {
+							msg = (Message)sockList.get(serverNum[i]).input.readObject();
 							// Check response
 							String msgSplit[] = msg.theMessage.split(" ");
 							if (my_tm.policyPush == 4) { // Check version
@@ -544,14 +561,17 @@ public class IncrementalThread extends PunctualThread {
 								System.out.println("Server " + serverNum +
 												   " is using txn policy version " +
 												   Integer.parseInt(msgSplit[1]) +
-												   " (allowing for simulation)");
+												   " (not checking until PTC)");
+							}
+							else if (my_tm.policyPush == 0) {
+								// No policy pushing - no need to check
 							}
 							else {
 								System.out.println("Invalid policy push variable is set: " + my_tm.policyPush);
 							}
 						}
 						catch (Exception e) {
-							System.err.println("checkTxnConsistency() Error: " + e.getMessage());
+							System.err.println("VERSION Recv Error: " + e.getMessage());
 							e.printStackTrace(System.err);
 						}
 					}
@@ -568,27 +588,43 @@ public class IncrementalThread extends PunctualThread {
 				if (my_tm.policyPush == 4) { // Check version
 					return false;
 				}
-				else { // Not checking until PTC time
+				else { // Not checking until PTC time (5), or no pushes (0)
 					// We're cool
 				}
 			}
 			else { // Check any participants
 				// Call all participants, ask for version
 				if (sockList.size() > 0) {
-					int serverNum;
-					Message msg = null;
+					int serverNum[] = new int[sockList.size()];
+					int counter = 0;
+					boolean consistencyOkay = true;
+					// Gather server sockets
 					for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-						serverNum = socketList.nextElement();
-						if (serverNum != 0) { // Don't call the Policy server
+						serverNum[counter] = socketList.nextElement();
+						counter++;
+					}
+					// Send messages to all participants
+					for (int i = 0; i < sockList.size(); i++) {
+						if (serverNum[i] != 0) { // Don't call the Policy server
 							try {
 								System.out.println("Asking server " + serverNum +
 												   " for txn policy version.");
 								msg = new Message("VERSION");
 								latencySleep(); // Simulate latency
 								// Send
-								sockList.get(serverNum).output.writeObject(msg);
-								// Rec'v
-								msg = (Message)sockList.get(serverNum).input.readObject();
+								sockList.get(serverNum[i]).output.writeObject(msg);
+							}
+							catch (Exception e) {
+								System.err.println("VERSION Send Error: " + e.getMessage());
+								e.printStackTrace(System.err);
+							}
+						}
+					}
+					// Receive responses
+					for (int i = 0; i < sockList.size(); i++) {
+						if (serverNum[i] != 0) { // Don't listen for the Policy server
+							try {
+								msg = (Message)sockList.get(serverNum[i]).input.readObject();
 								// Check response
 								String msgSplit[] = msg.theMessage.split(" ");
 								if (my_tm.policyPush == 4) { // Check version
@@ -603,14 +639,17 @@ public class IncrementalThread extends PunctualThread {
 									System.out.println("Server " + serverNum +
 													   " is using txn policy version " +
 													   Integer.parseInt(msgSplit[1]) +
-													   " (allowing for simulation)");
+													   " (not checking until PTC)");
+								}
+								else if (my_tm.policyPush == 0) {
+									// No policy pushing - no need to check
 								}
 								else {
 									System.out.println("Invalid policy push variable is set: " + my_tm.policyPush);
 								}
 							}
 							catch (Exception e) {
-								System.err.println("checkTxnConsistency() Error: " + e.getMessage());
+								System.err.println("VERSION Recv Error: " + e.getMessage());
 								e.printStackTrace(System.err);
 							}
 						}
