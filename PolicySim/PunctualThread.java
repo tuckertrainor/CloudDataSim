@@ -418,7 +418,7 @@ public class PunctualThread extends DeferredThread {
 				}
 			}
 			else {
-				return "YES FALSE"; // (policy inequality)
+				return "ABORT POLICY_INEQUALITY"; // (policy inequality)
 			}
 		}
 		else { // (my_tm.validationMode == 4)
@@ -461,17 +461,18 @@ public class PunctualThread extends DeferredThread {
 				else {
 					return "NO FALSE"; // (integrity fail)
 				}
-			}			
+			}
 			else { // (globalVersion == transactionPolicyVersion) 
-				for (int j = 0; j < queryLog.size(); j++) {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + globalVersion +
-									   ": ALREADY DONE");
-				}
 				// Perform integrity check
 				if (integrityCheck()) {
+					// Output authorizations status
+					for (int j = 0; j < queryLog.size(); j++) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for txn " + queryLog.get(j).getTransaction() +
+										   ", seq " + queryLog.get(j).getSequence() +
+										   " with policy v. " + globalVersion +
+										   ": ALREADY DONE");
+					}
 					return "YES TRUE"; // (integrity and authorizations pass)
 				}
 				else {
