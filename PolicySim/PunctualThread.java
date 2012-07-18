@@ -755,66 +755,111 @@ public class PunctualThread extends DeferredThread {
 	 * @return String - COMMIT or ABORT
 	 */
 	public String runAuths(int version) {
-		// Check local auths on coordinator
-		System.out.println("Running auth. on transaction " +
-						   queryLog.get(0).getTransaction() + 
-						   " queries using policy version " +
-						   version);
-		for (int j = 0; j < queryLog.size(); j++) {
-			// If policy used for proof during transaction differs
-			if (queryLog.get(j).getPolicy() != version) {
-				if (!checkLocalAuth()) {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for txn " + queryLog.get(j).getTransaction() +
-									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + version +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): FAIL");
-					return "ABORT LOCAL_AUTHORIZATION_FAIL";
+		if (sockList.size() > 0) {
+			Message msg = null;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			boolean authorizationsOkay = true;
+			// Gather server sockets
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
+					try {
+						msg = new Message("RUNAUTHS " + version);
+						latencySleep(); // Simulate latency
+						// Send
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("RUNAUTHS Send Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+			// Run authorizations on coordinator
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   version);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (queryLog.get(j).getPolicy() != version) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": FAIL");
+						authorizationsOkay = false;
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": PASS");
+					}
 				}
 				else {
 					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 									   " for txn " + queryLog.get(j).getTransaction() +
 									   ", seq " + queryLog.get(j).getSequence() +
 									   " with policy v. " + version +
-									   " (was v. " + queryLog.get(j).getPolicy() +
-									   "): PASS");
-					queryLog.get(j).setPolicy(version); // Update policy in log
+									   ": ALREADY DONE");
 				}
 			}
-			else { // Output message of same policy
-				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-								   " for txn " + queryLog.get(j).getTransaction() +
-								   ", seq " + queryLog.get(j).getSequence() +
-								   " with policy v. " + version +
-								   ": ALREADY DONE");
-			}
-		}
-		
-		// Contact all other participants, have them run authorizations and return results
-		if (sockList.size() > 0) {
-			Message msg = null;
-			int serverNum;
-			
-			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
 					try {
-						msg = new Message("RUNAUTHS " + version);
-						latencySleep(); // Simulate latency
-						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						// Check response, add policy version to ArrayList
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						// Check response
 						if (msg.theMessage.equals("FALSE")) {
-							return "ABORT LOCAL_AUTHORIZATION_FAIL";
+							authorizationsOkay = false;
 						}
 					}
 					catch (Exception e) {
-						System.err.println("runAuths() error: " + e.getMessage());
+						System.err.println("RUNAUTHS Recv Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
+				}
+			}			
+			if (!authorizationsOkay) {
+				return "ABORT LOCAL_AUTHORIZATION_FAIL";
+			}
+		}
+		else { // No other servers - run auths only on coordinator
+			System.out.println("Running auth. on transaction " +
+							   queryLog.get(0).getTransaction() + 
+							   " queries using policy version " +
+							   version);
+			for (int j = 0; j < queryLog.size(); j++) {
+				if (queryLog.get(j).getPolicy() != version) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": FAIL");
+						return "ABORT LOCAL_AUTHORIZATION_FAIL";
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": PASS");
+					}
+				}
+				else {
+					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
+									   " with policy v. " + version +
+									   ": ALREADY DONE");
 				}
 			}
 		}
