@@ -494,11 +494,6 @@ public class PunctualThread extends DeferredThread {
 		Message msg = null;
 		ArrayList<Integer> versions = new ArrayList<Integer>();
 		
-		// Check coordinator's integrity
-		if (!integrityCheck()) {
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		
 		// Add coordinator's policy version to ArrayList
 		versions.add(transactionPolicyVersion);
 		// Call all participants, send PTC and gather policy versions
