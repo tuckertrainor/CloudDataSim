@@ -529,7 +529,7 @@ public class IncrementalThread extends PunctualThread {
 				for (int i = 0; i < sockList.size(); i++) {
 					if (serverNum[i] != 0) { // Don't call the Policy server
 						try {
-							System.out.println("Asking server " + serverNum +
+							System.out.println("Asking server " + serverNum[i] +
 											   " for txn policy version.");
 							msg = new Message("VERSION");
 							latencySleep(); // Simulate latency
@@ -550,7 +550,7 @@ public class IncrementalThread extends PunctualThread {
 							// Check response
 							String msgSplit[] = msg.theMessage.split(" ");
 							if (my_tm.policyPush == 4) { // Check version
-								System.out.println("Server " + serverNum +
+								System.out.println("Server " + serverNum[i] +
 												   " is using txn policy version " +
 												   Integer.parseInt(msgSplit[1]));
 								if (Integer.parseInt(msgSplit[1]) != transactionPolicyVersion) {
@@ -558,7 +558,7 @@ public class IncrementalThread extends PunctualThread {
 								}
 							}
 							else if (my_tm.policyPush == 5) { // Not checking until PTC time
-								System.out.println("Server " + serverNum +
+								System.out.println("Server " + serverNum[i] +
 												   " is using txn policy version " +
 												   Integer.parseInt(msgSplit[1]) +
 												   " (not checking until PTC)");
@@ -607,7 +607,7 @@ public class IncrementalThread extends PunctualThread {
 					for (int i = 0; i < sockList.size(); i++) {
 						if (serverNum[i] != 0) { // Don't call the Policy server
 							try {
-								System.out.println("Asking server " + serverNum +
+								System.out.println("Asking server " + serverNum[i] +
 												   " for txn policy version.");
 								msg = new Message("VERSION");
 								latencySleep(); // Simulate latency
@@ -628,7 +628,7 @@ public class IncrementalThread extends PunctualThread {
 								// Check response
 								String msgSplit[] = msg.theMessage.split(" ");
 								if (my_tm.policyPush == 4) { // Check version
-									System.out.println("Server " + serverNum +
+									System.out.println("Server " + serverNum[i] +
 													   " is using txn policy version " +
 													   Integer.parseInt(msgSplit[1]));
 									if (Integer.parseInt(msgSplit[1]) != globalVersion) {
@@ -636,7 +636,7 @@ public class IncrementalThread extends PunctualThread {
 									}
 								}
 								else if (my_tm.policyPush == 5) { // Not checking until PTC time
-									System.out.println("Server " + serverNum +
+									System.out.println("Server " + serverNum[i] +
 													   " is using txn policy version " +
 													   Integer.parseInt(msgSplit[1]) +
 													   " (not checking until PTC)");
