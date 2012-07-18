@@ -725,38 +725,59 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return boolean - the result of the 2PV process
 	 */
 	public boolean run2PV(int policyVersion) {
-		// Check that coordinator's policy version is up to date
-		if (policyVersion > transactionPolicyVersion) {
-			// Re-run proofs on coordinator
-			transactionPolicyVersion = policyVersion;
-			System.out.println("Running auth. on transaction " +
-							   queryLog.get(0).getTransaction() + 
-							   " queries using policy version " +
-							   transactionPolicyVersion);
-			if (!rerunAuths(transactionPolicyVersion)) {
-				return false;
-			}
-		}
+		boolean authorizationsOkay = true;
 		// Contact all servers, send 2PV [policy] and gather responses
 		if (sockList.size() > 0) {
-			int serverNum;
+			Message msg = null;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
 			int recdPolicy;
 			int freshestPolicy = transactionPolicyVersion;
 			int highestPolicyForFalse = 0;
 			boolean needToRun = true;
-			Message msg = null;
-			while (needToRun) {
+
+			// Gather server sockets
+			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Run 2PV as long as necessary
+			while (needToRun && authorizationsOkay) {
 				needToRun = false;
-				for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-					serverNum = socketList.nextElement();
-					if (serverNum != 0) { // Don't call the Policy server
+				// Send messages to all participants
+				for (int i = 0; i < sockList.size(); i++) {
+					if (serverNum[i] != 0) { // Don't call the Policy server
 						try {
 							msg = new Message("2PV " + transactionPolicyVersion);
 							latencySleep(); // Simulate latency
 							// Send
-							sockList.get(serverNum).output.writeObject(msg);
-							// Rec'v
-							msg = (Message)sockList.get(serverNum).input.readObject();
+							sockList.get(serverNum[i]).output.writeObject(msg);
+						}
+						catch (Exception e) {
+							System.err.println("run2PV() Send Error: " + e.getMessage());
+							e.printStackTrace(System.err);
+						}
+					}
+				}
+				
+				// Check that coordinator's policy version is up to date
+				if (freshestPolicy > transactionPolicyVersion) {
+					// Re-run proofs on coordinator
+					transactionPolicyVersion = policyVersion;
+					System.out.println("Running auth. on transaction " +
+									   queryLog.get(0).getTransaction() + 
+									   " queries using policy version " +
+									   transactionPolicyVersion);
+					if (!rerunAuths(transactionPolicyVersion)) {
+						authorizationsOkay = false;
+					}
+				}
+				
+				// Receive responses
+				for (int i = 0; i < sockList.size(); i++) {
+					if (serverNum[i] != 0) { // Don't listen for the Policy server
+						try {
+							msg = (Message)sockList.get(serverNum[i]).input.readObject();
 							System.out.println("Response of server " + serverNum +
 											   " for message 2PV " + transactionPolicyVersion +
 											   ": " + msg.theMessage);
@@ -776,26 +797,29 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 						catch (Exception e) {
-							System.err.println("run2PV() Error: " + e.getMessage());
+							System.err.println("run2PV() Recv Error: " + e.getMessage());
 							e.printStackTrace(System.err);
-							return false;
 						}
 					}
 				}
 				// If we received a FALSE for a policy version equal to or
 				// greater than the most recent version that returned TRUE
 				if (highestPolicyForFalse >= freshestPolicy) {
-					return false;
+					authorizationsOkay = false;
+					needToRun = false;
 				}
 				// If there was a server with a fresher policy than the
 				// coordinator, run 2PV again with the freshest policy
 				else if (freshestPolicy > transactionPolicyVersion) {
 					transactionPolicyVersion = freshestPolicy;
+					// Allow another chance if coordinator set authOkay to false
+					authorizationsOkay = true;
 					needToRun = true;
 				}
 			}
 		}
-		return true;
+
+		return authorizationsOkay;
 	}
 	
 	/**
