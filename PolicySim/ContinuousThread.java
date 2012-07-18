@@ -653,39 +653,64 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the result of the 2PV process
 	 */
 	public String run2PC() {
-		// Perform integrity check on coordinator
-		if (!integrityCheck()) {
-			System.out.println("*** Integrity check failed on coordinator ***");
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		
-		// Call all participants, send PTC and get YES/NO
 		if (sockList.size() > 0) {
-			int serverNum;
 			Message msg = null;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			boolean integrityOkay = true;
+			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC");
 						latencySleep(); // Simulate latency
 						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("PTC Send Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+			
+			// Check coordinator's integrity
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						// Check response, add policy version to ArrayList
 						System.out.println("Response of server " + serverNum +
 										   " for message PTC: " + msg.theMessage);
 						// Parse response
 						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
-							return "ABORT PTC_RESPONSE_NO";
+							integrityOkay = false;
 						}
 					}
 					catch (Exception e) {
-						System.err.println("run2PC() Error: " + e.getMessage());
+						System.err.println("PTC Recv Error: " + e.getMessage());
 						e.printStackTrace(System.err);
-						return "ABORT run2PC()_Error";
 					}
 				}
+			}
+			// Check for any reported integrity failures
+			if (!integrityOkay) {
+				return "ABORT PTC_RESPONSE_NO";
+			}
+		}
+		else { // Coordinator is only participant
+			if (!integrityCheck()) {
+				return "ABORT PTC_RESPONSE_NO";
 			}
 		}
 		return "COMMIT";
