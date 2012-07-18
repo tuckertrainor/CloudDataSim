@@ -695,56 +695,22 @@ public class IncrementalThread extends PunctualThread {
 				// Get current global policy from policy server
 				int globalVersion = my_tm.callPolicyServer();
 				if (globalVersion == transactionPolicyVersion) {
-					// If integrity check passes, get YES/NO from all participants
-					if (integrityCheck()) {
-						if (prepareCall(0).equals("NO")) {
-							return "ABORT PTC_RESPONSE_NO";
-						}
-					}
-					else { // Coordinator integrity check fail
+					// Get YES/NO from all participants
+					if (prepareCall(0).equals("NO")) {
 						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
 				else {
-					// If integrity check passes, send PTC and version to
-					// other participants, get YES,TRUE / NO,FALSE
-					if (integrityCheck()) {
-						// Perform re-authorizations on self
-						transactionPolicyVersion = globalVersion;
-						System.out.println("Running auth. on transaction " +
-										   queryLog.get(0).getTransaction() + 
-										   " queries using policy version " +
-										   transactionPolicyVersion);
-						for (int j = 0; j < queryLog.size(); j++) {
-							if (!checkLocalAuth()) {
-								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-												   " for txn " + queryLog.get(j).getTransaction() +
-												   ", seq " + queryLog.get(j).getSequence() +
-												   " with policy v. " + transactionPolicyVersion +
-												   " (was v. " + queryLog.get(j).getPolicy() +
-												   "): FAIL");
-								return "ABORT PTC_RESPONSE_FALSE"; // (authorization failed)
-							}
-							else {
-								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-												   " for txn " + queryLog.get(j).getTransaction() +
-												   ", seq " + queryLog.get(j).getSequence() +
-												   " with policy v. " + transactionPolicyVersion +
-												   " (was v. " + queryLog.get(j).getPolicy() +
-												   "): PASS");
-							}
-						}
-						// Call other participants
-						String response = prepareCall(globalVersion);
-						if (response.equals("NO")) {
-							return "ABORT PTC_RESPONSE_NO";
-						}
-						else if (response.equals("YES FALSE")) {
+					// Get responses from all participants
+					String response = prepareCall(globalVersion);
+					if (response.equals("NO")) {
+						return "ABORT PTC_RESPONSE_NO";
+					}
+					else { // "YES" was received
+						if (response.indexOf("FALSE") != -1) {
+							// Someone responded FALSE
 							return "ABORT PTC_RESPONSE_FALSE";
 						}
-					}
-					else { // Coordinator integrity check fail
-						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
 			}
@@ -761,7 +727,7 @@ public class IncrementalThread extends PunctualThread {
 	 * received the PTC call from the coordinator
 	 *
 	 * @param globalVersion - used for global consistency check
-	 * @return boolean
+	 * @return String
 	 */
 	public String prepareToCommit(int globalVersion) {
 		// Receive PTC message, handle options
