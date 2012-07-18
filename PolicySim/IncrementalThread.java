@@ -544,6 +544,7 @@ public class IncrementalThread extends PunctualThread {
 				}
 				// Receive responses
 				for (int i = 0; i < sockList.size(); i++) {
+					System.out.println("Coordinator transaction policy version: " + transactionPolicyVersion);
 					if (serverNum[i] != 0) { // Don't listen for the Policy server
 						try {
 							msg = (Message)sockList.get(serverNum[i]).input.readObject();
