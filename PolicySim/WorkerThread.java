@@ -23,6 +23,14 @@ public class WorkerThread extends Thread {
 	public int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	public Random generator;
 	public boolean hasUpdated = false;
+	public final int READ_MIN = 75;
+	public final int READ_MAX = 125;
+	public final int WRITE_MIN = 150;
+	public final int WRITE_MAX = 225;
+	public final int AUTH_CHK_MIN = 50;
+	public final int AUTH_CHK_MAX = 100;
+	public final int INTEG_CHK_MIN = 150;
+	public final int INTEG_CHK_MAX = 225;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over
@@ -676,8 +684,14 @@ public class WorkerThread extends Thread {
 	public void databaseRead() {
 		if (my_tm.threadSleep) {
 			try {
-				// sleep for a random period of time between 75ms and 125ms
-				Thread.sleep(75 + generator.nextInt(50));
+				// Sleep for a random period of time between READ_MIN ms and
+				// READ_MAX ms
+				if (READ_MAX > READ_MIN) {
+					Thread.sleep(READ_MIN + generator.nextInt(READ_MAX - READ_MIN));
+				}
+				else {
+					Thread.sleep(READ_MAX);
+				}
 			}
 			catch(Exception e) {
 				System.err.println("databaseRead() Sleep Error: " + e.getMessage());
@@ -685,15 +699,26 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else {
-			totalSleepTime += 75 + generator.nextInt(50);
+			if (READ_MAX > READ_MIN) {
+				totalSleepTime += READ_MIN + generator.nextInt(READ_MAX - READ_MIN);
+			}
+			else {
+				totalSleepTime += READ_MAX;
+			}
 		}
 	}
 	
 	public void databaseWrite() {
 		if (my_tm.threadSleep) {
 			try {
-				// sleep for a random period of time between 150ms and 225ms
-				Thread.sleep(150 + generator.nextInt(75));
+				// Sleep for a random period of time between WRITE_MIN ms and
+				// WRITE_MAX ms
+				if (WRITE_MAX > WRITE_MIN) {
+					Thread.sleep(WRITE_MIN + generator.nextInt(WRITE_MAX - WRITE_MIN));
+				}
+				else {
+					Thread.sleep(WRITE_MAX);
+				}
 			}
 			catch(Exception e) {
 				System.err.println("databaseWrite() Sleep Error: " + e.getMessage());
@@ -701,7 +726,12 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else {
-			totalSleepTime += 150 + generator.nextInt(75);
+			if (WRITE_MAX > WRITE_MIN) {
+				totalSleepTime += WRITE_MIN + generator.nextInt(WRITE_MAX - WRITE_MIN);
+			}
+			else {
+				totalSleepTime += WRITE_MAX;
+			}
 		}
 	}
 	
@@ -713,8 +743,14 @@ public class WorkerThread extends Thread {
 	public boolean checkLocalAuth() {
 		if (my_tm.threadSleep) {
 			try {
-				// sleep for a random period of time between 50ms and 150ms
-				Thread.sleep(50 + generator.nextInt(100));
+				// Sleep for a random period of time between AUTH_CHK_MIN ms
+				// and AUTH_CHK_MAX ms
+				if (AUTH_CHK_MAX > AUTH_CHK_MIN) {
+					Thread.sleep(AUTH_CHK_MIN + generator.nextInt(AUTH_CHK_MAX - AUTH_CHK_MIN));
+				}
+				else {
+					Thread.sleep(AUTH_CHK_MAX);
+				}
 			}
 			catch(Exception e) {
 				System.err.println("checkLocalAuth() Sleep Error: " + e.getMessage());
@@ -722,7 +758,12 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else {
-			totalSleepTime += 50 + generator.nextInt(100);
+			if (AUTH_CHK_MAX > AUTH_CHK_MIN) {
+				totalSleepTime += AUTH_CHK_MIN + generator.nextInt(AUTH_CHK_MAX - AUTH_CHK_MIN);
+			}
+			else {
+				totalSleepTime += AUTH_CHK_MAX;
+			}
 		}
 		// Perform random success operation
 		if (my_tm.localAuthSuccessRate < 1.0) {
@@ -739,18 +780,29 @@ public class WorkerThread extends Thread {
 	 * @return boolean - true if integrity check comes back OK, else false
 	 */
 	public boolean integrityCheck() {
-		// Sleep for duration of check, between 150ms and 225ms
 		if (my_tm.threadSleep) {
 			try {
-				Thread.sleep(150 + generator.nextInt(75));
+				// Sleep for a random period of time between INTEG_CHK_MIN ms and
+				// INTEG_CHK_MAX ms
+				if (INTEG_CHK_MAX > INTEG_CHK_MIN) {
+					Thread.sleep(INTEG_CHK_MIN + generator.nextInt(INTEG_CHK_MAX - INTEG_CHK_MIN));
+				}
+				else {
+					Thread.sleep(INTEG_CHK_MAX);
+				}
 			}
 			catch(Exception e) {
-				System.err.println("verifyIntegrity() Sleep Error: " + e.getMessage());
+				System.err.println("integrityCheck() Sleep Error: " + e.getMessage());
 				e.printStackTrace(System.err);
 			}
 		}
 		else {
-			totalSleepTime += 150 + generator.nextInt(75);
+			if (INTEG_CHK_MAX > INTEG_CHK_MIN) {
+				totalSleepTime += INTEG_CHK_MIN + generator.nextInt(INTEG_CHK_MAX - INTEG_CHK_MIN);
+			}
+			else {
+				totalSleepTime += INTEG_CHK_MAX;
+			}
 		}
 		// Perform random success operation if necessary
 		if (my_tm.integrityCheckSuccessRate < 1.0) {
