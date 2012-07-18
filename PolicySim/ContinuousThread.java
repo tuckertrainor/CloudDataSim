@@ -6,10 +6,6 @@
  * Extends the IncrementalThread class.
  */
 
-/* TODO: run and debug if necessary
- * 
- */
-
 import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
