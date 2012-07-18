@@ -28,7 +28,7 @@ public class WorkerThread extends Thread {
 	public final int WRITE_MIN = 150;
 	public final int WRITE_MAX = 225;
 	public final int AUTH_CHK_MIN = 50;
-	public final int AUTH_CHK_MAX = 100;
+	public final int AUTH_CHK_MAX = 150;
 	public final int INTEG_CHK_MIN = 150;
 	public final int INTEG_CHK_MAX = 225;
 
