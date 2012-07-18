@@ -674,28 +674,16 @@ public class IncrementalThread extends PunctualThread {
 	public String coordinatorCommit() {
 		// Call each participating server with a PTC message
 		if (my_tm.validationMode >= 0 && my_tm.validationMode <= 4) {
-			if (my_tm.validationMode == 0) {
-				// 2PC only - Check integrity, call participants
-				if (integrityCheck()) {
-					// Get YES/NO from all participants
-					if (prepareCall(0).equals("NO")) {
-						return "ABORT PTC_RESPONSE_NO";
-					}
-				}
-				else { // Coordinator integrity check fail
+			if (my_tm.validationMode == 0) { // 2PC Only
+				// Get YES/NO from all participants
+				if (prepareCall(0).equals("NO")) {
 					return "ABORT PTC_RESPONSE_NO";
 				}
 			}
 			else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
 				// Check freshest global policy version == txn version
 				if (my_tm.callPolicyServer() == transactionPolicyVersion) {
-					// If integrity check passes, get YES/NO from all participants
-					if (integrityCheck()) {
-						if (prepareCall(0).equals("NO")) {
-							return "ABORT PTC_RESPONSE_NO";
-						}
-					}
-					else { // Coordinator integrity check fail
+					if (prepareCall(0).equals("NO")) {
 						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
@@ -827,33 +815,165 @@ public class IncrementalThread extends PunctualThread {
 		return "NO";
 	}
 		
+	/**
+	 * The prepareCall() method is invoked by the coordinator to handle
+	 * integrity checks and/or authorizations for itself and any participants
+	 *
+	 * @param version - the policy version being compared
+	 * @return string
+	 */
 	public String prepareCall(int version) {
-		// Call all participants, send PTC and get YES/NO
+		boolean integrityOkay = true;
+		boolean authorizationsOkay = true;
+		// Call all participants, send PTC message and gather responses
 		if (sockList.size() > 0) {
-			int serverNum;
 			Message msg = null;
+			int serverNum[] = new int[sockList.size()];
+			int counter = 0;
+			
+			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
-				serverNum = socketList.nextElement();
-				if (serverNum != 0) { // Don't call the Policy server
+				serverNum[counter] = socketList.nextElement();
+				counter++;
+			}
+			// Send messages to all participants
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC " + version);
 						latencySleep(); // Simulate latency
 						// Send
-						sockList.get(serverNum).output.writeObject(msg);
-						// Rec'v
-						msg = (Message)sockList.get(serverNum).input.readObject();
-						// Parse response
+						sockList.get(serverNum[i]).output.writeObject(msg);
+					}
+					catch (Exception e) {
+						System.err.println("prepareCall() send Error: " + e.getMessage());
+						e.printStackTrace(System.err);
+					}
+				}
+			}
+			
+			// Handle coordinator's operations
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			if (integrityOkay) {
+				// Check authorizations if necessary
+				if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+					if (version != transactionPolicyVersion) {
+						// Perform re-authorizations on self
+						transactionPolicyVersion = version;
+						System.out.println("Running auth. on transaction " +
+										   queryLog.get(0).getTransaction() + 
+										   " queries using policy version " +
+										   transactionPolicyVersion);
+						for (int j = 0; j < queryLog.size(); j++) {
+							if (queryLog.get(j).getPolicy() != transactionPolicyVersion) {
+								if (!checkLocalAuth()) {
+									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+													   " for txn " + queryLog.get(j).getTransaction() +
+													   ", seq " + queryLog.get(j).getSequence() +
+													   " with policy v. " + transactionPolicyVersion +
+													   " (was v. " + queryLog.get(j).getPolicy() +
+													   "): FAIL");
+									authorizationsOkay = false;
+								}
+								else {
+									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+													   " for txn " + queryLog.get(j).getTransaction() +
+													   ", seq " + queryLog.get(j).getSequence() +
+													   " with policy v. " + transactionPolicyVersion +
+													   " (was v. " + queryLog.get(j).getPolicy() +
+													   "): PASS");
+								}
+							}
+							else {
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+												   " for txn " + queryLog.get(j).getTransaction() +
+												   ", seq " + queryLog.get(j).getSequence() +
+												   " with policy v. " + transactionPolicyVersion +
+												   ": ALREADY DONE");
+							}
+						}
+					}
+				}
+			}
+			
+			// Receive responses
+			for (int i = 0; i < sockList.size(); i++) {
+				if (serverNum[i] != 0) { // Don't listen for the Policy server
+					try {
+						msg = (Message)sockList.get(serverNum[i]).input.readObject();
+						// Check response
 						if (msg.theMessage.indexOf("NO") != -1) { // Someone responded NO
-							return "NO";
+							integrityOkay = false;
+						}
+						else if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+							if (msg.theMessage.indexOf("FALSE") != -1) { // Someone responded FALSE
+								authorizationsOkay = false;
+							}
 						}
 					}
 					catch (Exception e) {
-						System.err.println("prepareCall() Error: " + e.getMessage());
+						System.err.println("prepareCall() recv Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
 				}
 			}
 		}
-		return "YES";
+		else { // Only the coordinator is participating in txn
+			if (!integrityCheck()) {
+				integrityOkay = false;
+			}
+			if (integrityOkay) {
+				// Check authorizations if necessary
+				if (my_tm.validationMode == 2 || my_tm.validationMode == 4) {
+					if (version != transactionPolicyVersion) {
+						// Perform re-authorizations on self
+						transactionPolicyVersion = version;
+						System.out.println("Running auth. on transaction " +
+										   queryLog.get(0).getTransaction() + 
+										   " queries using policy version " +
+										   transactionPolicyVersion);
+						for (int j = 0; j < queryLog.size(); j++) {
+							if (queryLog.get(j).getPolicy() != transactionPolicyVersion) {
+								if (!checkLocalAuth()) {
+									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+													   " for txn " + queryLog.get(j).getTransaction() +
+													   ", seq " + queryLog.get(j).getSequence() +
+													   " with policy v. " + transactionPolicyVersion +
+													   " (was v. " + queryLog.get(j).getPolicy() +
+													   "): FAIL");
+									authorizationsOkay = false;
+								}
+								else {
+									System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+													   " for txn " + queryLog.get(j).getTransaction() +
+													   ", seq " + queryLog.get(j).getSequence() +
+													   " with policy v. " + transactionPolicyVersion +
+													   " (was v. " + queryLog.get(j).getPolicy() +
+													   "): PASS");
+								}
+							}
+							else {
+								System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+												   " for txn " + queryLog.get(j).getTransaction() +
+												   ", seq " + queryLog.get(j).getSequence() +
+												   " with policy v. " + transactionPolicyVersion +
+												   ": ALREADY DONE");
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (!integrityOkay) {
+			return "NO";
+		}
+		else if (!authorizationsOkay) {
+			return "YES FALSE";
+		}
+		
+		return "YES TRUE";
 	}
 }
