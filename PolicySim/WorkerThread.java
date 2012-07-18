@@ -522,7 +522,7 @@ public class WorkerThread extends Thread {
 	
 	/**
 	 * Method to run authorizations on each query performed on all participating
-	 * servers, including the coordinator, after global consistency checks.
+	 * servers, including the coordinator, after consistency checks.
 	 *
 	 * @return String - COMMIT or ABORT
 	 */
