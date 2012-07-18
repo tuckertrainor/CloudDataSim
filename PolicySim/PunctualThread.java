@@ -520,7 +520,7 @@ public class PunctualThread extends DeferredThread {
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
 					catch (Exception e) {
-						System.err.println("PTC Call Error: " + e.getMessage());
+						System.err.println("PTC Send Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
 				}
@@ -548,7 +548,7 @@ public class PunctualThread extends DeferredThread {
 						}
 					}
 					catch (Exception e) {
-						System.err.println("PTC Call Error: " + e.getMessage());
+						System.err.println("PTC Recv Error: " + e.getMessage());
 						e.printStackTrace(System.err);
 					}
 				}
