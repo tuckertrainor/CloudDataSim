@@ -102,6 +102,8 @@ public class Robot {
 				System.exit(-1);
 				break;
 		}
+		System.out.printf("PROOF: %s\tVM: %s\tPUSH: %s\tOPMIN: %s\tOPMAX: %s\n",
+						  proof, validationMode, policyPush, minOperations, maxOperations);
 		
 		// Push parameters to active servers
 		if (!parameterPush(serverList)) {
@@ -133,8 +135,6 @@ public class Robot {
 		else if (proof.equals("CONTINUOUS") && policyPush == 1) {
 			pickRandomServer = true;
 		}
-		System.out.printf("PROOF: %s\tVM: %s\tPUSH: %s\tOPMIN: %s\tOPMAX: %s\n",
-						  proof, validationMode, policyPush, minOperations, maxOperations);
 		if (!verbose) {
 			System.out.print("Running");
 		}
