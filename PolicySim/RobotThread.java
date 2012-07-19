@@ -24,22 +24,25 @@ public class RobotThread implements Runnable {
 	private final int latencyMin;
 	private final int latencyMax;
 	private final boolean threadSleep;
+	private final boolean verbose;
 	private Random generator;
 
 	/**
 	 * Constructor that sets up transaction communication
 	 *
-	 * @param _txnNumber - the number of this transaction set
-	 * @param _coordinator
-	 * @param _transactions - A string representing the queries to be run
-	 * @param _server - The server name where the primary Transaction Manager
-	 * is located
-	 * @param _port - The port number of the server
-	 * @param _lMin
-	 * @param _lMax
-	 * @param _threadSleep
+	 * @param int _txnNumber - The number of this transaction set
+	 * @param int _coordinator - The server number of the transaction's
+	 * coordinator
+	 * @param int _transactions - A string representing the queries to be run
+	 * @param String _server - The server name where the primary Transaction
+	 * Manager is located
+	 * @param int _port - The port number of the server
+	 * @param int _lMin - Minimum simulated latency
+	 * @param int _lMax - Maximum simulated latency
+	 * @param boolean _threadSleep - Whether to Thread.sleep() for latency
+	 * @param boolean _verbose - Whether to output each transaction status
 	 */
-	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep) {
+	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep, boolean _verbose) {
 		coordinator = _coordinator;
 		txnNumber = _txnNumber;
 		transactions = _transactions;
@@ -48,6 +51,7 @@ public class RobotThread implements Runnable {
 		latencyMin = _lMin;
 		latencyMax = _lMax;
 		threadSleep = _threadSleep;
+		verbose = _verbose;
 	}
 
 	/**
@@ -63,8 +67,10 @@ public class RobotThread implements Runnable {
 
 			// Connect to the specified server
 			final Socket sock = new Socket(server, port);
-			System.out.println("RobotThread: Transaction " + txnNumber +
-							   " connected to " + server + " on port " + port);
+			if (verbose) {
+				System.out.println("RobotThread: Transaction " + txnNumber +
+								   " connected to " + server + " on port " + port);
+			}
 			// Set up I/O streams with the server
 			final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
@@ -103,8 +109,15 @@ public class RobotThread implements Runnable {
 				else if (respSplit[0].equals("ABORT")) { // Unsuccessful transaction
 					TransactionLog.entry.get(txnNumber).setStatus(respSplit[0] + ": " + respSplit[1]);
 					TransactionLog.entry.get(txnNumber).setEndTime(new Date().getTime());
-					System.out.println("RobotThread: Transaction " + txnNumber + " " +
-									   TransactionLog.entry.get(txnNumber).getStatus());
+					if (verbose) {
+						System.out.println("RobotThread: Transaction " + txnNumber + " " +
+										   TransactionLog.entry.get(txnNumber).getStatus());
+					}
+					else {
+						if (txnNumber % 25 == 0) {
+							System.out.print(".");
+						}
+					}
 					break;
 				}
 				else if (respSplit[0].equals("FIN")) {
@@ -112,8 +125,15 @@ public class RobotThread implements Runnable {
 					if (!threadSleep) {
 						TransactionLog.entry.get(txnNumber).addSleepTime(Integer.parseInt(respSplit[1]));
 					}
-					System.out.println("RobotThread: Transaction " + txnNumber + " " +
-									   TransactionLog.entry.get(txnNumber).getStatus());
+					if (verbose) {
+						System.out.println("RobotThread: Transaction " + txnNumber + " " +
+										   TransactionLog.entry.get(txnNumber).getStatus());
+					}
+					else {
+						if (txnNumber % 25 == 0) {
+							System.out.print(".");
+						}
+					}
 				}
 				else { // Something went wrong
 					System.out.println("RobotThread: Query handling error - received \"" + respSplit[0] + "\" from server.");

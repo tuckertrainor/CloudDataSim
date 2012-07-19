@@ -37,6 +37,7 @@ public class Robot {
 	static long randomSeed;
 	static Random generator;
 	static ExecutorService execSvc;
+	static boolean verbose = false;
 
 	/**
 	 * Main method.
@@ -132,6 +133,11 @@ public class Robot {
 		else if (proof.equals("CONTINUOUS") && policyPush == 1) {
 			pickRandomServer = true;
 		}
+		System.out.printf("PROOF: %s\tVM: %s\tPUSH: %s\tOPMIN: %s\tOPMAX: %s\n",
+						  proof, validationMode, policyPush, minOperations, maxOperations);
+		if (!verbose) {
+			System.out.print("Running");
+		}
 		for (int i = 1; i <= maxTransactions; i++) {
 			newTrans = "";
 			prevQuery = 'B';
@@ -216,7 +222,8 @@ public class Robot {
 											 serverList.get(coordinator).getPort(),
 											 latencyMin,
 											 latencyMax,
-											 threadSleep) );
+											 threadSleep,
+											 verbose) );
 		}
 		
 		execSvc.shutdown();

@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
-PROOF CONTINUOUS
+PROOF DEFERRED
 # VM validationMode - integer for setting mode of proof
 #
 # Deferred/Punctual 0: 2PC only
@@ -19,14 +19,14 @@ PROOF CONTINUOUS
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #
-VM 2
+VM 0
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 # 4: during operations (for inc.) 5: at PTC time (for inc.)
 #
 # For continuous - 0: no push; 1: single push to random server; 2: push for each
 # join (up to PTC); 3: push when entering commit phase (global consistency)
-PUSH 1
+PUSH 0
 # MT maxTransactions - number of transactions to perform
 MT 1000
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
@@ -34,13 +34,13 @@ OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
 OPMAX 15
 # MS maxServers - number of servers available
-MS 3
+MS 5
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
 # LMIN latencyMin - minimum delay due to latency
-LMIN 5
+LMIN 0
 # LMAX latencyMax - maximum delay due to latency
-LMAX 25
+LMAX 0
 # SLEEP threadSleep - boolean for whether or not to thread sleep or use sum
 SLEEP true
 # ICSR - integrity check success rate (0.00 to 1.00)
