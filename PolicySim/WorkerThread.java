@@ -23,14 +23,14 @@ public class WorkerThread extends Thread {
 	public int totalSleepTime = 0; // used if my_tm.threadSleep == false
 	public Random generator;
 	public boolean hasUpdated = false;
-	public final int READ_MIN = 75;
-	public final int READ_MAX = 125;
-	public final int WRITE_MIN = 150;
-	public final int WRITE_MAX = 225;
-	public final int AUTH_CHK_MIN = 50;
-	public final int AUTH_CHK_MAX = 150;
-	public final int INTEG_CHK_MIN = 150;
-	public final int INTEG_CHK_MAX = 225;
+	public final int READ_MIN = 1;
+	public final int READ_MAX = 3;
+	public final int WRITE_MIN = 12;
+	public final int WRITE_MAX = 20;
+	public final int AUTH_CHK_MIN = 1;
+	public final int AUTH_CHK_MAX = 3;
+	public final int INTEG_CHK_MIN = 1;
+	public final int INTEG_CHK_MAX = 3;
 
 	/**
 	 * Constructor that sets up the socket we'll chat over

@@ -34,7 +34,7 @@ OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction
 OPMAX 15
 # MS maxServers - number of servers available
-MS 5
+MS 3
 # MD maxDegree - degree of parallelism - number of active threads permitted
 MD 10
 # LMIN latencyMin - minimum delay due to latency
