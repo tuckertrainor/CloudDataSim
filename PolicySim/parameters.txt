@@ -19,7 +19,7 @@ PROOF DEFERRED
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #
-VM 4
+VM 2
 # PUSH policyPush - 0: none, 1: single participant, 2: all participants,
 # 3: update global but do not push (for global consistency check testing)
 # 4: during operations (for inc.) 5: at PTC time (for inc.)
@@ -28,7 +28,7 @@ VM 4
 # join (up to PTC); 3: push when entering commit phase (global consistency)
 PUSH 2
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 1000
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction

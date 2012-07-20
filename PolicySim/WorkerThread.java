@@ -8,6 +8,8 @@
  * over the socket until the socket is closed.
  */
 
+/* TODO: recheck extra/commented code on lines 72, 213, 635 */
+
 import java.lang.Thread;
 import java.net.Socket;
 import java.net.ConnectException;
@@ -67,7 +69,8 @@ public class WorkerThread extends Thread {
 																	new ObjectInputStream(sock.getInputStream())));
 				// If pushing updates for view consistency testing, do it now
 				if (!hasUpdated && (my_tm.validationMode == 1 || my_tm.validationMode == 2)) {
-					forcePolicyUpdate(my_tm.policyPush);
+//					forcePolicyUpdate(my_tm.policyPush);
+					transactionPolicyVersion++;
 					hasUpdated = true; // This only needs to be done once
 				}
 			}
@@ -207,7 +210,8 @@ public class WorkerThread extends Thread {
 			// Check global master policy version against transaction version
 			if (globalVersion != transactionPolicyVersion) {
 				// Have server get global version from the policy server
-				int calledGlobal = my_tm.callPolicyServer();
+//				int calledGlobal = my_tm.callPolicyServer();
+				int calledGlobal = globalVersion;
 				// Check version for possible race condition
 				if (calledGlobal > globalVersion) {
 					calledGlobal = globalVersion;
@@ -628,7 +632,10 @@ public class WorkerThread extends Thread {
 	 * @param mode - the integer value of policyPush from parameters.txt file
 	 */
 	public void forcePolicyUpdate(int mode) {
-		if (mode == 0) {
+		if (mode == 2 || mode == 3) {
+			// Do nothing (test)
+		}
+		else if (mode == 0) {
 			// No push, do nothing
 		}
 		else if (sockList.size() > 0) { // Can only perform if more than one server
