@@ -26,7 +26,7 @@ public class PolicyServer {
 
     public static void main(String[] args) {	
 		if (args.length == 1) {
-			if (args[1].equalsIgnoreCase("V")) {
+			if (args[0].equalsIgnoreCase("V")) {
 				verbose = true;
 			}
 			else {
