@@ -213,10 +213,6 @@ public class IncrementalThread extends PunctualThread {
 					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
-						// Force global update if necessary
-						if (my_tm.policyPush == 5) {
-							forcePolicyUpdate(3);
-						}
 						// Begin 2PC/2PV methods
 						msgText = coordinatorCommit();
 						System.out.println("Status of 2PC/2PV of transaction " + query[1] +
@@ -351,8 +347,14 @@ public class IncrementalThread extends PunctualThread {
 				}
 			}
 			else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
-				// Check freshest global policy version == txn version
-				if (my_tm.callPolicyServer() == transactionPolicyVersion) {
+				// Have coordinator's server call the policy server and retrieve the
+				// current global master policy version
+				int globalVersion = my_tm.callPolicyServer();
+				if (my_tm.policyPush == 2) { // Push at PTC
+					globalVersion++;
+				}
+				
+				if (globalVersion == transactionPolicyVersion) {
 					if (prepareCall(transactionPolicyVersion).equals("NO")) {
 						return "ABORT PTC_RESPONSE_NO";
 					}
@@ -362,8 +364,13 @@ public class IncrementalThread extends PunctualThread {
 				}
 			}
 			else { // VM == 2 || VM == 4
-				// Get current global policy from policy server
+				// Have coordinator's server call the policy server and retrieve the
+				// current global master policy version
 				int globalVersion = my_tm.callPolicyServer();
+				if (my_tm.policyPush == 2) { // Push at PTC
+					globalVersion++;
+				}
+				
 				if (globalVersion == transactionPolicyVersion) {
 					// Get YES/NO from all participants
 					if (prepareCall(transactionPolicyVersion).equals("NO")) {
