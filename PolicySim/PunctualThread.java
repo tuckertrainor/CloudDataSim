@@ -112,7 +112,7 @@ public class PunctualThread extends DeferredThread {
 												   " Policy version set: " +
 												   transactionPolicyVersion);
 							}
-							if (queryGroup.length == 5) { // Policy push
+							if (query.length == 5) { // Policy push
 								transactionPolicyVersion++;
 							}
 							
@@ -161,7 +161,7 @@ public class PunctualThread extends DeferredThread {
 												   " Policy version set: " +
 												   transactionPolicyVersion);
 							}
-							if (queryGroup.length == 5) { // Policy push
+							if (query.length == 5) { // Policy push
 								transactionPolicyVersion++;
 							}
 							
@@ -337,6 +337,11 @@ public class PunctualThread extends DeferredThread {
 						}
 					}
 				}
+				else if (hasUpdated && (my_tm.validationMode == 2 || my_tm.validationMode == 4)) {
+					// Continue updating the policy version on subsequent
+					// participants as they join
+					query += " P";
+				}
 			}
 			
 			// Send query
@@ -433,24 +438,24 @@ public class PunctualThread extends DeferredThread {
 			// Check global master policy version against transaction version
 			if (globalVersion != transactionPolicyVersion) {
 				// Have server get global version from the policy server
-				int calledGlobal = my_tm.callPolicyServer();
-				// Check version for possible race condition
-				if (calledGlobal > globalVersion) {
-					calledGlobal = globalVersion;
-				}
+
+				// Note: we are going to optimize this and have the participant
+				// use the policy passed by the coordinator and save a call to
+				// the policy server
+
 				// Perform integrity check
 				if (integrityCheck()) {
 					// Run local authorizations
 					System.out.println("Running auth. on transaction " +
 									   queryLog.get(0).getTransaction() + 
 									   " queries using policy version " +
-									   calledGlobal);
+									   globalVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
 						if (!checkLocalAuth()) {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for txn " + queryLog.get(j).getTransaction() +
 											   ", seq " + queryLog.get(j).getSequence() +
-											   " with policy v. " + calledGlobal +
+											   " with policy v. " + globalVersion +
 											   " (was v. " + queryLog.get(j).getPolicy() +
 											   "): FAIL");
 							return "YES FALSE"; // (authorization failed)
@@ -459,7 +464,7 @@ public class PunctualThread extends DeferredThread {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for txn " + queryLog.get(j).getTransaction() +
 											   ", seq " + queryLog.get(j).getSequence() +
-											   " with policy v. " + calledGlobal +
+											   " with policy v. " + globalVersion +
 											   " (was v. " + queryLog.get(j).getPolicy() +
 											   "): PASS");
 						}
@@ -612,6 +617,9 @@ public class PunctualThread extends DeferredThread {
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
 		int globalVersion = my_tm.callPolicyServer();
+		if (my_tm.policyPush == 1) {
+			globalVersion++;
+		}
 		
 		// Check coordinator for its version
 		if (my_tm.validationMode == 3 && transactionPolicyVersion != globalVersion) {
