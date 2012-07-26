@@ -72,7 +72,7 @@ public class WorkerThread extends Thread {
 					// Instead of contacting the Policy Server to force an
 					// update, in deferred proofs we merely need at least one
 					// server to have a differing policy version.
-					if (my_tm.policyPush == 2) { // if policyPush == 0, no push
+					if (my_tm.policyPush == 1) { // if policyPush == 0, no push
 						transactionPolicyVersion++;
 					}
 					hasUpdated = true; // This only needs to be done once
