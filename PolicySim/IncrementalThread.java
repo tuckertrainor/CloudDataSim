@@ -106,13 +106,9 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-									transactionPolicyVersion = my_tm.getPolicy();
-								}
-								else { // Get and set freshest global policy
-									my_tm.setPolicy(my_tm.callPolicyServer());
-									transactionPolicyVersion = my_tm.getPolicy();									
-								}
+								// Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();									
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
@@ -143,9 +139,17 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							int passServer = Integer.parseInt(query[2]);
-							int txnNum = Integer.parseInt(query[1]);
-							// Check if server has participated yet
+//							int passServer = Integer.parseInt(query[2]);
+//							int txnNum = Integer.parseInt(query[1]);
+							System.out.println("Pass READ of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2]);
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to READ of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
+/*							// Check if server has participated yet
 							if (!sockList.hasSocket(passServer)) {
 								if (!join(passServer, txnNum)) {
 									msgText = "FAIL during join(" + passServer +
@@ -181,7 +185,7 @@ public class IncrementalThread extends PunctualThread {
 												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   ": " + msgText);
-							}
+							}*/
 						}
 					}
 					else if (query[0].equals("W")) { // WRITE
@@ -190,13 +194,9 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-									transactionPolicyVersion = my_tm.getPolicy();
-								}
-								else { // Get and set freshest global policy
-									my_tm.setPolicy(my_tm.callPolicyServer());
-									transactionPolicyVersion = my_tm.getPolicy();									
-								}
+								// Get and set freshest global policy
+								my_tm.setPolicy(my_tm.callPolicyServer());
+								transactionPolicyVersion = my_tm.getPolicy();
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
@@ -227,7 +227,15 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-							int passServer = Integer.parseInt(query[2]);
+							System.out.println("Pass WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2]);
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
+/*							int passServer = Integer.parseInt(query[2]);
 							int txnNum = Integer.parseInt(query[1]);
 							// Check if server has participated yet
 							if (!sockList.hasSocket(passServer)) {
@@ -265,7 +273,7 @@ public class IncrementalThread extends PunctualThread {
 												   " sequence " + query[3] +
 												   " to server " + query[2] +
 												   ": " + msgText);
-							}
+							}*/
 						}
 					}
 					else if (query[0].equals("PASSR")) { // Passed read operation
@@ -339,6 +347,13 @@ public class IncrementalThread extends PunctualThread {
 						}
 					}
 					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
+						if (transactionPolicyVersion == 0) {
+							// This thread may not have had txn policy set yet
+							transactionPolicyVersion = my_tm.getPolicy();
+						}
+						if (query.length == 2 && query[1].equals("P")) { // Policy push
+							transactionPolicyVersion++;
+						}
 						msgText = "VERSION " + transactionPolicyVersion;
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
@@ -397,7 +412,7 @@ public class IncrementalThread extends PunctualThread {
 		System.out.flush();
 		System.setOut(printStreamOriginal);
 	}
-
+/*
 	public boolean join(int otherServer, int txnNumber) {
 		// Do only if server has not participated yet
 		if (!sockList.hasSocket(otherServer)) {
@@ -470,7 +485,7 @@ public class IncrementalThread extends PunctualThread {
 		else {
 			return true;
 		}
-	}
+	}*/
 	
 	/**
 	 * Passes a query to other specified server
@@ -484,6 +499,7 @@ public class IncrementalThread extends PunctualThread {
 		String server = my_tm.serverList.get(otherServer).getAddress();
 		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
+		String aMsg = "";
 		try {
 			// Check SocketList for an existing socket, else create and add new
 			if (!sockList.hasSocket(otherServer)) {
@@ -494,17 +510,32 @@ public class IncrementalThread extends PunctualThread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),
 																	new ObjectInputStream(sock.getInputStream())));
+				// Check newly participating server's policy version
+				aMsg = "VERSION";
 				// Push policy update to a random server (PUSH == 1)
 				if (!hasUpdated && my_tm.policyPush == 1) {
 					if (otherServer == randomServer) {
 						// Add a sentinel to end of query
-						query += " P";
+						aMsg += " P";
 						hasUpdated = true; // This only needs to be done once
 					}
 				}
+				// Send message
+				msg = new Message(aMsg);
+				latencySleep(); // Simulate latency to other server
+				sockList.get(otherServer).output.writeObject(msg);
+				msg = (Message)sockList.get(otherServer).input.readObject();
+				System.out.println("Server " + otherServer +
+								   " says: " + msg.theMessage +
+								   " for message " + aMsg);
+				String vSplit[] = msg.theMessage.split(" ");
+				if (Integer.parseInt(vSplit[1]) != transactionPolicyVersion) {
+					// Inconsistent - abort
+					return "ABORT TXN_CONSISTENCY_FAIL";
+				}
 			}
 			
-			// Send query
+			// Now we can send the query
 			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
@@ -701,7 +732,7 @@ public class IncrementalThread extends PunctualThread {
 			else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
 				// Check freshest global policy version == txn version
 				if (my_tm.callPolicyServer() == transactionPolicyVersion) {
-					if (prepareCall(0).equals("NO")) {
+					if (prepareCall(transactionPolicyVersion).equals("NO")) {
 						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
@@ -714,7 +745,7 @@ public class IncrementalThread extends PunctualThread {
 				int globalVersion = my_tm.callPolicyServer();
 				if (globalVersion == transactionPolicyVersion) {
 					// Get YES/NO from all participants
-					if (prepareCall(0).equals("NO")) {
+					if (prepareCall(transactionPolicyVersion).equals("NO")) {
 						return "ABORT PTC_RESPONSE_NO";
 					}
 				}
@@ -756,7 +787,7 @@ public class IncrementalThread extends PunctualThread {
 			}
 		}
 		else if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
-			// Global single chance
+			// Global single chance - just run 2PC on this participant
 			if (integrityCheck()) {
 				return "YES";
 			}
@@ -765,10 +796,12 @@ public class IncrementalThread extends PunctualThread {
 			// Check integrity, then call Policy Server for freshest policy,
 			// re-run authorizations
 			if (integrityCheck()) {
-				// Get fresh policy - this is a bit of a hack, just call server
-				// and set transaction policy from globalVersion
-				my_tm.callPolicyServer(); // For posterity
-				transactionPolicyVersion = globalVersion;
+				// Optimization - if txn policy is not the same as global
+				// version passed by coordinator, just use the passed version -
+				// no need to call policy server
+				if (transactionPolicyVersion != globalVersion) {
+					transactionPolicyVersion = globalVersion;
+				}
 				// Re-run authorizations
 				System.out.println("Running auth. on transaction " +
 								   queryLog.get(0).getTransaction() + 

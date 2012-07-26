@@ -129,7 +129,7 @@ public class Robot {
 			(validationMode == 2 || validationMode == 4)) {
 			pickRandomServer = true;
 		}
-		else if (proof.equals("INCREMENTAL") && policyPush == 4) {
+		else if (proof.equals("INCREMENTAL") && policyPush == 1) {
 			pickRandomServer = true;
 		}
 		else if (proof.equals("CONTINUOUS") && policyPush == 1) {
