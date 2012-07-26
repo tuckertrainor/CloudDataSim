@@ -481,20 +481,37 @@ public class IncrementalThread extends PunctualThread {
 	 * @return String - the ACK/ABORT from the other server
 	 */
 	public String passQuery(int otherServer, String query) {
+		String server = my_tm.serverList.get(otherServer).getAddress();
+		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
-		
 		try {
-
-			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
-			msg = new Message("PASS" + query);
+			// Check SocketList for an existing socket, else create and add new
+			if (!sockList.hasSocket(otherServer)) {
+				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
+				Socket sock = new Socket(server, port);
+				sockList.addSocketObj(otherServer, new SocketObject(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),
+																	new ObjectInputStream(sock.getInputStream())));
+				// Push policy update to a random server (PUSH == 1)
+				if (!hasUpdated && my_tm.policyPush == 1) {
+					if (otherServer == randomServer) {
+						// Add a sentinel to end of query
+						query += " P";
+						hasUpdated = true; // This only needs to be done once
+					}
+				}
+			}
+			
 			// Send query
+			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);
-			// else it is an ABORT, no need to log, will be handled by RobotThread
 			return msg.theMessage;
 		}
 		catch (ConnectException ce) {
