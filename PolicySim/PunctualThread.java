@@ -321,7 +321,7 @@ public class PunctualThread extends DeferredThread {
 																	new ObjectOutputStream(sock.getOutputStream()),	
 																	new ObjectInputStream(sock.getInputStream())));
 				// Push policy updates as necessary
-				if (!hasUpdated) {
+				if (!hasUpdated && my_tm.policyPush == 1) {
 					if (my_tm.validationMode == 1 || my_tm.validationMode == 3) {
 						// We can update at the addition of any participant
 						// Add a sentinel to end of query

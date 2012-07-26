@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
-PROOF DEFERRED
+PROOF PUNCTUAL
 # VM validationMode - integer for setting mode of proof
 #
 # Deferred/Punctual 0: 2PC only
