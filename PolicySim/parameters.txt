@@ -19,7 +19,7 @@ PROOF DEFERRED
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #
-VM 2
+VM 1
 # PUSH policyPush
 # Deferred/Punctual - 0: No push  1: Push
 # Incremental - 4: during operations  5: at PTC time
