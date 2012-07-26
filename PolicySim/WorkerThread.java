@@ -69,8 +69,12 @@ public class WorkerThread extends Thread {
 																	new ObjectInputStream(sock.getInputStream())));
 				// If pushing updates for view consistency testing, do it now
 				if (!hasUpdated && (my_tm.validationMode == 1 || my_tm.validationMode == 2)) {
-//					forcePolicyUpdate(my_tm.policyPush);
-					transactionPolicyVersion++;
+					// Instead of contacting the Policy Server to force an
+					// update, in deferred proofs we merely need at least one
+					// server to have a differing policy version.
+					if (my_tm.policyPush == 2) { // if policyPush == 0, no push
+						transactionPolicyVersion++;
+					}
 					hasUpdated = true; // This only needs to be done once
 				}
 			}
@@ -210,25 +214,23 @@ public class WorkerThread extends Thread {
 			// Check global master policy version against transaction version
 			if (globalVersion != transactionPolicyVersion) {
 				// Have server get global version from the policy server
-//				int calledGlobal = my_tm.callPolicyServer();
-				int calledGlobal = globalVersion;
-				// Check version for possible race condition
-				if (calledGlobal > globalVersion) {
-					calledGlobal = globalVersion;
-				}
+				// Note: we are going to optimize this and have the participant
+				// use the policy passed by the coordinator and save a call to
+				// the policy server
+
 				// Perform integrity check
 				if (integrityCheck()) {
-					// Run local authorizations
+					// Run local authorizations with global version
 					System.out.println("Running auth. on transaction " +
 									   queryLog.get(0).getTransaction() + 
 									   " queries using policy version " +
-									   calledGlobal);
+									   globalVersion);
 					for (int j = 0; j < queryLog.size(); j++) {
 						if (!checkLocalAuth()) {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for transaction " + queryLog.get(j).getTransaction() +
 											   ", sequence " + queryLog.get(j).getSequence() +
-											   " with policy v. " + calledGlobal +
+											   " with policy v. " + globalVersion +
 											   ": FAIL");
 							return "YES FALSE"; // (authorization failed)
 						}
@@ -236,7 +238,7 @@ public class WorkerThread extends Thread {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 											   " for transaction " + queryLog.get(j).getTransaction() +
 											   ", sequence " + queryLog.get(j).getSequence() +
-											   " with policy v. " + calledGlobal +
+											   " with policy v. " + globalVersion +
 											   ": PASS");
 						}
 					}
@@ -403,6 +405,10 @@ public class WorkerThread extends Thread {
 		// Have coordinator's server call the policy server and retrieve the
 		// current global master policy version
 		int globalVersion = my_tm.callPolicyServer();
+		// Force an update of the policy if necessary
+		if (globalVersion == transactionPolicyVersion && my_tm.policyPush != 0) {
+			globalVersion++;
+		}
 		
 		// Check coordinator for its version
 		if (my_tm.validationMode == 3 && transactionPolicyVersion != globalVersion) {
