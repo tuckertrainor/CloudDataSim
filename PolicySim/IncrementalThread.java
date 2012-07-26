@@ -139,8 +139,6 @@ public class IncrementalThread extends PunctualThread {
 							}
 						}
 						else { // Pass to server
-//							int passServer = Integer.parseInt(query[2]);
-//							int txnNum = Integer.parseInt(query[1]);
 							System.out.println("Pass READ of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
@@ -149,43 +147,6 @@ public class IncrementalThread extends PunctualThread {
 											   " sequence " + query[3] +
 											   " to server " + query[2] +
 											   ": " + msgText);
-/*							// Check if server has participated yet
-							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer, txnNum)) {
-									msgText = "FAIL during join(" + passServer +
-									") for txn " + txnNum; 
-								}
-								else {
-									// The other server has joined, so now run
-									// a transaction consistency check
-									if (checkTxnConsistency() == false) {
-										msgText = "ABORT TXN_CONSISTENCY_FAIL";
-										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-														   "READ for txn " + query[1] +
-														   " sequence " + query[3]);
-									}
-									else {
-										// Consistency confirmed, pass operation
-										System.out.println("*** Txn consistency validated for sequence " + query[3]);
-										System.out.println("Pass READ of transaction " + query[1] +
-														   " sequence " + query[3] +
-														   " to server " + query[2]);
-										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-										System.out.println("Response to READ of transaction " + query[1] +
-														   " sequence " + query[3] +
-														   " to server " + query[2] +
-														   ": " + msgText);
-									}
-								}
-							}
-							else {
-								// Server has previously joined, pass operation
-								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-								System.out.println("Response to READ of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   ": " + msgText);
-							}*/
 						}
 					}
 					else if (query[0].equals("W")) { // WRITE
@@ -235,115 +196,6 @@ public class IncrementalThread extends PunctualThread {
 											   " sequence " + query[3] +
 											   " to server " + query[2] +
 											   ": " + msgText);
-/*							int passServer = Integer.parseInt(query[2]);
-							int txnNum = Integer.parseInt(query[1]);
-							// Check if server has participated yet
-							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer, txnNum)) {
-									msgText = "FAIL during join(" + passServer +
-											  ") for txn " + txnNum; 
-								}
-								else {
-									// The other server has joined, so now run
-									// a transaction consistency check
-									if (checkTxnConsistency() == false) {
-										msgText = "ABORT TXN_CONSISTENCY_FAIL";
-										System.out.println("ABORT TXN_CONSISTENCY_FAIL: " +
-														   "WRITE for txn " + query[1] +
-														   " sequence " + query[3]);
-									}
-									else {
-										// Consistency confirmed, pass operation
-										System.out.println("*** Txn consistency validated for sequence " + query[3]);
-										System.out.println("Pass WRITE of transaction " + query[1] +
-														   " sequence " + query[3] +
-														   " to server " + query[2]);
-										msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-										System.out.println("Response to WRITE of transaction " + query[1] +
-														   " sequence " + query[3] +
-														   " to server " + query[2] +
-														   ": " + msgText);
-									}
-								}
-							}
-							// Server has previously joined, pass operation
-							else {
-								msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-								System.out.println("Response to WRITE of transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " to server " + query[2] +
-												   ": " + msgText);
-							}*/
-						}
-					}
-					else if (query[0].equals("PASSR")) { // Passed read operation
-						// Check transaction policy against server policy
-						if (checkLocalAuth() == false) {
-							msgText = "ABORT LOCAL_POLICY_FAIL";
-							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
-											   "READ for txn " + query[1] +
-											   " sequence " + query[3]);
-						}
-						else { // OK to read
-							System.out.println("READ for txn " + query[1] +
-											   " sequence " + query[3]);
-							databaseRead();
-							// Add policy version for passed query logging
-							msgText += " " + transactionPolicyVersion;
-							// Add to query log
-							if (addToQueryLog(query, transactionPolicyVersion)) {
-								System.out.println("Transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " query logged.");
-							}
-							else {
-								System.out.println("Error logging query.");
-							}
-						}
-					}
-					else if (query[0].equals("PASSW")) { // Passed write operation
-						// Check transaction policy against server policy
-						if (checkLocalAuth() == false) {
-							msgText = "ABORT LOCAL_POLICY_FAIL";
-							System.out.println("ABORT LOCAL_POLICY_FAIL: " +
-											   "WRITE for txn " + query[1] +
-											   " sequence " + query[3]);
-						}
-						else { // OK to write
-							System.out.println("WRITE for txn " + query[1] +
-											   " sequence " + query[3]);
-							databaseWrite();
-							// Add policy version for passed query logging
-							msgText += " " + transactionPolicyVersion;
-							// Add to query log
-							if (addToQueryLog(query, transactionPolicyVersion)) {
-								System.out.println("Transaction " + query[1] +
-												   " sequence " + query[3] +
-												   " query logged.");
-							}
-							else {
-								System.out.println("Error logging query.");
-							}
-						}
-					}
-					else if (query[0].equals("JOIN")) {
-						// Coordinator is requesting server to join txn,
-						// set the transaction policy version for this server
-						if (transactionPolicyVersion == 0) {
-							if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
-								// Get policy from the server
-								transactionPolicyVersion = my_tm.getPolicy();
-							}
-							else { // Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();									
-							}
-							System.out.println("Transaction " + query[1] +
-											   " Policy version set: " +
-											   transactionPolicyVersion);
-						}
-						if (transactionPolicyVersion < 1) {
-							msgText = "JOIN_FAIL"; // Error message if policy is not properly set
 						}
 					}
 					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
@@ -412,80 +264,6 @@ public class IncrementalThread extends PunctualThread {
 		System.out.flush();
 		System.setOut(printStreamOriginal);
 	}
-/*
-	public boolean join(int otherServer, int txnNumber) {
-		// Do only if server has not participated yet
-		if (!sockList.hasSocket(otherServer)) {
-			String server = my_tm.serverList.get(otherServer).getAddress();
-			int port = my_tm.serverList.get(otherServer).getPort();
-			Message msg = null;
-			try {
-				// Create new socket, add it to SocketGroup
-				System.out.println("Connecting to " + server +
-								   " on port " + port);
-				Socket sock = new Socket(server, port);
-				sockList.addSocketObj(otherServer, new SocketObject(sock,
-																	new ObjectOutputStream(sock.getOutputStream()),	
-																	new ObjectInputStream(sock.getInputStream())));
-				// Push policy update if necessary
-				if (my_tm.policyPush == 4) { // Do during operations
-					if (otherServer == randomServer) { // Do if random server is picked
-						System.out.println("*** Pushing policy update ***");
-						// Send policy server msg, wait for ACK
-						try {
-							Message pushMsg = new Message("POLICYPUSH");
-							// Connect to the policy server
-							final Socket pSock = new Socket(my_tm.serverList.get(0).getAddress(),
-															my_tm.serverList.get(0).getPort());
-							// Set up I/O streams with the policy server
-							final ObjectOutputStream output = new ObjectOutputStream(pSock.getOutputStream());
-							final ObjectInputStream input = new ObjectInputStream(pSock.getInputStream());
-							System.out.println("Connected to Policy Server at " +
-											   my_tm.serverList.get(0).getAddress() + ":" +
-											   my_tm.serverList.get(0).getPort());
-							// Send
-							output.writeObject(pushMsg);
-							// Rec'v ACK
-							pushMsg = (Message)input.readObject();
-							if (!pushMsg.theMessage.equals("ACK")) {
-								System.err.println("*** Error with Policy Server during POLICYPUSH.");
-							}
-							// Close the socket - won't be calling again on this thread
-							pSock.close();
-						}
-						catch (Exception e) {
-							System.err.println("Error: " + e.getMessage());
-							e.printStackTrace(System.err);
-						}
-					}
-				}
-				// Tell new participant that they are about to join
-				msg = new Message("JOIN " + txnNumber);
-				// Send message
-				latencySleep(); // Simulate latency to other server
-				sockList.get(otherServer).output.writeObject(msg);
-				// Get response
-				msg = (Message)sockList.get(otherServer).input.readObject();
-				if (!msg.theMessage.equals("ACK")) {
-					return false; // Failure to join properly
-				}
-				return true; // Successful join
-			}
-			catch (ConnectException ce) {
-				System.err.println(ce.getMessage() +
-								   ": Check server address and port number.");
-				ce.printStackTrace(System.err);
-			}
-			catch (Exception e) {
-				System.err.println("Error during join(): " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
-			return false;
-		}
-		else {
-			return true;
-		}
-	}*/
 	
 	/**
 	 * Passes a query to other specified server
