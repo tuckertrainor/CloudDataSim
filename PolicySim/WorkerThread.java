@@ -468,13 +468,6 @@ public class WorkerThread extends Thread {
 				if (serverNum[i] != 0) { // Don't listen for the Policy server
 					try {
 						msg = (Message)sockList.get(serverNum[i]).input.readObject();
-						// mode 3: if all participants are using global, they
-						// run auths and return YES/NO, TRUE/FALSE
-						// if any are not using global, ABORT
-						
-						// mode 4: if any not using global, they call policy
-						// server and get global, run auths, return Y/N, T/F
-						
 						// Check response
 						if (msg.theMessage.indexOf("ABORT") != -1) { // Policy inequality
 							consistencyOkay = false;
