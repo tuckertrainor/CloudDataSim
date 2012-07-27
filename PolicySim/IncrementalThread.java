@@ -106,9 +106,15 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								// Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();									
+								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+									// Get policy from server
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // VM == 3 OR VM == 4
+									// Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
