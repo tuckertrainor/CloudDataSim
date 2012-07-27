@@ -787,7 +787,7 @@ public class ContinuousThread extends IncrementalThread {
 	 *
 	 * @return boolean - the result of the 2PV process
 	 */
-	public boolean run2PV(int policyVersion) {
+	public boolean run2PV(int freshestPolicy) {
 		boolean authorizationsOkay = true;
 		// Contact all servers, send 2PV [policy] and gather responses
 		if (sockList.size() > 0) {
@@ -795,7 +795,6 @@ public class ContinuousThread extends IncrementalThread {
 			int serverNum[] = new int[sockList.size()];
 			int counter = 0;
 			int recdPolicy;
-			int freshestPolicy = transactionPolicyVersion;
 			int highestPolicyForFalse = 0;
 			boolean needToRun = true;
 
@@ -811,7 +810,7 @@ public class ContinuousThread extends IncrementalThread {
 				for (int i = 0; i < sockList.size(); i++) {
 					if (serverNum[i] != 0) { // Don't call the Policy server
 						try {
-							msg = new Message("2PV " + transactionPolicyVersion);
+							msg = new Message("2PV " + freshestPolicy);
 							latencySleep(); // Simulate latency
 							// Send
 							sockList.get(serverNum[i]).output.writeObject(msg);
@@ -826,7 +825,7 @@ public class ContinuousThread extends IncrementalThread {
 				// Check that coordinator's policy version is up to date
 				if (freshestPolicy > transactionPolicyVersion) {
 					// Re-run proofs on coordinator
-					transactionPolicyVersion = policyVersion;
+					transactionPolicyVersion = freshestPolicy;
 					System.out.println("Running auth. on transaction " +
 									   queryLog.get(0).getTransaction() + 
 									   " queries using policy version " +
@@ -842,7 +841,7 @@ public class ContinuousThread extends IncrementalThread {
 						try {
 							msg = (Message)sockList.get(serverNum[i]).input.readObject();
 							System.out.println("Response of server " + serverNum[i] +
-											   " for message 2PV " + transactionPolicyVersion +
+											   " for message 2PV " + freshestPolicy +
 											   ": " + msg.theMessage);
 							// Parse response: TRUE [policy] or FALSE [policy]
 							String msgSplit[] = msg.theMessage.split(" ");
