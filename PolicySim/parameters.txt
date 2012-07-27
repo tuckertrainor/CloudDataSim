@@ -15,7 +15,6 @@ PROOF INCREMENTAL
 # Incremental 3: TXN: global consistency PTC: global single chance
 # Incremental 4: TXN: global consistency PTC: global second chance
 #
-# Continuous 0: 2PC only (Is there such a thing? Nothing coded for this yet in run())
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #

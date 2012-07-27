@@ -366,6 +366,16 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 					}
+					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
+						if (transactionPolicyVersion == 0) {
+							// This thread may not have had txn policy set yet
+							transactionPolicyVersion = my_tm.getPolicy();
+						}
+						if (query.length == 2 && query[1].equals("P")) { // Policy push
+							transactionPolicyVersion++;
+						}
+						msgText = "VERSION " + transactionPolicyVersion;
+					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
 						// Begin 2PC/2PV methods
@@ -455,20 +465,73 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the response from the other server
 	 */
 	public String passQuery(int otherServer, String query) {
+		String server = my_tm.serverList.get(otherServer).getAddress();
+		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
-
 		try {
-			// Add "PASS" to beginning of query (so we have PASSR or PASSW)
-			// and the txn policy version
-			msg = new Message("PASS" + query + " " + transactionPolicyVersion);
-			// Send query
+			// Check SocketList for an existing socket, else create and add new
+			if (!sockList.hasSocket(otherServer)) {
+				// Create new socket, add it to SocketGroup
+				System.out.println("Connecting to " + server +
+								   " on port " + port);
+				Socket sock = new Socket(server, port);
+				sockList.addSocketObj(otherServer, new SocketObject(sock,
+																	new ObjectOutputStream(sock.getOutputStream()),
+																	new ObjectInputStream(sock.getInputStream())));
+				
+				// we are sending the query and the coordinator's policy version (and a push sentinel if need be)
+				// Pc is index 4 (length == 5) Push is index 5 (length == 6)
+				// participant uses greater of available policies, re-runs auths if necessary, returns TRUE or FALSE plus policy used (an ACK too?)
+				// coordinator parses policy version, if greater than Pc then run 2PV - receives T/F from that
+				
+				
+				// Add policy version and/or push sentinel to query
+				query += " " + transactionPolicyVersion;
+				if (my_tm.policyPush == 2) {
+					// Push policy update at each joining server
+					query += " P";
+				}
+				else if (!hasUpdated && my_tm.policyPush == 1) {
+					// Push policy update to a random server
+					if (otherServer == randomServer) {
+						// Add a sentinel to end of query
+						query += " P";
+						hasUpdated = true; // This only needs to be done once
+					}
+				}
+				
+				// Send message
+				msg = new Message(query);
+				latencySleep(); // Simulate latency to other server
+				sockList.get(otherServer).output.writeObject(msg);
+				msg = (Message)sockList.get(otherServer).input.readObject();
+				System.out.println("Server " + otherServer +
+								   " says: " + msg.theMessage +
+								   " for passed query " + query);
+				String msgSplit[] = msg.theMessage.split(" ");
+				// Expecting TRUE <policy version> or FALSE <policy version>
+				if (msg.theMessage.indexOf("FALSE") != -1) {
+					return "ABORT LOCAL_AUTHORIZATION_FAIL";
+				}
+				int recdPolicy = Integer.parseInt(msgSplit[1]);
+				if (recdPolicy > transactionPolicyVersion) {
+					// Run 2PV - any server who has a txn policy < rec'd must
+					// run authorizations again
+					if (!run2PV(recdPolicy)) {
+						return "ABORT LOCAL_AUTHORIZATION_FAIL";
+					}
+				}
+				return "ACK"; // Everything is OK
+			}
+			
+			// Send the normal query
+			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
 			msg = (Message)sockList.get(otherServer).input.readObject();
 			System.out.println("Server " + otherServer +
 							   " says: " + msg.theMessage +
 							   " for passed query " + query);
-			// else it is an ABORT, no need to log, will be handled by RobotThread
 			return msg.theMessage;
 		}
 		catch (ConnectException ce) {
@@ -480,7 +543,7 @@ public class ContinuousThread extends IncrementalThread {
 			System.err.println("Error during passQuery(): " + e.getMessage());
 			e.printStackTrace(System.err);
 		}
-		return "PASSQUERY_FAIL";
+		return "FAIL";
 	}
 	
 	/**
