@@ -119,7 +119,7 @@ public class ContinuousThread extends IncrementalThread {
 												   transactionPolicyVersion);
 							}
 							
-							// Check transaction policy against server policy
+							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FALSE";
 								System.out.println("ABORT LOCAL_POLICY_FALSE: " +
@@ -211,7 +211,7 @@ public class ContinuousThread extends IncrementalThread {
 												   transactionPolicyVersion);
 							}
 							
-							// Check transaction policy against server policy
+							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FALSE";
 								System.out.println("ABORT LOCAL_POLICY_FALSE: " +

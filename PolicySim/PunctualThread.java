@@ -116,7 +116,7 @@ public class PunctualThread extends DeferredThread {
 								transactionPolicyVersion++;
 							}
 							
-							// Check transaction policy against server policy
+							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
 								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
@@ -165,7 +165,7 @@ public class PunctualThread extends DeferredThread {
 								transactionPolicyVersion++;
 							}
 							
-							// Check transaction policy against server policy
+							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
 								System.out.println("ABORT LOCAL_POLICY_FAIL: " +
