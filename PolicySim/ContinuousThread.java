@@ -185,52 +185,14 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 						else { // Pass to server
-							int passServer = Integer.parseInt(query[2]);
-							int txnNum = Integer.parseInt(query[1]);
-							// Check if server has participated yet
-							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer, txnNum)) {
-									msgText = "FAIL during join(" + passServer +
-									") for txn " + txnNum; 
-								}
-							}
-							if (msgText.equals("ACK")) { // join() did not fail above
-								/* View consistency:
-								 * Send transactionPolicyVersion, operation
-								 * Rec'v TRUE, ACK, [policy] or FALSE, [policy]
-								 */
-
-								// The other server has joined - send passQuery message, parse response
-								String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-								// Expecting TRUE ACK [policy] or FALSE [policy]
-								String respSplit[] = response.split(" ");
-								if (respSplit[0].equals("TRUE") && respSplit[1].equals("ACK")) {
-									// Check policy returned from server
-									int returnPolicy = Integer.parseInt(respSplit[2]);
-									if (returnPolicy > transactionPolicyVersion) {
-										// Run 2PV
-										if (run2PV(returnPolicy)) {
-											System.out.println("2PV success: transaction " + query[1] +
-															   " sequence " + query[3] +
-															   " policy version " + returnPolicy);
-										}
-										else { // FALSE returned
-											msgText = "ABORT LOCAL_POLICY_FALSE_2PV";
-											System.out.println("ABORT LOCAL_POLICY_FALSE_2PV: " +
-															   " txn " + query[1] +
-															   " sequence " + query[3] +
-															   ", policy version " + returnPolicy);
-										}
-									}
-								}
-								else { // FALSE
-									msgText = "ABORT LOCAL_POLICY_FALSE";
-									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
-													   "READ for txn " + query[1] +
-													   " sequence " + query[3] +
-													   ", policy version " + respSplit[1]);
-								}
-							}
+							System.out.println("Pass WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2]);
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
 						}
 					}
 					else if (query[0].equals("W")) { // WRITE
@@ -319,52 +281,14 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 						else { // Pass to server
-							int passServer = Integer.parseInt(query[2]);
-							int txnNum = Integer.parseInt(query[1]);
-							// Check if server has participated yet
-							if (!sockList.hasSocket(passServer)) {
-								if (!join(passServer, txnNum)) {
-									msgText = "FAIL during join(" + passServer +
-									") for txn " + txnNum; 
-								}
-							}
-							if (msgText.equals("ACK")) { // join() did not fail above
-								/* View consistency:
-								 * Send transactionPolicyVersion, operation
-								 * Rec'v TRUE, ACK, policy used or FALSE, policy used
-								 */
-								
-								// The other server has joined - send passQuery message, parse response
-								String response = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-								// Expecting TRUE ACK [policy] or FALSE [policy]
-								String respSplit[] = response.split(" ");
-								if (respSplit[0].equals("TRUE") && respSplit[1].equals("ACK")) {
-									// Check policy returned from server
-									int returnPolicy = Integer.parseInt(respSplit[2]);
-									if (returnPolicy > transactionPolicyVersion) {
-										// Run 2PV
-										if (run2PV(returnPolicy)) {
-											System.out.println("2PV success: transaction " + query[1] +
-															   " sequence " + query[3] +
-															   " policy version " + returnPolicy);
-										}
-										else {
-											msgText = "ABORT LOCAL_POLICY_FALSE_2PV";
-											System.out.println("ABORT LOCAL_POLICY_FALSE_2PV: " +
-															   " txn " + query[1] +
-															   " sequence " + query[3] +
-															   ", policy version " + returnPolicy);
-										}
-									}
-								}
-								else { // FALSE
-									msgText = "ABORT LOCAL_POLICY_FALSE";
-									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
-													   "WRITE for txn " + query[1] +
-													   " sequence " + query[3] +
-													   ", policy version " + respSplit[1]);
-								}
-							}
+							System.out.println("Pass WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2]);
+							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
+							System.out.println("Response to WRITE of transaction " + query[1] +
+											   " sequence " + query[3] +
+											   " to server " + query[2] +
+											   ": " + msgText);
 						}
 					}
 					else if (query[0].equals("PASSR")) { // Passed read operation
