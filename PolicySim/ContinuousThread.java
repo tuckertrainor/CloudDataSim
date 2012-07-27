@@ -777,25 +777,6 @@ public class ContinuousThread extends IncrementalThread {
 			}
 		}
 
-		/*
-		// Perform integrity check on coordinator
-		if (!integrityCheck()) {
-			System.out.println("*** Integrity check failed on coordinator ***");
-			return "ABORT PTC_RESPONSE_NO";
-		}
-		*/
-
-		/*
-		// Get and set freshest global policy
-		my_tm.setPolicy(my_tm.callPolicyServer());
-		if (my_tm.getPolicy() > transactionPolicyVersion) {
-			transactionPolicyVersion = my_tm.getPolicy();
-			// Coordinator needs to rerun proofs with newer policy
-			if (!rerunAuths(transactionPolicyVersion)) {
-				return "ABORT LOCAL_POLICY_FALSE_2PVC";
-			}
-		}*/
-
 		// Get and set freshest global policy
 		my_tm.setPolicy(my_tm.callPolicyServer());
 		int freshestPolicy = my_tm.getPolicy();
