@@ -119,27 +119,68 @@ public class ContinuousThread extends IncrementalThread {
 												   transactionPolicyVersion);
 							}
 							
-							// Check authorization
-							if (checkLocalAuth() == false) {
-								msgText = "ABORT LOCAL_POLICY_FALSE";
-								System.out.println("ABORT LOCAL_POLICY_FALSE: " +
-												   "READ for txn " + query[1] +
-												   " sequence " + query[3]);
-							}
-							else { // OK to read
-								System.out.println("READ for txn " + query[1] +
-												   " sequence " + query[3]);
-								databaseRead();
-								// Add policy version for passed query logging
-								msgText += " " + transactionPolicyVersion;
-								// Add to query log
-								if (addToQueryLog(query, transactionPolicyVersion)) {
-									System.out.println("Transaction " + query[1] +
-													   " sequence " + query[3] +
-													   " query logged.");
+							// query[] has a length of 5 or 6 - handle each
+							if (query.length >= 5) {
+								// Get passed in policy version
+								int coordPolicy = Integer.parseInt(query[4]);
+								// Handle possible policy version inequality
+								if (transactionPolicyVersion < coordPolicy) {
+									// Update txn policy, rerun auths if necessary
+									transactionPolicyVersion = coordPolicy;
+									if (!rerunAuths(transactionPolicyVersion)) {
+										msgText = "ABORT LOCAL_POLICY_FALSE";
+									}
 								}
-								else {
-									System.out.println("Error logging query.");
+								// Perform usual auth and operation
+								if (checkLocalAuth() == false) {
+									msgText = "ABORT LOCAL_POLICY_FALSE";
+									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
+													   "READ for txn " + query[1] +
+													   " sequence " + query[3]);
+								}
+								else { // OK to read
+									System.out.println("READ for txn " + query[1] +
+													   " sequence " + query[3]);
+									databaseRead();
+									// Add policy version for passed query logging
+									msgText += " " + transactionPolicyVersion;
+									// Add to query log
+									if (addToQueryLog(query, transactionPolicyVersion)) {
+										System.out.println("Transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " query logged.");
+									}
+									else {
+										System.out.println("Error logging query.");
+									}
+								}
+								if (query.length == 6) { // Push a policy update
+									transactionPolicyVersion++;
+								}
+							}
+							else { // query.length == 4 (legacy code)
+								// Check authorization
+								if (checkLocalAuth() == false) {
+									msgText = "ABORT LOCAL_POLICY_FALSE";
+									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
+													   "READ for txn " + query[1] +
+													   " sequence " + query[3]);
+								}
+								else { // OK to read
+									System.out.println("READ for txn " + query[1] +
+													   " sequence " + query[3]);
+									databaseRead();
+									// Add policy version for passed query logging
+									msgText += " " + transactionPolicyVersion;
+									// Add to query log
+									if (addToQueryLog(query, transactionPolicyVersion)) {
+										System.out.println("Transaction " + query[1] +
+														   " sequence " + query[3] +
+														   " query logged.");
+									}
+									else {
+										System.out.println("Error logging query.");
+									}
 								}
 							}
 						}
