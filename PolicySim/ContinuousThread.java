@@ -187,11 +187,11 @@ public class ContinuousThread extends IncrementalThread {
 							}
 						}
 						else { // Pass to server
-							System.out.println("Pass WRITE of transaction " + query[1] +
+							System.out.println("Pass READ of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2]);
 							msgText = passQuery(Integer.parseInt(query[2]), queryGroup[i]);
-							System.out.println("Response to WRITE of transaction " + query[1] +
+							System.out.println("Response to READ of transaction " + query[1] +
 											   " sequence " + query[3] +
 											   " to server " + query[2] +
 											   ": " + msgText);
@@ -238,13 +238,13 @@ public class ContinuousThread extends IncrementalThread {
 								if (checkLocalAuth() == false) {
 									msgText = "ABORT LOCAL_POLICY_FALSE";
 									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
-													   "READ for txn " + query[1] +
+													   "WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
 								}
 								else { // OK to read
 									System.out.println("READ for txn " + query[1] +
 													   " sequence " + query[3]);
-									databaseRead();
+									databaseWrite();
 									// Add policy version for passed query logging
 									msgText += " " + transactionPolicyVersion;
 									// Add to query log
@@ -263,13 +263,13 @@ public class ContinuousThread extends IncrementalThread {
 								if (checkLocalAuth() == false) {
 									msgText = "ABORT LOCAL_POLICY_FALSE";
 									System.out.println("ABORT LOCAL_POLICY_FALSE: " +
-													   "READ for txn " + query[1] +
+													   "WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
 								}
 								else { // OK to read
-									System.out.println("READ for txn " + query[1] +
+									System.out.println("WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
-									databaseRead();
+									databaseWrite();
 									// Add policy version for passed query logging
 									msgText += " " + transactionPolicyVersion;
 									// Add to query log
@@ -444,7 +444,7 @@ public class ContinuousThread extends IncrementalThread {
 						return "ABORT LOCAL_AUTHORIZATION_FAIL";
 					}
 				}
-				return "ACK"; // Everything is OK
+				return msg.theMessage; // Everything is OK
 			}
 			
 			// Send the normal query
@@ -707,6 +707,7 @@ public class ContinuousThread extends IncrementalThread {
 	 * @return String - the result of the process (TRUE/FALSE [policy version]
 	 */
 	public String answer2PV(int coordPolicy) {
+		System.out.println("Received call for 2PV - C:" + coordPolicy + " S:" + transactionPolicyVersion);
 		if (coordPolicy > transactionPolicyVersion) { // Re-run proofs with fresher policy
 			transactionPolicyVersion = coordPolicy;
 			System.out.println("Running auth. on transaction " +

@@ -18,7 +18,7 @@ PROOF INCREMENTAL
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #
-VM 4
+VM 2
 # PUSH policyPush
 # Deferred/Punctual - 0: No push  1: Push
 # Incremental - 0: No push  1: During operations  2: At PTC time
