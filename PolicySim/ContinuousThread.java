@@ -777,9 +777,17 @@ public class ContinuousThread extends IncrementalThread {
 			}
 		}
 
-		// Get and set freshest global policy
-		my_tm.setPolicy(my_tm.callPolicyServer());
-		int freshestPolicy = my_tm.getPolicy();
+		// Get and set freshest global policy - make call even though we are
+		// discarding response
+		int freshestPolicy = my_tm.callPolicyServer();
+		if (my_tm.policyPush == 3) {
+			// Push update to policy version
+			freshestPolicy = transactionPolicyVersion + 1;
+		}
+		else {
+			freshestPolicy = transactionPolicyVersion;
+		}
+		
 		boolean start2PV = false;
 		
 		// Contact all servers, send 2PVC [policy] and gather responses
