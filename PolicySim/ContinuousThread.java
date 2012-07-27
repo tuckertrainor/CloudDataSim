@@ -404,12 +404,6 @@ public class ContinuousThread extends IncrementalThread {
 																	new ObjectOutputStream(sock.getOutputStream()),
 																	new ObjectInputStream(sock.getInputStream())));
 				
-				// we are sending the query and the coordinator's policy version (and a push sentinel if need be)
-				// Pc is index 4 (length == 5) Push is index 5 (length == 6)
-				// participant uses greater of available policies, re-runs auths if necessary, returns TRUE or FALSE plus policy used (an ACK too?)
-				// coordinator parses policy version, if greater than Pc then run 2PV - receives T/F from that
-				
-				
 				// Add policy version and/or push sentinel to query
 				query += " " + transactionPolicyVersion;
 				if (my_tm.policyPush == 2) {
