@@ -218,7 +218,6 @@ public class ContinuousThread extends IncrementalThread {
 												   transactionPolicyVersion);
 							}
 							
-							
 							// query[] has a length of 5 or 6 - handle each
 							if (query.length >= 5) {
 								// Get passed in policy version
@@ -503,7 +502,7 @@ public class ContinuousThread extends IncrementalThread {
 					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 									   " for txn " + queryLog.get(j).getTransaction() +
 									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
+									   " with policy v. " + currentPolicyVersion +
 									   " (was v. " + queryLog.get(j).getPolicy() +
 									   "): FALSE");
 					return false;
@@ -512,12 +511,19 @@ public class ContinuousThread extends IncrementalThread {
 					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 									   " for txn " + queryLog.get(j).getTransaction() +
 									   ", seq " + queryLog.get(j).getSequence() +
-									   " with policy v. " + transactionPolicyVersion +
+									   " with policy v. " + currentPolicyVersion +
 									   " (was v. " + queryLog.get(j).getPolicy() +
 									   "): TRUE");
 					// Update policy version used for proof
-					queryLog.get(j).setPolicy(transactionPolicyVersion);
+					queryLog.get(j).setPolicy(currentPolicyVersion);
 				}
+			}
+			else {
+				System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+								   " for txn " + queryLog.get(j).getTransaction() +
+								   ", seq " + queryLog.get(j).getSequence() +
+								   " with policy v. " + currentPolicyVersion +
+								   ": ALREADY DONE");
 			}
 		}
 		return true;
