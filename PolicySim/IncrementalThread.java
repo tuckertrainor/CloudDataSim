@@ -445,8 +445,8 @@ public class IncrementalThread extends PunctualThread {
 					if (queryLog.get(j).getPolicy() != globalVersion) {
 						if (!checkLocalAuth()) {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-											   " for transaction " + queryLog.get(j).getTransaction() +
-											   ", sequence " + queryLog.get(j).getSequence() +
+											   " for txn " + queryLog.get(j).getTransaction() +
+											   ", seq " + queryLog.get(j).getSequence() +
 											   " with policy v. " + globalVersion +
 											   " (was v. " + queryLog.get(j).getPolicy() +
 											   "): FAIL");
@@ -454,8 +454,8 @@ public class IncrementalThread extends PunctualThread {
 						}
 						else {
 							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-											   " for transaction " + queryLog.get(j).getTransaction() +
-											   ", sequence " + queryLog.get(j).getSequence() +
+											   " for txn " + queryLog.get(j).getTransaction() +
+											   ", seq " + queryLog.get(j).getSequence() +
 											   " with policy v. " + globalVersion +
 											   " (was v. " + queryLog.get(j).getPolicy() +
 											   "): PASS");
