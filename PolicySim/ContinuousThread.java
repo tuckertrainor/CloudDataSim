@@ -294,16 +294,6 @@ public class ContinuousThread extends IncrementalThread {
 											   ": " + msgText);
 						}
 					}
-					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
-						if (transactionPolicyVersion == 0) {
-							// This thread may not have had txn policy set yet
-							transactionPolicyVersion = my_tm.getPolicy();
-						}
-						if (query.length == 2 && query[1].equals("P")) { // Policy push
-							transactionPolicyVersion++;
-						}
-						msgText = "VERSION " + transactionPolicyVersion;
-					}
 					else if (query[0].equals("C")) { // COMMIT
 						System.out.println("COMMIT phase - transaction " + query[1]);
 						// Begin 2PC/2PV methods
