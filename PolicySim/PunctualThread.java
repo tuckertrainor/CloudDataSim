@@ -761,7 +761,7 @@ public class PunctualThread extends DeferredThread {
 	
 	/**
 	 * Method to run authorizations on each query performed on all participating
-	 * servers, including the coordinator.
+	 * servers, including the coordinator. (used only in view consistency)
 	 *
 	 * @return String - COMMIT or ABORT
 	 */

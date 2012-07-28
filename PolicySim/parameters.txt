@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
-PROOF DEFERRED
+PROOF PUNCTUAL
 # VM validationMode - integer for setting mode of proof
 #
 # Deferred/Punctual 0: 2PC only
@@ -18,7 +18,7 @@ PROOF DEFERRED
 # Continuous 1: View consistency (2PC for commit)
 # Continuous 2: Global consistency (2PVC for commit)
 #
-VM 1
+VM 3
 # PUSH policyPush
 # Deferred/Punctual - 0: No push  1: Push
 # Incremental - 0: No push  1: During operations  2: At PTC time
