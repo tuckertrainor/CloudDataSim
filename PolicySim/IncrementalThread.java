@@ -442,24 +442,33 @@ public class IncrementalThread extends PunctualThread {
 								   " queries using policy version " +
 								   transactionPolicyVersion);
 				for (int j = 0; j < queryLog.size(); j++) {
-					if (!checkLocalAuth()) {
-						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-										   " for txn " + queryLog.get(j).getTransaction() +
-										   ", seq " + queryLog.get(j).getSequence() +
-										   " with policy v. " + transactionPolicyVersion +
-										   " (was v. " + queryLog.get(j).getPolicy() +
-										   "): FAIL");
-						return "YES FALSE"; // (authorization failed)
+					if (queryLog.get(j).getPolicy() != globalVersion) {
+						if (!checkLocalAuth()) {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + globalVersion +
+											   " (was v. " + queryLog.get(j).getPolicy() +
+											   "): FAIL");
+							return "YES FALSE"; // (authorization failed)
+						}
+						else {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + globalVersion +
+											   " (was v. " + queryLog.get(j).getPolicy() +
+											   "): PASS");
+							queryLog.get(j).setPolicy(globalVersion); // Update policy in log
+						}
 					}
 					else {
 						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
 										   " for txn " + queryLog.get(j).getTransaction() +
 										   ", seq " + queryLog.get(j).getSequence() +
-										   " with policy v. " + transactionPolicyVersion +
-										   " (was v. " + queryLog.get(j).getPolicy() +
-										   "): PASS");
-					}
-				}
+										   " with policy v. " + globalVersion +
+										   ": ALREADY DONE");
+					}				}
 				return "YES TRUE"; // Successful re-authorizations
 			}
 		}
