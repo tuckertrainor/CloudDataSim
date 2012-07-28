@@ -481,7 +481,7 @@ public class ContinuousThread extends IncrementalThread {
 			return run2PC();
 		}
 		else if (my_tm.validationMode == 2) { // Global consistency - 2PVC
-			return run2PVC(transactionPolicyVersion);
+			return run2PVC();
 		}
 		
 		return "ABORT UNKNOWN_VALIDATION_MODE";
@@ -731,11 +731,9 @@ public class ContinuousThread extends IncrementalThread {
 	 * Performs the 2PVC algorithm with the servers participating in the
 	 * transaction.
 	 *
-	 * @param int - the policy version to perform 2PVC with
-	 *
 	 * @return String - the result of the 2PVC process
 	 */
-	public String run2PVC(int policyVersion) {
+	public String run2PVC() {
 		// Get and set freshest global policy - make call even though we are
 		// discarding response
 		int freshestPolicy = my_tm.callPolicyServer();
