@@ -468,7 +468,8 @@ public class IncrementalThread extends PunctualThread {
 										   ", seq " + queryLog.get(j).getSequence() +
 										   " with policy v. " + globalVersion +
 										   ": ALREADY DONE");
-					}				}
+					}
+				}
 				return "YES TRUE"; // Successful re-authorizations
 			}
 		}
