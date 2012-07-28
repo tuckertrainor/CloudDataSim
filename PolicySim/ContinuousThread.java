@@ -765,7 +765,7 @@ public class ContinuousThread extends IncrementalThread {
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
-						msg = new Message("2PVC " + transactionPolicyVersion);
+						msg = new Message("2PVC " + freshestPolicy);
 						latencySleep(); // Simulate latency
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
