@@ -624,69 +624,6 @@ public class WorkerThread extends Thread {
 		return "COMMIT";
 	}
 	
-	/**
-	 * Method to force a policy update in order to trigger policy mismatch
-	 * handling by 2PV algorithms.
-	 *
-	 * @param mode - the integer value of policyPush from parameters.txt file
-	 */
-	public void forcePolicyUpdate(int mode) {
-		if (mode == 2 || mode == 3) {
-			// Do nothing (test)
-		}
-		else if (mode == 0) {
-			// No push, do nothing
-		}
-		else if (sockList.size() > 0) { // Can only perform if more than one server
-			String msgText = "POLICYPUSH";
-			
-			if (mode == 1) { // Push an update to a single server
-				// Find the first server in the list, push an update to it
-				for (int i = 1; i <= my_tm.serverList.size(); i++) {
-					if (sockList.hasSocket(i)) {
-						// Call policy server to update policy version on it
-						System.out.println("Preparing to request policy update for server " +
-										   i + ".");
-						msgText += " " + i;
-						break;
-					}
-				}
-			}
-			else if (mode == 2) { // Push an update to all servers
-				// msgText is already set correctly
-				System.out.println("Preparing to request policy update to all servers.");
-			}
-			else if (mode == 3) { // Update global version, but do not push
-				msgText += " UPDATEONLY";
-				System.out.println("Preparing to request undistributed policy update.");
-			}
-			// Send policy server msg, wait for ACK
-			try {
-				Message msg = new Message(msgText);
-				// Connect to the policy server
-				final Socket sock = new Socket(my_tm.serverList.get(0).getAddress(),
-											   my_tm.serverList.get(0).getPort());
-				// Set up I/O streams with the policy server
-				final ObjectOutputStream output = new ObjectOutputStream(sock.getOutputStream());
-				final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
-				System.out.println("Connected to Policy Server at " +
-								   my_tm.serverList.get(0).getAddress() + ":" +
-								   my_tm.serverList.get(0).getPort());
-				// Send
-				output.writeObject(msg);
-				// Rec'v ACK
-				msg = (Message)input.readObject();
-				if (!msg.theMessage.equals("ACK")) {
-					System.err.println("*** Error with Policy Server during POLICYPUSH.");
-				}
-			}
-			catch (Exception e) {
-				System.err.println("Error: " + e.getMessage());
-				e.printStackTrace(System.err);
-			}
-		}
-	}
-	
 	public void databaseRead() {
 		if (my_tm.threadSleep) {
 			try {
