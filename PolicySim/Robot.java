@@ -628,7 +628,14 @@ public class Robot {
 		FileWriter outputFile = null;
 		BufferedWriter outputBuf = null;
 		String logID = Long.toString(new Date().getTime());
-		logID = "" + proof.charAt(0) + validationMode + policyPush + logID.substring(3);
+		char txnLength = 'M';
+		if (minOperations < 15) {
+			txnLength = 'S';
+		}
+		else if (maxOperations > 30) {
+			txnLength = 'L';
+		}
+		logID = "" + proof.charAt(0) + validationMode + policyPush + txnLength + logID.substring(3);
 		String filename = "Log_" + logID + ".txt";
 		boolean success = true;
 		long avgFullTxn = 0l; // Start to finish
