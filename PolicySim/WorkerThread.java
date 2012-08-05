@@ -306,12 +306,12 @@ public class WorkerThread extends Thread {
 				serverNum[counter] = socketList.nextElement();
 				counter++;
 			}
+			latencySleep(); // Simulate latency (before looping)
 			// Send messages to all participants
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC");
-						latencySleep(); // Simulate latency
 						// Send
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
@@ -423,13 +423,12 @@ public class WorkerThread extends Thread {
 				serverNum[counter] = socketList.nextElement();
 				counter++;
 			}
+			latencySleep(); // Simulate latency (before looping)
 			// Send messages to all participants
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC " + globalVersion);
-						latencySleep(); // Simulate latency
-						// Send
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
 					catch (Exception e) {
@@ -540,12 +539,12 @@ public class WorkerThread extends Thread {
 				serverNum[counter] = socketList.nextElement();
 				counter++;
 			}
+			latencySleep(); // Simulate latency (before looping)
 			// Send messages to all participants
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("RUNAUTHS " + version);
-						latencySleep(); // Simulate latency
 						// Send
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}

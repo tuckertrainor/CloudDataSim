@@ -536,13 +536,12 @@ public class ContinuousThread extends IncrementalThread {
 				serverNum[counter] = socketList.nextElement();
 				counter++;
 			}
+			latencySleep(); // Simulate latency (before looping)
 			// Send messages to all participants
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("PTC");
-						latencySleep(); // Simulate latency
-						// Send
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
 					catch (Exception e) {
@@ -616,13 +615,12 @@ public class ContinuousThread extends IncrementalThread {
 			// Run 2PV as long as necessary
 			while (needToRun && authorizationsOkay) {
 				needToRun = false;
+				latencySleep(); // Simulate latency (before looping)
 				// Send messages to all participants
 				for (int i = 0; i < sockList.size(); i++) {
 					if (serverNum[i] != 0) { // Don't call the Policy server
 						try {
 							msg = new Message("2PV " + freshestPolicy);
-							latencySleep(); // Simulate latency
-							// Send
 							sockList.get(serverNum[i]).output.writeObject(msg);
 						}
 						catch (Exception e) {
@@ -751,12 +749,12 @@ public class ContinuousThread extends IncrementalThread {
 				serverNum[counter] = socketList.nextElement();
 				counter++;
 			}
+			latencySleep(); // Simulate latency (before looping)
 			// Send messages to all participants
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
 						msg = new Message("2PVC " + freshestPolicy);
-						latencySleep(); // Simulate latency
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
 					catch (Exception e) {
