@@ -164,10 +164,31 @@ public class WorkerThread extends Thread {
 			}
 		}
 		else if (my_tm.validationMode == 1 || my_tm.validationMode == 2) {
-			// 1. Rec'v PTC, request for policy version
-			//    Return integrity status (YES/NO), Policy version
+			// Return integrity status (YES/NO), auths (TRUE/FALSE), policy version
 			if (integrityCheck()) {
-				return "YES " + transactionPolicyVersion;
+				// Run local authorizations
+				System.out.println("Running auth. on transaction " +
+								   queryLog.get(0).getTransaction() +
+								   " queries using policy version " +
+								   transactionPolicyVersion);
+				for (int j = 0; j < queryLog.size(); j++) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   ": FAIL");
+						return "YES FALSE " + transactionPolicyVersion; // (authorization failed)
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   ": PASS");
+					}
+				}
+				return "YES TRUE " + transactionPolicyVersion; // (integrity and authorizations pass)
 			}
 			else {
 				return "NO";
@@ -293,6 +314,8 @@ public class WorkerThread extends Thread {
 		String status = "COMMIT";
 		Message msg = null;
 		ArrayList<Integer> versions = new ArrayList<Integer>();
+		boolean integrityOkay = true;
+		boolean authorizationsOkay = true;
 
 		// Add coordinator's policy version to ArrayList
 		versions.add(transactionPolicyVersion);
@@ -300,7 +323,6 @@ public class WorkerThread extends Thread {
 		if (sockList.size() > 0) {
 			int serverNum[] = new int[sockList.size()];
 			int counter = 0;
-			boolean integrityOkay = true;
 			// Gather server sockets
 			for (Enumeration<Integer> socketList = sockList.keys(); socketList.hasMoreElements();) {
 				serverNum[counter] = socketList.nextElement();
@@ -311,8 +333,7 @@ public class WorkerThread extends Thread {
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't call the Policy server
 					try {
-						msg = new Message("PTC");
-						// Send
+						msg = new Message("PTC " + transactionPolicyVersion);
 						sockList.get(serverNum[i]).output.writeObject(msg);
 					}
 					catch (Exception e) {
@@ -326,8 +347,29 @@ public class WorkerThread extends Thread {
 			if (!integrityCheck()) {
 				integrityOkay = false;
 			}
+			// Check coordinator's authorizations if integrity check was fine
+			if (integrityCheck()) {
+				for (int j = 0; j < queryLog.size(); j++) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   ": FAIL");
+						authorizationsOkay = false;
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + transactionPolicyVersion +
+										   ": PASS");
+						queryLog.get(j).setPolicy(transactionPolicyVersion); // Update policy in log
+					}
+				}
+			}
 
-			// Receive responses
+			// Receive responses - YES/NO, TRUE/FALSE, policy version
 			for (int i = 0; i < sockList.size(); i++) {
 				if (serverNum[i] != 0) { // Don't listen for the Policy server
 					try {
@@ -335,11 +377,16 @@ public class WorkerThread extends Thread {
 						// Check response, add policy version to ArrayList
 						if (msg.theMessage.indexOf("YES") != -1) {
 							if (my_tm.validationMode != 0) { // Not 2PC only
-								String msgSplit[] = msg.theMessage.split(" ");
-								versions.add(Integer.parseInt(msgSplit[1]));
+								if (msg.theMessage.indexOf("TRUE") != -1) {
+									String msgSplit[] = msg.theMessage.split(" ");
+									versions.add(Integer.parseInt(msgSplit[2]));
+								}
+								else { // Someone responded with a FALSE
+									authorizationsOkay = false;
+								}
 							}
 						}
-						else { // ABORT - someone responded with a NO
+						else { // Someone responded with a NO
 							integrityOkay = false;
 						}
 					}
@@ -353,38 +400,69 @@ public class WorkerThread extends Thread {
 			if (!integrityOkay) {
 				return "ABORT PTC_RESPONSE_NO";
 			}
+			// Check for any authorization failures
+			if (!authorizationsOkay) {
+				return "ABORT PTC_RESPONSE_FALSE";
+			}
+			
+			
+			// If 2PC only, no need to compare policy versions or run auths
+			if (my_tm.validationMode == 0) {
+				return "COMMIT";
+			}
+			else {
+				// Turn ArrayList into an array of ints, sort and compare versions
+				Integer versionArray[] = new Integer[versions.size()];
+				versionArray = versions.toArray(versionArray);
+				// Sort array, compare first value with last
+				Arrays.sort(versionArray);
+				if (versionArray[0] == versionArray[versionArray.length - 1]) {
+					// Policy versions match across servers - we're okay
+					return "COMMIT";
+				}
+				else { // Handle inequality
+					if (my_tm.validationMode == 1) { // ABORT
+						return "ABORT VIEW_CONSISTENCY_FAIL";
+					}
+					else { // Find common policy and run authorizations with it
+						// For simplicity, use minimum of versions as common policy
+						return runAuths((int)versionArray[0]);
+					}
+				}
+			}
 		}
-		else { // No other servers - check only coordinator for integrity
-			if (!integrityCheck()) {
+		else { // No other servers - check only coordinator for integrity and auths
+			if (integrityCheck()) {
+				if (my_tm.validationMode != 0) {
+					for (int j = 0; j < queryLog.size(); j++) {
+						if (!checkLocalAuth()) {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": FAIL");
+							return "ABORT PTC_RESPONSE_FALSE";
+						}
+						else {
+							System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+											   " for transaction " + queryLog.get(j).getTransaction() +
+											   ", sequence " + queryLog.get(j).getSequence() +
+											   " with policy v. " + transactionPolicyVersion +
+											   ": PASS");
+							queryLog.get(j).setPolicy(transactionPolicyVersion); // Update policy in log
+						}
+					}
+					return "COMMIT";
+				}
+				else { // 2PC only
+					return "COMMIT";
+				}
+			}
+			else {
 				return "ABORT PTC_RESPONSE_NO";
 			}
+			
 		}
-		
-		// If 2PC only, no need to compare policy versions or run auths
-		if (my_tm.validationMode == 0) {
-			return status;
-		}
-		
-		// Turn ArrayList into an array of ints, sort and compare versions
-		Integer versionArray[] = new Integer[versions.size()];
-		versionArray = versions.toArray(versionArray);
-		// Sort array, compare first value with last
-		Arrays.sort(versionArray);
-		if (versionArray[0] == versionArray[versionArray.length - 1]) {
-			// Policy versions match across servers - run authorizations
-			status = runAuths((int)versionArray[0]);
-		}
-		else { // Handle inequality
-			if (my_tm.validationMode == 1) { // ABORT
-				status = "ABORT VIEW_CONSISTENCY_FAIL";
-			}
-			else { // Find common policy and run authorizations with it
-				// For simplicity, use minimum of versions as common policy
-				status = runAuths((int)versionArray[0]);
-			}
-		}
-		
-		return status;
 	}
 
 	/**
