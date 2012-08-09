@@ -240,7 +240,7 @@ public class ContinuousThread extends IncrementalThread {
 													   "WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
 								}
-								else { // OK to read
+								else { // OK to write
 									System.out.println("READ for txn " + query[1] +
 													   " sequence " + query[3]);
 									databaseWrite();
@@ -265,7 +265,7 @@ public class ContinuousThread extends IncrementalThread {
 													   "WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
 								}
-								else { // OK to read
+								else { // OK to write
 									System.out.println("WRITE for txn " + query[1] +
 													   " sequence " + query[3]);
 									databaseWrite();
