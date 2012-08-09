@@ -119,7 +119,10 @@ public class IncrementalThread extends PunctualThread {
 												   " Policy version set: " +
 												   transactionPolicyVersion);
 							}
-							
+							// If P sentinel is rec'd, "update" policy version
+							if (query.length == 5) {
+								transactionPolicyVersion++;
+							}
 							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -168,7 +171,10 @@ public class IncrementalThread extends PunctualThread {
 												   " Policy version set: " +
 												   transactionPolicyVersion);
 							}
-							
+							// If P sentinel is rec'd, "update" policy version
+							if (query.length == 5) {
+								transactionPolicyVersion++;
+							}
 							// Check authorization
 							if (checkLocalAuth() == false) {
 								msgText = "ABORT LOCAL_POLICY_FAIL";
@@ -203,16 +209,6 @@ public class IncrementalThread extends PunctualThread {
 											   " to server " + query[2] +
 											   ": " + msgText);
 						}
-					}
-					else if (query[0].equals("VERSION")) { // Coordinator is requesting policy version
-						if (transactionPolicyVersion == 0) {
-							// This thread may not have had txn policy set yet
-							transactionPolicyVersion = my_tm.getPolicy();
-						}
-						if (query.length == 2 && query[1].equals("P")) { // Policy push
-							transactionPolicyVersion++;
-						}
-						msgText = "VERSION " + transactionPolicyVersion;
 					}
 					else if (query[0].equals("PTC")) { // Prepare-to-Commit
 						msgText = prepareToCommit(Integer.parseInt(query[1]));
@@ -279,7 +275,6 @@ public class IncrementalThread extends PunctualThread {
 		String server = my_tm.serverList.get(otherServer).getAddress();
 		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
-		String aMsg = "";
 		try {
 			// Check SocketList for an existing socket, else create and add new
 			if (!sockList.hasSocket(otherServer)) {
@@ -290,32 +285,38 @@ public class IncrementalThread extends PunctualThread {
 				sockList.addSocketObj(otherServer, new SocketObject(sock,
 																	new ObjectOutputStream(sock.getOutputStream()),
 																	new ObjectInputStream(sock.getInputStream())));
-				// Check newly participating server's policy version
-				aMsg = "VERSION";
 				// Push policy update to a random server (PUSH == 1)
 				if (!hasUpdated && my_tm.policyPush == 1) {
 					if (otherServer == randomServer) {
 						// Add a sentinel to end of query
-						aMsg += " P";
+						query += " P";
 						hasUpdated = true; // This only needs to be done once
 					}
 				}
 				// Send message
-				msg = new Message(aMsg);
+				msg = new Message(query);
 				latencySleep(); // Simulate latency to other server
 				sockList.get(otherServer).output.writeObject(msg);
 				msg = (Message)sockList.get(otherServer).input.readObject();
 				System.out.println("Server " + otherServer +
 								   " says: " + msg.theMessage +
-								   " for message " + aMsg);
+								   " for query " + query);
+				if (msg.theMessage.indexOf("ABORT") != -1) {
+					// ABORT message received
+					return msg.theMessage;
+				}
+				// Otherwise there was an ACK - read policy used
 				String vSplit[] = msg.theMessage.split(" ");
 				if (Integer.parseInt(vSplit[1]) != transactionPolicyVersion) {
 					// Inconsistent - abort
 					return "ABORT TXN_CONSISTENCY_FAIL";
 				}
+				else { // No problem
+					return msg.theMessage;
+				}
 			}
 			
-			// Now we can send the query
+			// Send regular query
 			msg = new Message(query);
 			latencySleep(); // Simulate latency to other server
 			sockList.get(otherServer).output.writeObject(msg);
