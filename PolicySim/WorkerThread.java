@@ -638,20 +638,30 @@ public class WorkerThread extends Thread {
 							   " queries using policy version " +
 							   version);
 			for (int j = 0; j < queryLog.size(); j++) {
-				if (!checkLocalAuth()) {
-					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for transaction " + queryLog.get(j).getTransaction() +
-									   ", sequence " + queryLog.get(j).getSequence() +
-									   " with policy v. " + version +
-									   ": FAIL");
-					authorizationsOkay = false;
+				if (queryLog.get(j).getPolicy() != version) {
+					if (!checkLocalAuth()) {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": FAIL");
+						return "YES FALSE"; // (authorization failed)
+					}
+					else {
+						System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
+										   " for transaction " + queryLog.get(j).getTransaction() +
+										   ", sequence " + queryLog.get(j).getSequence() +
+										   " with policy v. " + version +
+										   ": PASS");
+						queryLog.get(j).setPolicy(version); // Update policy in log
+					}
 				}
 				else {
 					System.out.println("Authorization of " + queryLog.get(j).getQueryType() +
-									   " for transaction " + queryLog.get(j).getTransaction() +
-									   ", sequence " + queryLog.get(j).getSequence() +
+									   " for txn " + queryLog.get(j).getTransaction() +
+									   ", seq " + queryLog.get(j).getSequence() +
 									   " with policy v. " + version +
-									   ": PASS");
+									   ": ALREADY DONE");
 				}
 			}
 			// Receive responses
