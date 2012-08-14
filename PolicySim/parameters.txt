@@ -52,6 +52,9 @@ PMAX 0
 # RS1 randomSeed - long integer for seeding PRNG for trace (queries)
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS1 86205
-# RS2 randomSeed - long integer for seeding PRNG for worker thread operations
+# RS2 randomSeed - long integer for seeding PRNG for robot thread operations
 # NOTE: do not include an "L" at end of number - it will not parse!
 RS2 949939
+# RS3 randomSeed - long integer for seeding PRNG for worker thread operations
+# NOTE: do not include an "L" at end of number - it will not parse!
+RS3 841429

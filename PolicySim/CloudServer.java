@@ -27,6 +27,7 @@ public class CloudServer {
 	public static float integrityCheckSuccessRate;
 	public static float localAuthSuccessRate;
 	public static float globalAuthSuccessRate;
+	public static long workerSeed; // From RS3 of parameters file
 	
 	public CloudServer(int _serverNumber) {
 		serverNumber = _serverNumber;
@@ -305,6 +306,9 @@ public class CloudServer {
 					}
 					else if (tuple[0].equals("LASR")) {
 						localAuthSuccessRate = Float.parseFloat(tuple[1]);
+					}
+					else if (tuple[0].equals("RS3")) {
+						workerSeed = Long.parseLong(tuple[1]);
 					}
 				}
 				catch (Exception e) {

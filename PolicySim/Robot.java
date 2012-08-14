@@ -36,6 +36,7 @@ public class Robot {
 	static int policyUpdateMax;
 	static long randomSeed1;
 	static long randomSeed2;
+	static long randomSeed3;
 	static Random generator;
 	static ExecutorService execSvc;
 	static boolean verbose = false;
@@ -355,6 +356,9 @@ public class Robot {
 					else if (tuple[0].equals("RS2")) {
 						randomSeed2 = Long.parseLong(tuple[1]);
 					}
+					else if (tuple[0].equals("RS3")) {
+						randomSeed3 = Long.parseLong(tuple[1]);
+					}
 				}
 				catch (Exception e) {
 					System.out.println("Error while parsing \"" + filename +
@@ -660,6 +664,8 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("RS2=" + randomSeed2);
 			outputBuf.newLine();
+			outputBuf.write("RS3=" + randomSeed3);
+			outputBuf.newLine();
 
 			/*** Output metrics ***/
 			// Total time of run
@@ -802,6 +808,8 @@ public class Robot {
 			outputBuf.write("RS1=" + randomSeed1);
 			outputBuf.newLine();
 			outputBuf.write("RS2=" + randomSeed2);
+			outputBuf.newLine();
+			outputBuf.write("RS3=" + randomSeed3);
 			outputBuf.newLine();		}
 		catch(IOException ioe) {
 			System.out.println("IOException while writing to output file.");
