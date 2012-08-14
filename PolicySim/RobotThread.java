@@ -26,6 +26,7 @@ public class RobotThread implements Runnable {
 	private final boolean threadSleep;
 	private final boolean verbose;
 	private Random generator;
+	private final long seed2;
 
 	/**
 	 * Constructor that sets up transaction communication
@@ -42,7 +43,7 @@ public class RobotThread implements Runnable {
 	 * @param boolean _threadSleep - Whether to Thread.sleep() for latency
 	 * @param boolean _verbose - Whether to output each transaction status
 	 */
-	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep, boolean _verbose) {
+	public RobotThread(int _txnNumber, int _coordinator, String _transactions, String _server, int _port, int _lMin, int _lMax, boolean _threadSleep, boolean _verbose, long _seed2) {
 		coordinator = _coordinator;
 		txnNumber = _txnNumber;
 		transactions = _transactions;
@@ -52,6 +53,7 @@ public class RobotThread implements Runnable {
 		latencyMax = _lMax;
 		threadSleep = _threadSleep;
 		verbose = _verbose;
+		seed2 = _seed2;
 	}
 
 	/**
@@ -76,7 +78,7 @@ public class RobotThread implements Runnable {
 			final ObjectInputStream input = new ObjectInputStream(sock.getInputStream());
 			
 			// Seed Random for latency, pauses
-			generator = new Random(new Date().getTime());
+			generator = new Random(seed2);
 
 			// Set start time of transaction
 			TransactionLog.entry.get(txnNumber).setStartTime(new Date().getTime());

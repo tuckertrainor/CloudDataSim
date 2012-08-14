@@ -220,7 +220,8 @@ public class Robot {
 											 latencyMin,
 											 latencyMax,
 											 threadSleep,
-											 verbose) );
+											 verbose,
+											 randomSeed2) );
 		}
 		
 		execSvc.shutdown();
