@@ -233,7 +233,7 @@ public class Robot {
 			// necessary, but we'll be on the safe side)
 			boolean poolean = execSvc.awaitTermination(3600, TimeUnit.SECONDS);
 			// If the execution timed out, false is returned
-			System.out.println("Execution complete: " + poolean);
+			System.out.println("\nExecution complete: " + poolean);
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
