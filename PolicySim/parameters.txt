@@ -49,6 +49,9 @@ LASR 1.00
 PMIN 0
 #PMAX - policyUpdateMax - maximum time between Policy version updates in ms
 PMAX 0
-# RS randomSeed - long integer for seeding PRNG
+# RS1 randomSeed - long integer for seeding PRNG for trace (queries)
 # NOTE: do not include an "L" at end of number - it will not parse!
-RS 12345
+RS1 86205
+# RS2 randomSeed - long integer for seeding PRNG for worker thread operations
+# NOTE: do not include an "L" at end of number - it will not parse!
+RS2 949939

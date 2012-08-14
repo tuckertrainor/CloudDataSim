@@ -34,7 +34,8 @@ public class Robot {
 	static float globalAuthSuccessRate;
 	static int policyUpdateMin;
 	static int policyUpdateMax;
-	static long randomSeed;
+	static long randomSeed1;
+	static long randomSeed2;
 	static Random generator;
 	static ExecutorService execSvc;
 	static boolean verbose = false;
@@ -113,7 +114,7 @@ public class Robot {
 		}
 		
 		// Build a series of transactions using parameters
-		generator = new Random(randomSeed);
+		generator = new Random(randomSeed1);
 		TransactionData tData = new TransactionData(0, "ZERO");
 		tData.setStartTime();
 		tData.setEndTime(0L);
@@ -351,8 +352,11 @@ public class Robot {
 					else if (tuple[0].equals("PMAX")) {
 						policyUpdateMax = Integer.parseInt(tuple[1]);
 					}
-					else if (tuple[0].equals("RS")) {
-						randomSeed = Long.parseLong(tuple[1]);
+					else if (tuple[0].equals("RS1")) {
+						randomSeed1 = Long.parseLong(tuple[1]);
+					}
+					else if (tuple[0].equals("RS2")) {
+						randomSeed2 = Long.parseLong(tuple[1]);
 					}
 				}
 				catch (Exception e) {
@@ -415,7 +419,7 @@ public class Robot {
 		
 	public static void setSeed(ArrayList<ServerID> _serverList, String str) {
 		try {
-			randomSeed = Long.parseLong(str);
+			randomSeed1 = Long.parseLong(str);
 		}
 		catch (Exception e) {
 			System.err.println("Error parsing argument for seed. Please use a valid integer.");
@@ -688,7 +692,9 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("PMAX=" + policyUpdateMax);
 			outputBuf.newLine();
-			outputBuf.write("RS=" + randomSeed);
+			outputBuf.write("RS1=" + randomSeed1);
+			outputBuf.newLine();
+			outputBuf.write("RS2=" + randomSeed2);
 			outputBuf.newLine();
 
 			/*** Output metrics ***/
@@ -829,7 +835,9 @@ public class Robot {
 			outputBuf.newLine();
 			outputBuf.write("PMAX=" + policyUpdateMax);
 			outputBuf.newLine();
-			outputBuf.write("RS=" + randomSeed);
+			outputBuf.write("RS1=" + randomSeed1);
+			outputBuf.newLine();
+			outputBuf.write("RS2=" + randomSeed2);
 			outputBuf.newLine();		}
 		catch(IOException ioe) {
 			System.out.println("IOException while writing to output file.");
