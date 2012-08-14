@@ -29,7 +29,7 @@ public class IncrementalThread extends PunctualThread {
 	 * simply reads Message objects off of the socket.
 	 */
 	public void run() {
-		generator = new Random(new Date().getTime());
+		generator = new Random(my_tm.workerSeed);
 		
 		PrintStream printStreamOriginal = System.out;
 		if (!my_tm.verbose) {
