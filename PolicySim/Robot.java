@@ -392,26 +392,6 @@ public class Robot {
 		System.err.println("Usage: java Robot <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
 	}
 	
-	public static int getTM(ArrayList<ServerID> _serverList, String str) {
-		int number = 0;
-		// Check arg for proper value, range
-		try {
-			number = Integer.parseInt(str);
-			if (number < 1 || number >= _serverList.size()) {
-				System.err.println("Error in server number. Please check server configuration.");
-				outputErrorLog(_serverList, "getTM(): Error in server number.");
-				System.exit(-1);
-			}
-		}
-		catch (Exception e) {
-			System.err.println("Error parsing argument for TM. Please use a valid integer.");
-			argsError();
-			outputErrorLog(_serverList, "getTM(): Error parsing argument for TM.");
-			System.exit(-1);
-		}
-		return number;
-	}
-		
 	public static void setOpMin(ArrayList<ServerID> _serverList, String str) {
 		int min = 0;
 		// Check arg for proper value, range
