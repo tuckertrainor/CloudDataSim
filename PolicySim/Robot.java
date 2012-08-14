@@ -75,8 +75,8 @@ public class Robot {
 			System.exit(-1);
 		}
 
-		// Error checking for arguments (0, 1, or 6 args)
-		if (args.length != 0 && args.length != 1 && args.length != 6) {
+		// Error checking for arguments (0 or 5 args)
+		if (args.length != 0 && args.length != 5) {
 			System.err.println("Improper argument count.");
 			argsError();
 			outputErrorLog(serverList, "Improper argument count.");
@@ -86,16 +86,12 @@ public class Robot {
 		switch (args.length) {
 			case 0:
 				break;
-			case 1:
-				setSeed(serverList, args[0]);
-				break;
-			case 6:
-				setSeed(serverList, args[0]);
-				proof = args[1]; // Note that this does not check against typo
-				setVM(serverList, args[2]);
-				setPush(serverList, args[3]);
-				setOpMin(serverList, args[4]);
-				setOpMax(serverList, minOperations, args[5]);
+			case 5:
+				proof = args[0]; // Note that this does not check against typo
+				setVM(serverList, args[1]);
+				setPush(serverList, args[2]);
+				setOpMin(serverList, args[3]);
+				setOpMax(serverList, minOperations, args[4]);
 				break;
 			default: // We should never reach here, but just in case
 				System.err.println("Default case reached in switch. Exiting.");
@@ -393,8 +389,7 @@ public class Robot {
 	
 	public static void argsError() {
 		System.err.println("Usage: java Robot or");
-		System.err.println("Usage: java Robot <Seed> or");
-		System.err.println("Usage: java Robot <Seed> <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
+		System.err.println("Usage: java Robot <PROOF> <VM> <PUSH> <OPMIN> <OPMAX>\n");
 	}
 	
 	public static int getTM(ArrayList<ServerID> _serverList, String str) {
@@ -417,18 +412,6 @@ public class Robot {
 		return number;
 	}
 		
-	public static void setSeed(ArrayList<ServerID> _serverList, String str) {
-		try {
-			randomSeed1 = Long.parseLong(str);
-		}
-		catch (Exception e) {
-			System.err.println("Error parsing argument for seed. Please use a valid integer.");
-			argsError();
-			outputErrorLog(_serverList, "setSeed(): Error parsing argument for seed.");
-			System.exit(-1);
-		}
-	}
-	
 	public static void setOpMin(ArrayList<ServerID> _serverList, String str) {
 		int min = 0;
 		// Check arg for proper value, range
