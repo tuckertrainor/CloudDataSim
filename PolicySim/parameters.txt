@@ -1,6 +1,6 @@
 # *** This file is required by the Robot and the Policy Server
 # PROOF proof - DEFERRED, PUNCTUAL, INCREMENTAL, CONTINUOUS
-PROOF INCREMENTAL
+PROOF DEFERRED
 # VM validationMode - integer for setting mode of proof
 #
 # Deferred/Punctual 0: 2PC only
@@ -24,9 +24,9 @@ VM 4
 # Incremental - 0: No push  1: During operations  2: At PTC time
 # Continuous - 0: No push  1: Single push to random server; 2: Push for each
 # join (up to PTC); 3: push when entering commit phase (global consistency)
-PUSH 2
+PUSH 1
 # MT maxTransactions - number of transactions to perform
-MT 1
+MT 1000
 # OPMIN minOperations - minimum number of operations (READ/WRITE) per transaction
 OPMIN 8
 # OPMAX maxOperations - maximum number of operations (READ/WRITE) per transaction

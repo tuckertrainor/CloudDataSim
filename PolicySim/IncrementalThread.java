@@ -106,7 +106,7 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								if (my_tm.validationMode >= 0 && my_tm.validationMode <= 2) {
+								if ((my_tm.validationMode >= 0 && my_tm.validationMode <= 2) || query.length >= 5) {
 									// Get policy from server
 									transactionPolicyVersion = my_tm.getPolicy();
 								}
@@ -120,7 +120,7 @@ public class IncrementalThread extends PunctualThread {
 												   transactionPolicyVersion);
 							}
 							// If P sentinel is rec'd, "update" policy version
-							if (query.length == 5) {
+							if (query.length == 6) {
 								transactionPolicyVersion++;
 							}
 							// Check authorization
@@ -164,15 +164,21 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
-								// Get and set freshest global policy
-								my_tm.setPolicy(my_tm.callPolicyServer());
-								transactionPolicyVersion = my_tm.getPolicy();
+								if ((my_tm.validationMode >= 0 && my_tm.validationMode <= 2) || query.length >= 5) {
+									// Get policy from server
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
+								else { // VM == 3 OR VM == 4
+									// Get and set freshest global policy
+									my_tm.setPolicy(my_tm.callPolicyServer());
+									transactionPolicyVersion = my_tm.getPolicy();
+								}
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
 												   transactionPolicyVersion);
 							}
 							// If P sentinel is rec'd, "update" policy version
-							if (query.length == 5) {
+							if (query.length == 6) {
 								transactionPolicyVersion++;
 							}
 							// Check authorization
@@ -275,6 +281,8 @@ public class IncrementalThread extends PunctualThread {
 		String server = my_tm.serverList.get(otherServer).getAddress();
 		int port = my_tm.serverList.get(otherServer).getPort();
 		Message msg = null;
+		// Add coordinator's policy version
+		query += " " + transactionPolicyVersion;
 		try {
 			// Check SocketList for an existing socket, else create and add new
 			if (!sockList.hasSocket(otherServer)) {
