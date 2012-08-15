@@ -106,6 +106,8 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								if ((my_tm.validationMode >= 0 && my_tm.validationMode <= 2) || query.length >= 5) {
 									// Get policy from server
 									transactionPolicyVersion = my_tm.getPolicy();
@@ -164,6 +166,8 @@ public class IncrementalThread extends PunctualThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								if ((my_tm.validationMode >= 0 && my_tm.validationMode <= 2) || query.length >= 5) {
 									// Get policy from server
 									transactionPolicyVersion = my_tm.getPolicy();

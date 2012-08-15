@@ -105,6 +105,8 @@ public class ContinuousThread extends IncrementalThread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that a txn policy version has been set
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								if (my_tm.validationMode == 2 && query.length == 4) {
 									// Only the coordinator should call the
 									// policy server, and only the coordinator
@@ -202,6 +204,8 @@ public class ContinuousThread extends IncrementalThread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that a txn policy version has been set
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								if (my_tm.validationMode == 2 && query.length == 4) {
 									// Only the coordinator should call the
 									// policy server, and only the coordinator

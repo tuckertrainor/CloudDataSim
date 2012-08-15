@@ -106,6 +106,8 @@ public class DeferredThread extends WorkerThread {
 							// Check that if a fresh Policy version is needed
 							// (e.g. if this query has been passed in) it is set
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								transactionPolicyVersion = my_tm.getPolicy();
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
@@ -144,6 +146,8 @@ public class DeferredThread extends WorkerThread {
 						if (Integer.parseInt(query[2]) == my_tm.serverNumber) { // Perform query on this server
 							// Check that if a fresh Policy version is needed, it is gotten
 							if (transactionPolicyVersion == 0) {
+								// Set seed from txn number
+								generator.setSeed(my_tm.workerSeed + Long.parseLong(query[1]));
 								transactionPolicyVersion = my_tm.getPolicy();
 								System.out.println("Transaction " + query[1] +
 												   " Policy version set: " +
