@@ -2,7 +2,7 @@
 
 A Java-based simulation of enforcing policy and data consistency of cloud transactions. The goal is to simulate an array of servers processing data transactions while subject to different commit protocols and authentication policies.
 
-The code was written in 2012 for Java SE 6, and is untested on more recent versions of Java. The authors do not support this code any longer.
+The code was written in 2012 for Java SE 6, and is untested on more recent versions of Java. The authors no longer support this code.
 
 ## Copyright
 
